@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Haemin WorkSpace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top-bar">
+    <div class="brand">
+      <span class="brand-mark">H</span>
+      <h1>Haemin WorkSpace</h1>
+    </div>
+    <nav class="top-nav" aria-label="main navigation">
+      <a href="#">Home</a>
+      <a href="#">Tools</a>
+      <a href="#">Archive</a>
+    </nav>
+  </header>
+
+  <main class="workspace">
+    <div class="search-area">
+      <label for="workspace-search">Search workspace</label>
+      <input id="workspace-search" type="search" placeholder="Search tools, notes, schedule..." autocomplete="off">
+    </div>
+
+    <div class="workspace-grid" aria-label="workspace tools">
+      <section class="tool-box" tabindex="0">
+        <p class="tool-kicker">Workspace</p>
+        <h2>Project Notes</h2>
+        <p>Ideas, drafts, and quick references for current work.</p>
+      </section>
+      <section class="tool-box" tabindex="0">
+        <p class="tool-kicker">Planner</p>
+        <h2>Schedule</h2>
+        <p>Keep upcoming tasks and important dates in one place.</p>
+      </section>
+      <section class="tool-box" tabindex="0">
+        <p class="tool-kicker">Library</p>
+        <h2>Resources</h2>
+        <p>Collect files, links, and useful study materials.</p>
+      </section>
+      <section class="tool-box" tabindex="0">
+        <p class="tool-kicker">Focus</p>
+        <h2>Daily Tasks</h2>
+        <p>Track small actions and clear priorities for the day.</p>
+      </section>
+      <section class="tool-box" tabindex="0">
+        <p class="tool-kicker">Review</p>
+        <h2>Progress</h2>
+        <p>Check what has been completed and what needs attention.</p>
+      </section>
+      <section class="tool-box" tabindex="0">
+        <p class="tool-kicker">Personal</p>
+        <h2>Memo Board</h2>
+        <p>Save quick thoughts before they disappear.</p>
+      </section>
+    </div>
+  </main>
+
+  <div class="detail-view" aria-hidden="true">
+    <div class="detail-panel" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+      <button class="detail-close" type="button" aria-label="close detail">Close</button>
+      <p class="detail-kicker"></p>
+      <h2 id="detail-title"></h2>
+      <p class="detail-description"></p>
+      <div class="detail-placeholder">
+        <span>Content area</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
