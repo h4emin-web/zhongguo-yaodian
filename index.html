@@ -32,9 +32,9 @@
 
     <div class="workspace-grid" aria-label="workspace tools">
       <section class="tool-box" tabindex="0">
-        <p class="tool-kicker">Workspace</p>
-        <h2>Project Notes</h2>
-        <p>Ideas, drafts, and quick references for current work.</p>
+        <p class="tool-kicker">Search</p>
+        <h2>WC &amp; COPP 검색</h2>
+        <p>2026년 07월 06일 기준</p>
       </section>
       <section class="tool-box" tabindex="0">
         <p class="tool-kicker">Planner</p>
@@ -70,6 +70,12 @@
       <p class="detail-kicker"></p>
       <h2 id="detail-title"></h2>
       <p class="detail-description"></p>
+      <div class="wc-search-panel" hidden>
+        <label for="wc-search-input">WC &amp; COPP 검색</label>
+        <input id="wc-search-input" type="search" placeholder="한국어, English, 中文으로 검색" autocomplete="off">
+        <p class="wc-search-meta">A, B, C열 기준으로 검색합니다.</p>
+        <div class="wc-results" aria-live="polite"></div>
+      </div>
       <div class="detail-placeholder">
         <span>Content area</span>
       </div>
