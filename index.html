@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 </head>
 <body>
   <header class="top-bar">
@@ -70,9 +71,14 @@
       <h2 id="detail-title"></h2>
       <p class="detail-description"></p>
       <div class="wc-search-panel" hidden>
-        <label for="wc-search-input">WC &amp; COPP 검색</label>
+        <div class="wc-search-head">
+          <div>
+            <label for="wc-search-input">WC &amp; COPP 검색</label>
+            <p class="wc-search-meta">A, B, C열 기준으로 검색합니다.</p>
+          </div>
+          <button class="excel-export" type="button">엑셀 추출</button>
+        </div>
         <input id="wc-search-input" type="search" placeholder="한국어, English, 中文으로 검색" autocomplete="off">
-        <p class="wc-search-meta">A, B, C열 기준으로 검색합니다.</p>
         <div class="wc-results" aria-live="polite"></div>
       </div>
     </div>

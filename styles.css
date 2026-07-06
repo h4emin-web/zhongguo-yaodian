@@ -270,12 +270,40 @@ body.detail-open {
   margin-top: 34px;
 }
 
+.wc-search-head {
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
 .wc-search-panel label {
   display: block;
   margin-bottom: 10px;
   color: var(--muted);
   font-size: 14px;
   font-weight: 800;
+}
+
+.excel-export {
+  flex: 0 0 auto;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  background: var(--accent);
+  cursor: pointer;
+}
+
+.excel-export:hover,
+.excel-export:focus-visible {
+  outline: none;
+  background: #2f5d93;
 }
 
 .wc-search-panel input {
@@ -298,7 +326,7 @@ body.detail-open {
 }
 
 .wc-search-meta {
-  margin: 10px 0 18px;
+  margin: 0;
   color: var(--muted);
   font-size: 13px;
   font-weight: 700;
@@ -391,5 +419,13 @@ body.detail-open {
   .wc-result-item p {
     grid-template-columns: 1fr;
     gap: 4px;
+  }
+
+  .wc-search-head {
+    flex-direction: column;
+  }
+
+  .excel-export {
+    width: 100%;
   }
 }

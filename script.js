@@ -9,6 +9,7 @@ const searchInput = document.querySelector("#workspace-search");
 const wcSearchPanel = document.querySelector(".wc-search-panel");
 const wcSearchInput = document.querySelector("#wc-search-input");
 const wcResults = document.querySelector(".wc-results");
+const excelExportButton = document.querySelector(".excel-export");
 const supabaseConfig = window.HAEMIN_SUPABASE || {};
 const hasSupabaseKey = Boolean(
   supabaseConfig.anonKey && supabaseConfig.anonKey !== "YOUR_SUPABASE_ANON_KEY"
@@ -20,6 +21,7 @@ const supabaseClient = hasSupabaseKey && window.supabase
 let lastFocusedCard = null;
 let wcRows = [];
 let wcLoaded = false;
+let currentWcResults = [];
 
 function openDetail(card) {
   const kicker = card.querySelector(".tool-kicker").textContent;
@@ -136,6 +138,8 @@ function renderWcResults() {
     })
     .slice(0, 80);
 
+  currentWcResults = results;
+
   if (results.length === 0) {
     wcResults.innerHTML = '<p class="empty-result">검색 결과가 없습니다.</p>';
     return;
@@ -152,6 +156,78 @@ function renderWcResults() {
   `).join("");
 }
 
+async function exportWcResults() {
+  if (!window.ExcelJS) {
+    alert("엑셀 추출 도구를 불러오지 못했습니다.");
+    return;
+  }
+
+  if (currentWcResults.length === 0) {
+    alert("추출할 검색 결과가 없습니다.");
+    return;
+  }
+
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = "Haemin WorkSpace";
+  workbook.created = new Date();
+
+  const worksheet = workbook.addWorksheet("WC COPP 검색결과");
+  worksheet.columns = [
+    { header: "원료명(중국어)", key: "chinese", width: 28 },
+    { header: "원료명(한국어)", key: "korean", width: 34 },
+    { header: "원료명(영어)", key: "english", width: 38 },
+    { header: "제조사", key: "manufacturer", width: 36 },
+    { header: "유효기간", key: "validity", width: 18 },
+    { header: "이메일", key: "email", width: 30 },
+    { header: "연락처", key: "phone", width: 22 }
+  ];
+
+  currentWcResults.forEach((row) => worksheet.addRow(row));
+
+  worksheet.eachRow((row, rowNumber) => {
+    row.eachCell((cell) => {
+      cell.font = {
+        name: "Nanum Gothic",
+        size: rowNumber === 1 ? 11 : 10,
+        bold: rowNumber === 1
+      };
+      cell.alignment = {
+        vertical: "middle",
+        wrapText: true
+      };
+      cell.border = {
+        top: { style: "thin", color: { argb: "FFD8E0EA" } },
+        left: { style: "thin", color: { argb: "FFD8E0EA" } },
+        bottom: { style: "thin", color: { argb: "FFD8E0EA" } },
+        right: { style: "thin", color: { argb: "FFD8E0EA" } }
+      };
+    });
+  });
+
+  worksheet.getRow(1).height = 24;
+  worksheet.getRow(1).fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: "FFE9F1FB" }
+  };
+  worksheet.views = [{ state: "frozen", ySplit: 1 }];
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  const dateText = new Date().toISOString().slice(0, 10);
+
+  link.href = url;
+  link.download = `WC_COPP_검색결과_${dateText}.xlsx`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 function escapeHtml(value) {
   return String(value || "")
     .replaceAll("&", "&amp;")
@@ -162,3 +238,4 @@ function escapeHtml(value) {
 }
 
 wcSearchInput.addEventListener("input", renderWcResults);
+excelExportButton.addEventListener("click", exportWcResults);
