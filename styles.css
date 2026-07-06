@@ -130,6 +130,32 @@ body.detail-open {
   color: #91a0b4;
 }
 
+.connection-status {
+  width: fit-content;
+  margin: 12px 0 0;
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: #6b7890;
+  font-size: 12px;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.connection-status[data-status="connected"] {
+  color: #227256;
+  background: #e6f6ef;
+}
+
+.connection-status[data-status="waiting"] {
+  color: #80621b;
+  background: #fff5d6;
+}
+
+.connection-status[data-status="error"] {
+  color: #9b3131;
+  background: #fde9e9;
+}
+
 .workspace-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(240px, 1fr));

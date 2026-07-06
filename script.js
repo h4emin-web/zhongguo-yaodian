@@ -6,6 +6,14 @@ const detailKicker = document.querySelector(".detail-kicker");
 const detailTitle = document.querySelector("#detail-title");
 const detailDescription = document.querySelector(".detail-description");
 const searchInput = document.querySelector("#workspace-search");
+const connectionStatus = document.querySelector(".connection-status");
+const supabaseConfig = window.HAEMIN_SUPABASE || {};
+const hasSupabaseKey = Boolean(
+  supabaseConfig.anonKey && supabaseConfig.anonKey !== "YOUR_SUPABASE_ANON_KEY"
+);
+const supabaseClient = hasSupabaseKey && window.supabase
+  ? window.supabase.createClient(supabaseConfig.url, supabaseConfig.anonKey)
+  : null;
 
 let lastFocusedCard = null;
 
@@ -66,3 +74,32 @@ searchInput.addEventListener("input", () => {
     card.hidden = keyword.length > 0 && !cardText.includes(keyword);
   });
 });
+
+async function checkSupabaseConnection() {
+  if (!connectionStatus) {
+    return;
+  }
+
+  if (!supabaseClient) {
+    connectionStatus.textContent = "Supabase anon key를 넣으면 연결됩니다";
+    connectionStatus.dataset.status = "waiting";
+    return;
+  }
+
+  try {
+    const { error } = await supabaseClient.auth.getSession();
+
+    if (error) {
+      throw error;
+    }
+
+    connectionStatus.textContent = "Supabase 연결됨";
+    connectionStatus.dataset.status = "connected";
+  } catch (error) {
+    connectionStatus.textContent = "Supabase 연결 확인 실패";
+    connectionStatus.dataset.status = "error";
+    console.error("Supabase connection check failed:", error);
+  }
+}
+
+checkSupabaseConnection();

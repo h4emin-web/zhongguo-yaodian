@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <header class="top-bar">
@@ -26,6 +27,7 @@
     <div class="search-area">
       <label for="workspace-search">Search workspace</label>
       <input id="workspace-search" type="search" placeholder="Search tools, notes, schedule..." autocomplete="off">
+      <p class="connection-status" data-status="checking">Supabase 연결 확인 중</p>
     </div>
 
     <div class="workspace-grid" aria-label="workspace tools">
@@ -74,6 +76,7 @@
     </div>
   </div>
 
+  <script src="supabase-config.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
