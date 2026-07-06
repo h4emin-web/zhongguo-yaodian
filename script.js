@@ -6,8 +6,6 @@ const detailKicker = document.querySelector(".detail-kicker");
 const detailTitle = document.querySelector("#detail-title");
 const detailDescription = document.querySelector(".detail-description");
 const searchInput = document.querySelector("#workspace-search");
-const connectionStatus = document.querySelector(".connection-status");
-const detailPlaceholder = document.querySelector(".detail-placeholder");
 const wcSearchPanel = document.querySelector(".wc-search-panel");
 const wcSearchInput = document.querySelector("#wc-search-input");
 const wcResults = document.querySelector(".wc-results");
@@ -90,7 +88,6 @@ searchInput.addEventListener("input", () => {
 
 function showWcSearch(isWcSearch) {
   wcSearchPanel.hidden = !isWcSearch;
-  detailPlaceholder.hidden = isWcSearch;
 
   if (isWcSearch) {
     wcSearchInput.value = "";
@@ -146,9 +143,11 @@ function renderWcResults() {
 
   wcResults.innerHTML = results.map((row) => `
     <article class="wc-result-item">
-      <p><strong>중국어</strong><span>${escapeHtml(row.chinese)}</span></p>
-      <p><strong>한국어</strong><span>${escapeHtml(row.korean)}</span></p>
-      <p><strong>영어</strong><span>${escapeHtml(row.english)}</span></p>
+      <p><strong>원료명</strong><span>${escapeHtml(row.chinese)} / ${escapeHtml(row.korean)} / ${escapeHtml(row.english)}</span></p>
+      <p><strong>제조사</strong><span>${escapeHtml(row.manufacturer)}</span></p>
+      <p><strong>유효기간</strong><span>${escapeHtml(row.validity)}</span></p>
+      <p><strong>이메일</strong><span>${escapeHtml(row.email)}</span></p>
+      <p><strong>연락처</strong><span>${escapeHtml(row.phone)}</span></p>
     </article>
   `).join("");
 }
@@ -163,32 +162,3 @@ function escapeHtml(value) {
 }
 
 wcSearchInput.addEventListener("input", renderWcResults);
-
-async function checkSupabaseConnection() {
-  if (!connectionStatus) {
-    return;
-  }
-
-  if (!supabaseClient) {
-    connectionStatus.textContent = "Supabase anon key를 넣으면 연결됩니다";
-    connectionStatus.dataset.status = "waiting";
-    return;
-  }
-
-  try {
-    const { error } = await supabaseClient.auth.getSession();
-
-    if (error) {
-      throw error;
-    }
-
-    connectionStatus.textContent = "Supabase 연결됨";
-    connectionStatus.dataset.status = "connected";
-  } catch (error) {
-    connectionStatus.textContent = "Supabase 연결 확인 실패";
-    connectionStatus.dataset.status = "error";
-    console.error("Supabase connection check failed:", error);
-  }
-}
-
-checkSupabaseConnection();
