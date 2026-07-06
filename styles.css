@@ -365,6 +365,12 @@ body.detail-open {
   font-weight: 800;
 }
 
+.expired-label {
+  margin-left: 8px;
+  color: #d43838;
+  font-weight: 800;
+}
+
 .empty-result {
   margin: 0;
   padding: 26px;

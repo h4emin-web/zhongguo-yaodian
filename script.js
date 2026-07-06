@@ -149,11 +149,33 @@ function renderWcResults() {
     <article class="wc-result-item">
       <p><strong>원료명</strong><span>${escapeHtml(row.chinese)} / ${escapeHtml(row.korean)} / ${escapeHtml(row.english)}</span></p>
       <p><strong>제조사</strong><span>${escapeHtml(row.manufacturer)}</span></p>
-      <p><strong>유효기간</strong><span>${escapeHtml(row.validity)}</span></p>
+      <p><strong>유효기간</strong><span>${formatValidity(row.validity)}</span></p>
       <p><strong>이메일</strong><span>${escapeHtml(row.email)}</span></p>
       <p><strong>연락처</strong><span>${escapeHtml(row.phone)}</span></p>
     </article>
   `).join("");
+}
+
+function isExpired(validity) {
+  if (!validity) {
+    return false;
+  }
+
+  const validityDate = new Date(`${validity}T00:00:00`);
+  const today = new Date();
+  const searchDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+  return !Number.isNaN(validityDate.getTime()) && validityDate < searchDate;
+}
+
+function formatValidity(validity) {
+  const safeValidity = escapeHtml(validity);
+
+  if (!isExpired(validity)) {
+    return safeValidity;
+  }
+
+  return `${safeValidity} <span class="expired-label">만료</span>`;
 }
 
 async function exportWcResults() {
@@ -177,12 +199,15 @@ async function exportWcResults() {
     { header: "원료명(한국어)", key: "korean", width: 34 },
     { header: "원료명(영어)", key: "english", width: 38 },
     { header: "제조사", key: "manufacturer", width: 36 },
-    { header: "유효기간", key: "validity", width: 18 },
+    { header: "유효기간", key: "validity", width: 22 },
     { header: "이메일", key: "email", width: 30 },
     { header: "연락처", key: "phone", width: 22 }
   ];
 
-  currentWcResults.forEach((row) => worksheet.addRow(row));
+  currentWcResults.forEach((row) => worksheet.addRow({
+    ...row,
+    validity: isExpired(row.validity) ? `${row.validity} 만료` : row.validity
+  }));
 
   worksheet.eachRow((row, rowNumber) => {
     row.eachCell((cell) => {
@@ -202,6 +227,15 @@ async function exportWcResults() {
         right: { style: "thin", color: { argb: "FFD8E0EA" } }
       };
     });
+
+    if (rowNumber > 1 && String(row.getCell("validity").value || "").includes("만료")) {
+      row.getCell("validity").font = {
+        name: "Nanum Gothic",
+        size: 10,
+        color: { argb: "FFD43838" },
+        bold: true
+      };
+    }
   });
 
   worksheet.getRow(1).height = 24;
