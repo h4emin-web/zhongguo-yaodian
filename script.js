@@ -1374,11 +1374,15 @@ function parseValidityDate(value) {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
+function normalizeManufacturer(value) {
+  return String(value || "").toLowerCase().replace(/[^a-z0-9一-鿿가-힣]/g, "");
+}
+
 function latestByManufacturer(rows) {
   const bestByKey = new Map();
 
   rows.forEach((row) => {
-    const key = `${row.chinese}|${row.korean}|${row.english}|${row.manufacturer}`;
+    const key = `${row.chinese}|${row.korean}|${row.english}|${normalizeManufacturer(row.manufacturer)}`;
     const existing = bestByKey.get(key);
 
     if (!existing) {
