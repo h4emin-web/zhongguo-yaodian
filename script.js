@@ -22,6 +22,10 @@ const cnphSearchPanel = document.querySelector(".cnph-search-panel");
 const cnphSearchInput = document.querySelector("#cnph-search-input");
 const cnphResults = document.querySelector(".cnph-results");
 const cnphExcelExportButton = document.querySelector(".cnph-excel-export");
+const usdmfSearchPanel = document.querySelector(".usdmf-search-panel");
+const usdmfSearchInput = document.querySelector("#usdmf-search-input");
+const usdmfResults = document.querySelector(".usdmf-results");
+const usdmfExcelExportButton = document.querySelector(".usdmf-excel-export");
 const cnphCriteriaToggle = document.querySelector(".cnph-criteria-toggle");
 const cnphCriteria = document.querySelector(".cnph-criteria");
 const globalSearchHead = document.querySelector(".global-search-head");
@@ -73,6 +77,9 @@ let currentMfdsResults = [];
 let cnphRows = [];
 let cnphLoaded = false;
 let currentCnphResults = [];
+let usdmfRows = [];
+let usdmfLoaded = false;
+let currentUsdmfResults = [];
 let globalSearchToken = 0;
 let currentGlobalKeyword = "";
 let currentGlobalMatches = { wc: [], mfds: [], cnph: [] };
@@ -98,6 +105,7 @@ function openDetail(card) {
   showPoReceive(title.includes("PO 입고처리"));
   showMfdsSearch(title.includes("K-DMF 검색"));
   showCnphSearch(title.includes("중국 약전"));
+  showUsdmfSearch(title.includes("미국 DMF"));
   showMarginCalc(false);
   showImportCostCalc(false);
   detailView.classList.add("is-open");
@@ -115,6 +123,9 @@ function openDetail(card) {
   } else if (title.includes("중국 약전")) {
     loadCnphData();
     cnphSearchInput.focus();
+  } else if (title.includes("미국 DMF")) {
+    loadUsdmfData();
+    usdmfSearchInput.focus();
   } else {
     closeButton.focus();
   }
@@ -697,6 +708,7 @@ function openMarginCalculator() {
   showPoReceive(false);
   showMfdsSearch(false);
   showCnphSearch(false);
+  showUsdmfSearch(false);
   showImportCostCalc(false);
   showMarginCalc(true);
   detailView.classList.add("is-open");
@@ -775,6 +787,7 @@ function openImportCostCalculator() {
   showPoReceive(false);
   showMfdsSearch(false);
   showCnphSearch(false);
+  showUsdmfSearch(false);
   showMarginCalc(false);
   showImportCostCalc(true);
   detailView.classList.add("is-open");
@@ -909,6 +922,141 @@ async function exportCnphResults() {
 
   link.href = url;
   link.download = `중국약전_검색결과_${dateText}.xlsx`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function showUsdmfSearch(isUsdmfSearch) {
+  usdmfSearchPanel.hidden = !isUsdmfSearch;
+
+  if (isUsdmfSearch) {
+    usdmfSearchInput.value = "";
+    usdmfResults.innerHTML = '<p class="empty-result">검색어를 입력하세요.</p>';
+  }
+}
+
+async function loadUsdmfData() {
+  if (usdmfLoaded) {
+    return;
+  }
+
+  usdmfResults.innerHTML = '<p class="empty-result">데이터를 불러오는 중입니다.</p>';
+
+  try {
+    const dataUrl = supabaseConfig.usdmfDataUrl || "data/us-dmf.json";
+    const response = await fetch(dataUrl);
+
+    if (!response.ok) {
+      throw new Error(`Failed to load US DMF data: ${response.status}`);
+    }
+
+    usdmfRows = await response.json();
+    usdmfRows.forEach((row) => {
+      row._s = `${row.korean} ${row.english}`.toLowerCase();
+    });
+    usdmfLoaded = true;
+    usdmfResults.innerHTML = '<p class="empty-result">검색어를 입력하세요.</p>';
+  } catch (error) {
+    console.error(error);
+    usdmfResults.innerHTML = '<p class="empty-result">데이터를 불러오지 못했습니다.</p>';
+  }
+}
+
+function renderUsdmfResults() {
+  const keyword = usdmfSearchInput.value.trim().toLowerCase();
+
+  if (!keyword) {
+    usdmfResults.innerHTML = '<p class="empty-result">검색어를 입력하세요.</p>';
+    return;
+  }
+
+  const results = usdmfRows
+    .filter((row) => row._s.includes(keyword))
+    .slice(0, 80);
+
+  currentUsdmfResults = results;
+
+  if (results.length === 0) {
+    usdmfResults.innerHTML = '<p class="empty-result">검색 결과가 없습니다.</p>';
+    return;
+  }
+
+  usdmfResults.innerHTML = results.map((row) => `
+    <article class="wc-result-item">
+      <p><strong>원료명</strong><span>${escapeHtml(row.korean)} / ${escapeHtml(row.english)}</span></p>
+      <p><strong>제조사</strong><span>${escapeHtml(row.manufacturer)}</span></p>
+      <p><strong>DMF번호</strong><span>${escapeHtml(row.dmfNumber)}</span></p>
+      <p><strong>등록일</strong><span>${escapeHtml(row.regDate)}</span></p>
+    </article>
+  `).join("");
+}
+
+async function exportUsdmfResults() {
+  if (!window.ExcelJS) {
+    alert("엑셀 추출 도구를 불러오지 못했습니다.");
+    return;
+  }
+
+  if (currentUsdmfResults.length === 0) {
+    alert("추출할 검색 결과가 없습니다.");
+    return;
+  }
+
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = "WorkSpace";
+  workbook.created = new Date();
+
+  const worksheet = workbook.addWorksheet("미국 DMF 검색결과");
+  worksheet.columns = [
+    { header: "한국어명", key: "korean", width: 30 },
+    { header: "영어명", key: "english", width: 38 },
+    { header: "제조사", key: "manufacturer", width: 34 },
+    { header: "DMF번호", key: "dmfNumber", width: 18 },
+    { header: "등록일", key: "regDate", width: 16 }
+  ];
+
+  currentUsdmfResults.forEach((row) => worksheet.addRow(row));
+
+  worksheet.eachRow((row, rowNumber) => {
+    row.eachCell((cell) => {
+      cell.font = {
+        name: EXPORT_FONT_NAME,
+        size: rowNumber === 1 ? 11 : 10,
+        bold: rowNumber === 1
+      };
+      cell.alignment = {
+        vertical: "middle",
+        wrapText: true
+      };
+      cell.border = {
+        top: { style: "thin", color: { argb: "FFD8E0EA" } },
+        left: { style: "thin", color: { argb: "FFD8E0EA" } },
+        bottom: { style: "thin", color: { argb: "FFD8E0EA" } },
+        right: { style: "thin", color: { argb: "FFD8E0EA" } }
+      };
+    });
+  });
+
+  worksheet.getRow(1).height = 24;
+  worksheet.getRow(1).fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: "FFE9F1FB" }
+  };
+  worksheet.views = [{ state: "frozen", ySplit: 1 }];
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  const dateText = new Date().toISOString().slice(0, 10);
+
+  link.href = url;
+  link.download = `미국DMF_검색결과_${dateText}.xlsx`;
   document.body.appendChild(link);
   link.click();
   link.remove();
@@ -1393,6 +1541,8 @@ mfdsSearchInput.addEventListener("input", renderMfdsResults);
 mfdsExcelExportButton.addEventListener("click", exportMfdsResults);
 cnphSearchInput.addEventListener("input", renderCnphResults);
 cnphExcelExportButton.addEventListener("click", exportCnphResults);
+usdmfSearchInput.addEventListener("input", renderUsdmfResults);
+usdmfExcelExportButton.addEventListener("click", exportUsdmfResults);
 cnphCriteriaToggle.addEventListener("click", () => {
   cnphCriteria.hidden = !cnphCriteria.hidden;
 });
