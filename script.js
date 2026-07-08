@@ -1162,39 +1162,45 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
-const WORKLOG_STORAGE_KEY = "haeminWorklogData";
-
 function todayEndOfDayTimestamp() {
   const now = new Date();
   return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999).getTime();
 }
 
-function saveWorklogToStorage() {
+async function saveWorklogToStorage() {
+  if (!supabaseClient) {
+    return;
+  }
+
   try {
-    localStorage.setItem(WORKLOG_STORAGE_KEY, JSON.stringify({
-      expiresAt: todayEndOfDayTimestamp(),
-      people: worklogPeople,
-      aiSummaries: Object.fromEntries(worklogAiSummaryCache)
-    }));
+    await supabaseClient.functions.invoke("worklog-sync", {
+      body: {
+        action: "save",
+        people: worklogPeople,
+        aiSummaries: Object.fromEntries(worklogAiSummaryCache),
+        expiresAt: todayEndOfDayTimestamp()
+      }
+    });
   } catch (error) {
     console.error(error);
   }
 }
 
-function loadWorklogFromStorage() {
+async function loadWorklogFromStorage() {
+  if (!supabaseClient) {
+    return false;
+  }
+
   try {
-    const raw = localStorage.getItem(WORKLOG_STORAGE_KEY);
+    const { data, error } = await supabaseClient.functions.invoke("worklog-sync", {
+      body: { action: "load" }
+    });
 
-    if (!raw) {
+    if (error || !data || !data.ok || !data.data || !Array.isArray(data.data.people)) {
       return false;
     }
 
-    const saved = JSON.parse(raw);
-
-    if (!saved || !saved.expiresAt || Date.now() > saved.expiresAt || !Array.isArray(saved.people)) {
-      localStorage.removeItem(WORKLOG_STORAGE_KEY);
-      return false;
-    }
+    const saved = data.data;
 
     worklogPeople = saved.people;
     worklogAiSummaryCache.clear();
@@ -1206,25 +1212,30 @@ function loadWorklogFromStorage() {
     return worklogPeople.length > 0;
   } catch (error) {
     console.error(error);
-    localStorage.removeItem(WORKLOG_STORAGE_KEY);
     return false;
   }
 }
 
-function clearWorklogStorage() {
+async function clearWorklogStorage() {
+  if (!supabaseClient) {
+    return;
+  }
+
   try {
-    localStorage.removeItem(WORKLOG_STORAGE_KEY);
+    await supabaseClient.functions.invoke("worklog-sync", {
+      body: { action: "clear" }
+    });
   } catch (error) {
     console.error(error);
   }
 }
 
-function clearWorklog() {
+async function clearWorklog() {
   if (worklogPeople.length === 0) {
     return;
   }
 
-  if (!confirm("불러온 업무일지를 삭제하시겠습니까?")) {
+  if (!confirm("불러온 업무일지를 삭제하시겠습니까? (다른 기기에서도 함께 삭제됩니다)")) {
     return;
   }
 
@@ -1233,23 +1244,21 @@ function clearWorklog() {
   worklogAiSummaryCache.clear();
   worklogAiToggle.textContent = "AI 요약";
   worklogFilterInput.value = "";
-  clearWorklogStorage();
   renderWorklog();
+  await clearWorklogStorage();
 }
 
-function openWorklog(card) {
+async function openWorklog(card) {
   lastFocusedCard = card;
   worklogFullscreen.classList.add("is-open");
   worklogFullscreen.setAttribute("aria-hidden", "false");
   document.body.classList.add("detail-open");
-
-  if (worklogPeople.length === 0) {
-    loadWorklogFromStorage();
-  }
-
   worklogFilterInput.value = "";
-  renderWorklog();
+  worklogResults.innerHTML = '<p class="empty-result">불러오는 중입니다.</p>';
   worklogLoadButton.focus();
+
+  await loadWorklogFromStorage();
+  renderWorklog();
 }
 
 function closeWorklog() {
@@ -1301,8 +1310,8 @@ async function loadWorklogFile(file) {
     worklogAiSummaryCache.clear();
     worklogAiToggle.textContent = "AI 요약";
     worklogFilterInput.value = "";
-    saveWorklogToStorage();
     renderWorklog();
+    await saveWorklogToStorage();
   } catch (error) {
     console.error(error);
     worklogPeople = [];
@@ -1477,7 +1486,7 @@ async function ensureWorklogAiSummaries() {
     worklogAiSummaryCache.set(id, summary);
   });
 
-  saveWorklogToStorage();
+  await saveWorklogToStorage();
 }
 
 wcSearchInput.addEventListener("input", renderWcResults);
