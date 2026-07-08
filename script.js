@@ -1304,14 +1304,6 @@ async function loadWorklogFile(file) {
   }
 }
 
-function highlightWorklogFigures(escapedText) {
-  return escapedText
-    .replace(/((?:USD|CNY|EUR|JPY|KRW)\s?[\d,.]+(?:\s?\/\s?[a-zA-Z]+)?)/g, '<strong class="worklog-figure">$1</strong>')
-    .replace(/([\d][\d,]*(?:\.\d+)?\s?원)/g, '<strong class="worklog-figure">$1</strong>')
-    .replace(/(\b[\d][\d,]*(?:\.\d+)?\s?(?:kg|KG|Kg|g|G)\b)/g, '<strong class="worklog-figure">$1</strong>')
-    .replace(/([\d.]+\s?%)/g, '<strong class="worklog-figure">$1</strong>');
-}
-
 function renderWorklog() {
   if (worklogPeople.length === 0) {
     worklogResults.innerHTML = '<p class="empty-result">엑셀 불러오기 버튼을 누르거나, 파일을 이 화면으로 끌어다 놓으세요.</p>';
@@ -1356,7 +1348,7 @@ function renderWorklog() {
                 ${row.contact ? `<span>${escapeHtml(row.contact)}</span>` : ""}
               </span>
             </div>
-            <div class="worklog-content">${highlightWorklogFigures(escapeHtml(row.content))}</div>
+            <div class="worklog-content">${escapeHtml(row.content)}</div>
           </article>
         `).join("")}
       </div>
