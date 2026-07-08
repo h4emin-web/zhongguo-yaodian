@@ -1014,7 +1014,7 @@ async function loadUsdmfData() {
 
     usdmfRows = await response.json();
     usdmfRows.forEach((row) => {
-      row._s = `${row.korean} ${row.english}`.toLowerCase();
+      row._s = row.english.toLowerCase();
     });
     usdmfLoaded = true;
     usdmfResults.innerHTML = '<p class="empty-result">검색어를 입력하세요.</p>';
@@ -1045,10 +1045,11 @@ function renderUsdmfResults() {
 
   usdmfResults.innerHTML = results.map((row) => `
     <article class="wc-result-item">
-      <p><strong>원료명</strong><span>${escapeHtml(row.korean)} / ${escapeHtml(row.english)}</span></p>
+      <p><strong>원료명</strong><span>${escapeHtml(row.english)}${row.korean ? ` / ${escapeHtml(row.korean)}` : ""}</span></p>
       <p><strong>제조사</strong><span>${escapeHtml(row.manufacturer)}</span></p>
       <p><strong>DMF번호</strong><span>${escapeHtml(row.dmfNumber)}</span></p>
-      <p><strong>등록일</strong><span>${escapeHtml(row.regDate)}</span></p>
+      <p><strong>구분</strong><span>Type ${escapeHtml(row.type)} · ${escapeHtml(row.status)}</span></p>
+      <p><strong>제출일</strong><span>${escapeHtml(row.regDate)}</span></p>
     </article>
   `).join("");
 }
@@ -1070,11 +1071,13 @@ async function exportUsdmfResults() {
 
   const worksheet = workbook.addWorksheet("미국 DMF 검색결과");
   worksheet.columns = [
-    { header: "한국어명", key: "korean", width: 30 },
     { header: "영어명", key: "english", width: 38 },
+    { header: "한국어명", key: "korean", width: 30 },
     { header: "제조사", key: "manufacturer", width: 34 },
     { header: "DMF번호", key: "dmfNumber", width: 18 },
-    { header: "등록일", key: "regDate", width: 16 }
+    { header: "TYPE", key: "type", width: 10 },
+    { header: "STATUS", key: "status", width: 10 },
+    { header: "제출일", key: "regDate", width: 16 }
   ];
 
   currentUsdmfResults.forEach((row) => worksheet.addRow(row));
