@@ -1179,9 +1179,11 @@ function parseWorklogDateFromFilename(filename) {
 }
 
 function updateWorklogDateDisplay() {
-  const label = worklogPeople.length > 0 && worklogDateLabel
-    ? worklogDateLabel
-    : "불러온 업무일지 없음";
+  let label = "불러온 업무일지 없음";
+
+  if (worklogPeople.length > 0) {
+    label = worklogDateLabel || "업무일지 불러옴 (날짜 확인 불가)";
+  }
 
   worklogBoxDate.textContent = label;
   worklogDateMeta.textContent = label;
