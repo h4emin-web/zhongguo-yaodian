@@ -33,6 +33,7 @@ const worklogLoadButton = document.querySelector(".worklog-load-button");
 const worklogFileInput = document.querySelector(".worklog-file-input");
 const worklogFilterInput = document.querySelector("#worklog-filter-input");
 const worklogFormatToggle = document.querySelector(".worklog-format-toggle");
+const worklogAiToggle = document.querySelector(".worklog-ai-toggle");
 const worklogClearButton = document.querySelector(".worklog-clear-button");
 const toolsTrigger = document.querySelector(".tools-trigger");
 const toolsDropdown = document.querySelector(".tools-dropdown");
@@ -76,6 +77,8 @@ let currentGlobalKeyword = "";
 let currentGlobalMatches = { wc: [], mfds: [], cnph: [] };
 let worklogPeople = [];
 let worklogFormatMode = false;
+let worklogAiMode = false;
+const worklogAiSummaryCache = new Map();
 
 function openDetail(card) {
   const title = card.querySelector("h2").textContent;
@@ -1296,6 +1299,9 @@ async function loadWorklogFile(file) {
 
     worklogFormatMode = false;
     worklogFormatToggle.textContent = "깔끔하게 보기";
+    worklogAiMode = false;
+    worklogAiSummaryCache.clear();
+    worklogAiToggle.textContent = "AI 요약";
     worklogFilterInput.value = "";
     saveWorklogToStorage();
     renderWorklog();
@@ -1350,7 +1356,7 @@ function renderWorklog() {
                 ${row.contact ? `<span>${escapeHtml(row.contact)}</span>` : ""}
               </span>
             </div>
-            <div class="worklog-content">${worklogFormatMode ? formatWorklogContent(row.content) : escapeHtml(row.content)}</div>
+            <div class="worklog-content">${worklogContentHtml(row)}</div>
           </article>
         `).join("")}
       </div>
@@ -1401,6 +1407,83 @@ function formatWorklogContent(content) {
   return `${tagHtml}${lineHtml}`;
 }
 
+function worklogContentHtml(row) {
+  if (worklogAiMode && worklogAiSummaryCache.has(row.id)) {
+    return formatWorklogContent(worklogAiSummaryCache.get(row.id));
+  }
+
+  if (worklogFormatMode) {
+    return formatWorklogContent(row.content);
+  }
+
+  return escapeHtml(row.content);
+}
+
+async function toggleWorklogAi() {
+  if (worklogPeople.length === 0) {
+    return;
+  }
+
+  if (worklogAiMode) {
+    worklogAiMode = false;
+    worklogAiToggle.textContent = "AI 요약";
+    renderWorklog();
+    return;
+  }
+
+  worklogAiToggle.disabled = true;
+  worklogAiToggle.textContent = "요약 생성 중...";
+
+  try {
+    await ensureWorklogAiSummaries();
+    worklogAiMode = true;
+    worklogAiToggle.textContent = "원본 보기";
+  } catch (error) {
+    console.error(error);
+    alert("AI 요약을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
+    worklogAiToggle.textContent = "AI 요약";
+  } finally {
+    worklogAiToggle.disabled = false;
+    renderWorklog();
+  }
+}
+
+async function ensureWorklogAiSummaries() {
+  const items = [];
+
+  worklogPeople.forEach((person) => {
+    person.rows.forEach((row) => {
+      if (row.content && !worklogAiSummaryCache.has(row.id)) {
+        items.push({ id: row.id, text: row.content });
+      }
+    });
+  });
+
+  if (items.length === 0) {
+    return;
+  }
+
+  if (!supabaseClient) {
+    throw new Error("Supabase 연결 설정이 없어 요약을 요청할 수 없습니다.");
+  }
+
+  const { data, error } = await supabaseClient.functions.invoke("summarize-worklog", {
+    body: { items }
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data || !data.ok) {
+    throw new Error((data && data.error) || "요약 실패");
+  }
+
+  Object.entries(data.summaries || {}).forEach(([id, summary]) => {
+    worklogAiSummaryCache.set(id, summary);
+  });
+}
+
 function toggleWorklogFormat() {
   if (worklogPeople.length === 0) {
     return;
@@ -1441,6 +1524,7 @@ worklogFileInput.addEventListener("change", () => {
 });
 worklogFilterInput.addEventListener("input", renderWorklog);
 worklogFormatToggle.addEventListener("click", toggleWorklogFormat);
+worklogAiToggle.addEventListener("click", toggleWorklogAi);
 
 let worklogDragDepth = 0;
 
