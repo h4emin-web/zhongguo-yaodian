@@ -6,50 +6,108 @@
   <title>Haemin WorkSpace</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&family=Roboto:wght@400;500;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 </head>
 <body>
   <header class="top-bar">
-    <div class="brand">
+    <a class="brand" href="index.html">
       <span class="brand-mark">H</span>
       <h1>Haemin WorkSpace</h1>
-    </div>
+    </a>
     <nav class="top-nav" aria-label="main navigation">
       <a href="#">Home</a>
-      <a href="#">Tools</a>
+      <div class="tools-menu">
+        <button class="tools-trigger" type="button" aria-haspopup="true" aria-expanded="false">Tools</button>
+        <div class="tools-dropdown" hidden>
+          <button class="tools-item" type="button" data-tool="margin-calculator">마진율 계산기</button>
+          <button class="tools-item" type="button" data-tool="import-cost-calculator">예상수입원가 계산기</button>
+        </div>
+      </div>
       <a href="#">Archive</a>
     </nav>
   </header>
 
   <main class="workspace">
     <div class="search-area">
-      <label for="workspace-search">Search workspace</label>
-      <input id="workspace-search" type="search" placeholder="Search tools, notes, schedule..." autocomplete="off">
+      <label for="workspace-search">종합검색</label>
+      <input id="workspace-search" type="search" placeholder="원료명, 성분명 등으로 K-DMF / 중국 약전 / WC &amp; COPP 통합검색" autocomplete="off">
     </div>
+
+    <div class="global-search-head" hidden>
+      <p class="wc-search-meta">K-DMF / 중국 약전 / WC &amp; COPP 검색 결과를 한 번에 엑셀로 추출합니다.</p>
+      <button class="excel-export global-excel-export" type="button">엑셀 추출</button>
+    </div>
+    <div class="global-search-results" hidden aria-live="polite"></div>
 
     <div class="workspace-grid" aria-label="workspace tools">
       <section class="tool-box" tabindex="0">
         <p class="tool-kicker">Search</p>
-        <h2>WC &amp; COPP 검색</h2>
+        <h2>중국 WC &amp; COPP <svg class="flag-cn" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <rect width="30" height="20" fill="#DE2910"/>
+          <polygon fill="#FFDE00" points="5.00,2.00 5.71,4.03 7.85,4.07 6.14,5.37 6.76,7.43 5.00,6.20 3.24,7.43 3.86,5.37 2.15,4.07 4.29,4.03"/>
+          <polygon fill="#FFDE00" points="10.39,1.08 10.34,1.79 11.00,2.09 10.30,2.26 10.22,2.97 9.84,2.37 9.14,2.52 9.60,1.97 9.25,1.34 9.91,1.61"/>
+          <polygon fill="#FFDE00" points="12.32,3.31 12.00,3.94 12.48,4.47 11.78,4.36 11.43,4.98 11.31,4.28 10.61,4.14 11.25,3.81 11.16,3.10 11.67,3.61"/>
+          <polygon fill="#FFDE00" points="12.53,6.24 11.99,6.70 12.23,7.38 11.62,7.00 11.06,7.44 11.23,6.74 10.63,6.34 11.35,6.29 11.55,5.60 11.82,6.26"/>
+          <polygon fill="#FFDE00" points="11.00,8.60 10.32,8.84 10.31,9.55 9.88,8.98 9.19,9.19 9.60,8.60 9.19,8.01 9.88,8.22 10.31,7.65 10.32,8.36"/>
+        </svg></h2>
         <p>2026년 07월 06일 기준</p>
       </section>
       <section class="tool-box" tabindex="0">
-        <p class="tool-kicker">Planner</p>
-        <h2>Schedule</h2>
-        <p>Keep upcoming tasks and important dates in one place.</p>
+        <p class="tool-kicker">Search</p>
+        <h2>K-DMF 검색 <svg class="flag-kr" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <rect width="30" height="20" fill="#FFFFFF"/>
+          <circle cx="15" cy="10" r="5.5" fill="#CD2E3A"/>
+          <path d="M15,4.5 A5.5,5.5 0 0,1 15,15.5 A2.75,2.75 0 0,1 15,10 A2.75,2.75 0 0,0 15,4.5 Z" fill="#0047A0"/>
+          <g fill="#000000">
+            <g transform="translate(4.2 3.6) rotate(-45)">
+              <rect x="-2" y="-1.75" width="4" height="0.7"/>
+              <rect x="-2" y="-0.35" width="4" height="0.7"/>
+              <rect x="-2" y="1.05" width="4" height="0.7"/>
+            </g>
+            <g transform="translate(25.8 3.6) rotate(45)">
+              <rect x="-2" y="-1.75" width="1.7" height="0.7"/>
+              <rect x="0.3" y="-1.75" width="1.7" height="0.7"/>
+              <rect x="-2" y="-0.35" width="4" height="0.7"/>
+              <rect x="-2" y="1.05" width="1.7" height="0.7"/>
+              <rect x="0.3" y="1.05" width="1.7" height="0.7"/>
+            </g>
+            <g transform="translate(4.2 16.4) rotate(45)">
+              <rect x="-2" y="-1.75" width="4" height="0.7"/>
+              <rect x="-2" y="-0.35" width="1.7" height="0.7"/>
+              <rect x="0.3" y="-0.35" width="1.7" height="0.7"/>
+              <rect x="-2" y="1.05" width="4" height="0.7"/>
+            </g>
+            <g transform="translate(25.8 16.4) rotate(-45)">
+              <rect x="-2" y="-1.75" width="1.7" height="0.7"/>
+              <rect x="0.3" y="-1.75" width="1.7" height="0.7"/>
+              <rect x="-2" y="-0.35" width="1.7" height="0.7"/>
+              <rect x="0.3" y="-0.35" width="1.7" height="0.7"/>
+              <rect x="-2" y="1.05" width="1.7" height="0.7"/>
+              <rect x="0.3" y="1.05" width="1.7" height="0.7"/>
+            </g>
+          </g>
+        </svg></h2>
+        <p>2026년 07월 07일 기준</p>
       </section>
       <section class="tool-box" tabindex="0">
-        <p class="tool-kicker">Library</p>
-        <h2>Resources</h2>
-        <p>Collect files, links, and useful study materials.</p>
+        <p class="tool-kicker">Search</p>
+        <h2>중국 약전 <svg class="flag-cn" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <rect width="30" height="20" fill="#DE2910"/>
+          <polygon fill="#FFDE00" points="5.00,2.00 5.71,4.03 7.85,4.07 6.14,5.37 6.76,7.43 5.00,6.20 3.24,7.43 3.86,5.37 2.15,4.07 4.29,4.03"/>
+          <polygon fill="#FFDE00" points="10.39,1.08 10.34,1.79 11.00,2.09 10.30,2.26 10.22,2.97 9.84,2.37 9.14,2.52 9.60,1.97 9.25,1.34 9.91,1.61"/>
+          <polygon fill="#FFDE00" points="12.32,3.31 12.00,3.94 12.48,4.47 11.78,4.36 11.43,4.98 11.31,4.28 10.61,4.14 11.25,3.81 11.16,3.10 11.67,3.61"/>
+          <polygon fill="#FFDE00" points="12.53,6.24 11.99,6.70 12.23,7.38 11.62,7.00 11.06,7.44 11.23,6.74 10.63,6.34 11.35,6.29 11.55,5.60 11.82,6.26"/>
+          <polygon fill="#FFDE00" points="11.00,8.60 10.32,8.84 10.31,9.55 9.88,8.98 9.19,9.19 9.60,8.60 9.19,8.01 9.88,8.22 10.31,7.65 10.32,8.36"/>
+        </svg></h2>
+        <p>2025년도 기준</p>
       </section>
       <section class="tool-box" tabindex="0">
-        <p class="tool-kicker">Focus</p>
-        <h2>Daily Tasks</h2>
-        <p>Track small actions and clear priorities for the day.</p>
+        <p class="tool-kicker">Report</p>
+        <h2>업무일지</h2>
+        <p>일별 업무일지 엑셀을 불러와 인원별로 정리</p>
       </section>
       <section class="tool-box" tabindex="0">
         <p class="tool-kicker">Review</p>
@@ -73,13 +131,183 @@
       <div class="wc-search-panel" hidden>
         <div class="wc-search-head">
           <div>
-            <label for="wc-search-input">WC &amp; COPP 검색</label>
+            <label for="wc-search-input">중국 WC &amp; COPP <svg class="flag-cn" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <rect width="30" height="20" fill="#DE2910"/>
+          <polygon fill="#FFDE00" points="5.00,2.00 5.71,4.03 7.85,4.07 6.14,5.37 6.76,7.43 5.00,6.20 3.24,7.43 3.86,5.37 2.15,4.07 4.29,4.03"/>
+          <polygon fill="#FFDE00" points="10.39,1.08 10.34,1.79 11.00,2.09 10.30,2.26 10.22,2.97 9.84,2.37 9.14,2.52 9.60,1.97 9.25,1.34 9.91,1.61"/>
+          <polygon fill="#FFDE00" points="12.32,3.31 12.00,3.94 12.48,4.47 11.78,4.36 11.43,4.98 11.31,4.28 10.61,4.14 11.25,3.81 11.16,3.10 11.67,3.61"/>
+          <polygon fill="#FFDE00" points="12.53,6.24 11.99,6.70 12.23,7.38 11.62,7.00 11.06,7.44 11.23,6.74 10.63,6.34 11.35,6.29 11.55,5.60 11.82,6.26"/>
+          <polygon fill="#FFDE00" points="11.00,8.60 10.32,8.84 10.31,9.55 9.88,8.98 9.19,9.19 9.60,8.60 9.19,8.01 9.88,8.22 10.31,7.65 10.32,8.36"/>
+        </svg></label>
             <p class="wc-search-meta">A, B, C열 기준으로 검색합니다.</p>
           </div>
           <button class="excel-export" type="button">엑셀 추출</button>
         </div>
         <input id="wc-search-input" type="search" placeholder="한국어, English, 中文으로 검색" autocomplete="off">
         <div class="wc-results" aria-live="polite"></div>
+      </div>
+      <div class="wc-search-panel mfds-search-panel" hidden>
+        <div class="wc-search-head">
+          <div>
+            <label for="mfds-search-input">K-DMF 검색 <svg class="flag-kr" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+              <rect width="30" height="20" fill="#FFFFFF"/>
+              <circle cx="15" cy="10" r="5.5" fill="#CD2E3A"/>
+              <path d="M15,4.5 A5.5,5.5 0 0,1 15,15.5 A2.75,2.75 0 0,1 15,10 A2.75,2.75 0 0,0 15,4.5 Z" fill="#0047A0"/>
+              <g fill="#000000">
+                <g transform="translate(4.2 3.6) rotate(-45)">
+                  <rect x="-2" y="-1.75" width="4" height="0.7"/>
+                  <rect x="-2" y="-0.35" width="4" height="0.7"/>
+                  <rect x="-2" y="1.05" width="4" height="0.7"/>
+                </g>
+                <g transform="translate(25.8 3.6) rotate(45)">
+                  <rect x="-2" y="-1.75" width="1.7" height="0.7"/>
+                  <rect x="0.3" y="-1.75" width="1.7" height="0.7"/>
+                  <rect x="-2" y="-0.35" width="4" height="0.7"/>
+                  <rect x="-2" y="1.05" width="1.7" height="0.7"/>
+                  <rect x="0.3" y="1.05" width="1.7" height="0.7"/>
+                </g>
+                <g transform="translate(4.2 16.4) rotate(45)">
+                  <rect x="-2" y="-1.75" width="4" height="0.7"/>
+                  <rect x="-2" y="-0.35" width="1.7" height="0.7"/>
+                  <rect x="0.3" y="-0.35" width="1.7" height="0.7"/>
+                  <rect x="-2" y="1.05" width="4" height="0.7"/>
+                </g>
+                <g transform="translate(25.8 16.4) rotate(-45)">
+                  <rect x="-2" y="-1.75" width="1.7" height="0.7"/>
+                  <rect x="0.3" y="-1.75" width="1.7" height="0.7"/>
+                  <rect x="-2" y="-0.35" width="1.7" height="0.7"/>
+                  <rect x="0.3" y="-0.35" width="1.7" height="0.7"/>
+                  <rect x="-2" y="1.05" width="1.7" height="0.7"/>
+                  <rect x="0.3" y="1.05" width="1.7" height="0.7"/>
+                </g>
+              </g>
+            </svg></label>
+            <p class="wc-search-meta">성분명 기준으로 검색합니다.</p>
+          </div>
+          <button class="excel-export mfds-excel-export" type="button">엑셀 추출</button>
+        </div>
+        <input id="mfds-search-input" type="search" placeholder="성분명을 입력하세요" autocomplete="off">
+        <div class="wc-results mfds-results" aria-live="polite"></div>
+      </div>
+      <div class="wc-search-panel cnph-search-panel" hidden>
+        <div class="wc-search-head">
+          <div>
+            <label for="cnph-search-input">중국 약전 검색 <svg class="flag-cn" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+              <rect width="30" height="20" fill="#DE2910"/>
+              <polygon fill="#FFDE00" points="5.00,2.00 5.71,4.03 7.85,4.07 6.14,5.37 6.76,7.43 5.00,6.20 3.24,7.43 3.86,5.37 2.15,4.07 4.29,4.03"/>
+              <polygon fill="#FFDE00" points="10.39,1.08 10.34,1.79 11.00,2.09 10.30,2.26 10.22,2.97 9.84,2.37 9.14,2.52 9.60,1.97 9.25,1.34 9.91,1.61"/>
+              <polygon fill="#FFDE00" points="12.32,3.31 12.00,3.94 12.48,4.47 11.78,4.36 11.43,4.98 11.31,4.28 10.61,4.14 11.25,3.81 11.16,3.10 11.67,3.61"/>
+              <polygon fill="#FFDE00" points="12.53,6.24 11.99,6.70 12.23,7.38 11.62,7.00 11.06,7.44 11.23,6.74 10.63,6.34 11.35,6.29 11.55,5.60 11.82,6.26"/>
+              <polygon fill="#FFDE00" points="11.00,8.60 10.32,8.84 10.31,9.55 9.88,8.98 9.19,9.19 9.60,8.60 9.19,8.01 9.88,8.22 10.31,7.65 10.32,8.36"/>
+            </svg></label>
+            <p class="wc-search-meta">한국어, 영어, 중국어로 검색합니다.</p>
+          </div>
+          <div class="cnph-head-actions">
+            <button class="excel-export cnph-criteria-toggle" type="button">기준</button>
+            <button class="excel-export cnph-excel-export" type="button">엑셀 추출</button>
+          </div>
+        </div>
+        <div class="cnph-criteria" hidden>
+          <ul>
+            <li><strong>一部 (제1부) — 中药 (중약)</strong>: 약재·음편(饮片), 식물유지·추출물, 성방제제·단미제제 등. 수재 품종 총 3,069종 (신증 28, 수정 420, 삭제 19).</li>
+            <li><strong>二部 (제2부) — 化学药 (화학약품)</strong>: 화학 원료의약품(API) 및 그 제제. 수재 품종 총 2,776종 (신증 66, 수정 483). 순화수·주사용수 2품목은 삭제되어 四部로 이동.</li>
+            <li><strong>三部 (제3부) — 生物制品 (생물제품)</strong>: 백신·혈액제제·바이오의약품 등. 수재 품종 총 153종 (신증 13, 수정 62, 삭제 13).</li>
+            <li><strong>四部 (제4부) — 通用技术要求 및 药用辅料 (통용기술요구·약용부형제)</strong>: 通则(통칙)·지도원칙 등 통용기술요구, 그리고 부형제. 부형제 총 387종 (신증 52, 수정 136).</li>
+          </ul>
+        </div>
+        <input id="cnph-search-input" type="search" placeholder="한국어, English, 中文으로 검색" autocomplete="off">
+        <div class="wc-results cnph-results" aria-live="polite"></div>
+      </div>
+      <div class="wc-search-panel margin-calc-panel" hidden>
+        <label>마진율 계산기</label>
+        <p class="wc-search-meta">예상수입원가와 납품가를 입력하면 마진율을 계산합니다.</p>
+        <div class="margin-calc-inputs">
+          <div class="margin-calc-field">
+            <label for="margin-cost-input">예상수입원가</label>
+            <input id="margin-cost-input" type="number" inputmode="decimal" placeholder="예: 10300">
+          </div>
+          <div class="margin-calc-field">
+            <label for="margin-price-input">납품가</label>
+            <input id="margin-price-input" type="number" inputmode="decimal" placeholder="예: 9500">
+          </div>
+        </div>
+        <div class="margin-calc-result" aria-live="polite"></div>
+      </div>
+      <div class="wc-search-panel import-cost-panel" hidden>
+        <label>예상수입원가 계산기</label>
+        <p class="wc-search-meta">단가, 환율, 수량, 운송방식, 관세를 입력하면 kg당 예상수입원가를 계산합니다.</p>
+        <div class="import-cost-inputs">
+          <div class="margin-calc-field">
+            <label for="import-price-input">단가</label>
+            <div class="import-cost-combo">
+              <input id="import-price-input" type="number" inputmode="decimal" placeholder="예: 4.96">
+              <select id="import-price-currency">
+                <option value="USD">USD</option>
+                <option value="CNY">CNY</option>
+                <option value="EUR">EUR</option>
+                <option value="JPY">JPY</option>
+                <option value="KRW">KRW</option>
+              </select>
+            </div>
+          </div>
+          <div class="margin-calc-field">
+            <label for="import-rate-input">환율</label>
+            <input id="import-rate-input" type="number" inputmode="decimal" placeholder="예: 1550">
+          </div>
+          <div class="margin-calc-field">
+            <label for="import-qty-input">수량</label>
+            <div class="import-cost-combo">
+              <input id="import-qty-input" type="number" inputmode="decimal" placeholder="예: 100">
+              <select id="import-qty-unit">
+                <option value="KG">KG</option>
+                <option value="G">G</option>
+              </select>
+            </div>
+          </div>
+          <div class="margin-calc-field">
+            <label for="import-shipping-select">운송방식</label>
+            <select id="import-shipping-select">
+              <option value="선박">선박</option>
+              <option value="항공">항공</option>
+            </select>
+          </div>
+          <div class="margin-calc-field">
+            <label for="import-duty-input">관세 (%)</label>
+            <input id="import-duty-input" type="number" inputmode="decimal" placeholder="예: 1.3">
+          </div>
+        </div>
+        <div class="import-cost-result" aria-live="polite"></div>
+      </div>
+      <div class="po-receive-panel" hidden>
+        <label for="po-receive-input">PO 번호</label>
+        <div class="po-receive-row">
+          <input id="po-receive-input" type="text" placeholder="예: Z26-00752" autocomplete="off">
+          <button class="po-receive-submit" type="button">입고처리</button>
+        </div>
+        <div class="po-receive-result" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="worklog-fullscreen" aria-hidden="true">
+    <div class="worklog-topbar">
+      <div class="worklog-topbar-title">
+        <h2>업무일지</h2>
+        <p class="wc-search-meta">일별 업무일지 엑셀을 불러와 인원별로 정리</p>
+      </div>
+      <div class="worklog-topbar-actions">
+        <input id="worklog-filter-input" type="search" placeholder="이름, 업체, 원료, 내용으로 필터" autocomplete="off">
+        <button class="excel-export worklog-format-toggle" type="button">깔끔하게 보기</button>
+        <button class="excel-export worklog-load-button" type="button">엑셀 불러오기</button>
+        <button class="worklog-clear-button" type="button">삭제</button>
+        <button class="worklog-close" type="button" aria-label="close worklog">Close</button>
+      </div>
+    </div>
+    <input type="file" class="worklog-file-input" accept=".xlsx,.xlsm" hidden>
+    <div class="worklog-dropzone">
+      <div class="worklog-results" aria-live="polite"></div>
+      <div class="worklog-dropzone-overlay">
+        <p>여기에 엑셀 파일을 놓으세요</p>
       </div>
     </div>
   </div>
