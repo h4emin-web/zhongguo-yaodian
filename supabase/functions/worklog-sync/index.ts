@@ -1,6 +1,7 @@
-// 업무일지(파싱된 데이터 + AI 요약 캐시)를 기기 간에 공유하기 위한 동기화 함수.
+// 업무일지(파싱된 데이터)를 기기 간에 공유하기 위한 동기화 함수.
 // 비공개 Storage 버킷(haemin-worklog)에 service_role 권한으로만 접근한다.
 // 프론트는 이 함수를 통해서만 데이터를 읽고 쓰며, 버킷 자체는 공개 URL이 없다.
+// 만료 시간은 없으며, "삭제" 액션이 호출되기 전까지 계속 유지된다.
 
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "@supabase/supabase-js";
@@ -32,13 +33,12 @@ Deno.serve(async (req) => {
   );
 
   try {
-    const { action, people, aiSummaries, expiresAt } = await req.json();
+    const { action, people, dateLabel } = await req.json();
 
     if (action === "save") {
       const payload = JSON.stringify({
         people: people ?? [],
-        aiSummaries: aiSummaries ?? {},
-        expiresAt,
+        dateLabel: dateLabel ?? "",
         savedAt: Date.now()
       });
 
@@ -65,10 +65,6 @@ Deno.serve(async (req) => {
 
       const text = await data.text();
       const parsed = JSON.parse(text);
-
-      if (!parsed.expiresAt || Date.now() > parsed.expiresAt) {
-        return json({ ok: true, data: null });
-      }
 
       return json({ ok: true, data: parsed });
     }

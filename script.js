@@ -28,6 +28,8 @@ const globalSearchHead = document.querySelector(".global-search-head");
 const globalSearchResults = document.querySelector(".global-search-results");
 const globalExcelExportButton = document.querySelector(".global-excel-export");
 const worklogFullscreen = document.querySelector(".worklog-fullscreen");
+const worklogBoxDate = document.querySelector(".worklog-box-date");
+const worklogDateMeta = document.querySelector(".worklog-date-meta");
 const worklogClose = document.querySelector(".worklog-close");
 const worklogLoadButton = document.querySelector(".worklog-load-button");
 const worklogFileInput = document.querySelector(".worklog-file-input");
@@ -75,6 +77,7 @@ let globalSearchToken = 0;
 let currentGlobalKeyword = "";
 let currentGlobalMatches = { wc: [], mfds: [], cnph: [] };
 let worklogPeople = [];
+let worklogDateLabel = "";
 
 function openDetail(card) {
   const title = card.querySelector("h2").textContent;
@@ -1159,9 +1162,29 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
-function todayEndOfDayTimestamp() {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999).getTime();
+function parseWorklogDateFromFilename(filename) {
+  const match = String(filename || "").match(/(\d{2,4})[-_](\d{2})[-_](\d{2})/);
+
+  if (!match) {
+    return "";
+  }
+
+  let [, year, month, day] = match;
+
+  if (year.length === 2) {
+    year = `20${year}`;
+  }
+
+  return `${year}년 ${month}월 ${day}일자`;
+}
+
+function updateWorklogDateDisplay() {
+  const label = worklogPeople.length > 0 && worklogDateLabel
+    ? worklogDateLabel
+    : "불러온 업무일지 없음";
+
+  worklogBoxDate.textContent = label;
+  worklogDateMeta.textContent = label;
 }
 
 async function saveWorklogToStorage() {
@@ -1174,7 +1197,7 @@ async function saveWorklogToStorage() {
       body: {
         action: "save",
         people: worklogPeople,
-        expiresAt: todayEndOfDayTimestamp()
+        dateLabel: worklogDateLabel
       }
     });
   } catch (error) {
@@ -1199,6 +1222,8 @@ async function loadWorklogFromStorage() {
     const saved = data.data;
 
     worklogPeople = saved.people;
+    worklogDateLabel = saved.dateLabel || "";
+    updateWorklogDateDisplay();
 
     return worklogPeople.length > 0;
   } catch (error) {
@@ -1231,8 +1256,10 @@ async function clearWorklog() {
   }
 
   worklogPeople = [];
+  worklogDateLabel = "";
   worklogFilterInput.value = "";
   renderWorklog();
+  updateWorklogDateDisplay();
   await clearWorklogStorage();
 }
 
@@ -1294,8 +1321,10 @@ async function loadWorklogFile(file) {
       })
       .filter((person) => person.rows.length > 0);
 
+    worklogDateLabel = parseWorklogDateFromFilename(file.name);
     worklogFilterInput.value = "";
     renderWorklog();
+    updateWorklogDateDisplay();
     await saveWorklogToStorage();
   } catch (error) {
     console.error(error);
@@ -1417,3 +1446,5 @@ worklogDropzone.addEventListener("drop", (event) => {
     loadWorklogFile(file);
   }
 });
+
+loadWorklogFromStorage();
