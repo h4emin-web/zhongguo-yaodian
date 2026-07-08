@@ -151,6 +151,66 @@ cards.forEach((card) => {
   });
 });
 
+async function shareCardAsImage(card, button) {
+  if (!window.html2canvas) {
+    alert("이미지 캡처 도구를 불러오지 못했습니다.");
+    return;
+  }
+
+  const title = card.querySelector("h2").textContent.trim();
+
+  button.disabled = true;
+
+  try {
+    const canvas = await window.html2canvas(card, { backgroundColor: "#ffffff", scale: 2 });
+
+    canvas.toBlob(async (blob) => {
+      button.disabled = false;
+
+      if (!blob) {
+        alert("이미지를 만들지 못했습니다.");
+        return;
+      }
+
+      const file = new File([blob], `${title}.png`, { type: "image/png" });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title });
+          return;
+        } catch (shareError) {
+          if (shareError.name === "AbortError") {
+            return;
+          }
+          console.error(shareError);
+        }
+      }
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = `${title}.png`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      alert("이 브라우저는 공유가 지원되지 않아 이미지를 다운로드했습니다. 카카오톡에서 사진 첨부로 보내주세요.");
+    }, "image/png");
+  } catch (error) {
+    button.disabled = false;
+    console.error(error);
+    alert("카드 이미지를 캡처하지 못했습니다.");
+  }
+}
+
+document.querySelectorAll(".card-share-button").forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    shareCardAsImage(button.closest(".tool-box"), button);
+  });
+});
+
 closeButton.addEventListener("click", closeDetail);
 
 detailView.addEventListener("click", (event) => {
