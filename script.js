@@ -1600,3 +1600,11 @@ worklogDropzone.addEventListener("drop", (event) => {
 });
 
 loadWorklogFromStorage();
+
+if (location.hash === "#worklog") {
+  const worklogCard = Array.from(cards).find((card) => card.querySelector("h2").textContent.includes("업무일지"));
+
+  if (worklogCard) {
+    openWorklog(worklogCard);
+  }
+}
