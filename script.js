@@ -32,7 +32,6 @@ const worklogClose = document.querySelector(".worklog-close");
 const worklogLoadButton = document.querySelector(".worklog-load-button");
 const worklogFileInput = document.querySelector(".worklog-file-input");
 const worklogFilterInput = document.querySelector("#worklog-filter-input");
-const worklogAiToggle = document.querySelector(".worklog-ai-toggle");
 const worklogClearButton = document.querySelector(".worklog-clear-button");
 const toolsMenu = document.querySelector(".tools-menu");
 const toolsTrigger = document.querySelector(".tools-trigger");
@@ -76,8 +75,6 @@ let globalSearchToken = 0;
 let currentGlobalKeyword = "";
 let currentGlobalMatches = { wc: [], mfds: [], cnph: [] };
 let worklogPeople = [];
-let worklogAiMode = false;
-const worklogAiSummaryCache = new Map();
 
 function openDetail(card) {
   const title = card.querySelector("h2").textContent;
@@ -1177,7 +1174,6 @@ async function saveWorklogToStorage() {
       body: {
         action: "save",
         people: worklogPeople,
-        aiSummaries: Object.fromEntries(worklogAiSummaryCache),
         expiresAt: todayEndOfDayTimestamp()
       }
     });
@@ -1203,11 +1199,6 @@ async function loadWorklogFromStorage() {
     const saved = data.data;
 
     worklogPeople = saved.people;
-    worklogAiSummaryCache.clear();
-
-    Object.entries(saved.aiSummaries || {}).forEach(([id, summary]) => {
-      worklogAiSummaryCache.set(id, summary);
-    });
 
     return worklogPeople.length > 0;
   } catch (error) {
@@ -1240,9 +1231,6 @@ async function clearWorklog() {
   }
 
   worklogPeople = [];
-  worklogAiMode = false;
-  worklogAiSummaryCache.clear();
-  worklogAiToggle.textContent = "AI 요약";
   worklogFilterInput.value = "";
   renderWorklog();
   await clearWorklogStorage();
@@ -1306,9 +1294,6 @@ async function loadWorklogFile(file) {
       })
       .filter((person) => person.rows.length > 0);
 
-    worklogAiMode = false;
-    worklogAiSummaryCache.clear();
-    worklogAiToggle.textContent = "AI 요약";
     worklogFilterInput.value = "";
     renderWorklog();
     await saveWorklogToStorage();
@@ -1317,6 +1302,14 @@ async function loadWorklogFile(file) {
     worklogPeople = [];
     worklogResults.innerHTML = '<p class="empty-result">엑셀을 불러오지 못했습니다. 파일 형식을 확인하세요.</p>';
   }
+}
+
+function highlightWorklogFigures(escapedText) {
+  return escapedText
+    .replace(/((?:USD|CNY|EUR|JPY|KRW)\s?[\d,.]+(?:\s?\/\s?[a-zA-Z]+)?)/g, '<strong class="worklog-figure">$1</strong>')
+    .replace(/([\d][\d,]*(?:\.\d+)?\s?원)/g, '<strong class="worklog-figure">$1</strong>')
+    .replace(/(\b[\d][\d,]*(?:\.\d+)?\s?(?:kg|KG|Kg|g|G)\b)/g, '<strong class="worklog-figure">$1</strong>')
+    .replace(/([\d.]+\s?%)/g, '<strong class="worklog-figure">$1</strong>');
 }
 
 function renderWorklog() {
@@ -1363,130 +1356,12 @@ function renderWorklog() {
                 ${row.contact ? `<span>${escapeHtml(row.contact)}</span>` : ""}
               </span>
             </div>
-            <div class="worklog-content">${worklogContentHtml(row)}</div>
+            <div class="worklog-content">${highlightWorklogFigures(escapeHtml(row.content))}</div>
           </article>
         `).join("")}
       </div>
     </details>
   `).join("");
-}
-
-function highlightWorklogFigures(escapedText) {
-  return escapedText
-    .replace(/(USD\s?[\d,.]+\s?\/?\s?[a-zA-Z]*)/g, '<span class="worklog-figure">$1</span>')
-    .replace(/([\d][\d,]*\s?원)/g, '<span class="worklog-figure">$1</span>')
-    .replace(/([\d.]+\s?%)/g, '<span class="worklog-figure">$1</span>');
-}
-
-function formatWorklogContent(content) {
-  if (!content) {
-    return "";
-  }
-
-  const tagMatch = content.match(/^\[([^\]]+)\]\s*/);
-  let tag = "";
-  let body = content;
-
-  if (tagMatch) {
-    tag = tagMatch[1];
-    body = content.slice(tagMatch[0].length);
-  }
-
-  const lines = body
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-
-  const tagHtml = tag ? `<p class="worklog-tag">${escapeHtml(tag)}</p>` : "";
-
-  const lineHtml = lines.map((line) => {
-    const isConclusion = line.startsWith("→") || line.startsWith("->");
-    const cleaned = line.replace(/^(→|->)\s*/, "");
-    const escaped = highlightWorklogFigures(escapeHtml(cleaned));
-
-    if (isConclusion) {
-      return `<p class="worklog-conclusion">→ ${escaped}</p>`;
-    }
-
-    return `<p class="worklog-line">${escaped}</p>`;
-  }).join("");
-
-  return `${tagHtml}${lineHtml}`;
-}
-
-function worklogContentHtml(row) {
-  if (worklogAiMode && worklogAiSummaryCache.has(row.id)) {
-    return formatWorklogContent(worklogAiSummaryCache.get(row.id));
-  }
-
-  return escapeHtml(row.content);
-}
-
-async function toggleWorklogAi() {
-  if (worklogPeople.length === 0) {
-    return;
-  }
-
-  if (worklogAiMode) {
-    worklogAiMode = false;
-    worklogAiToggle.textContent = "AI 요약";
-    renderWorklog();
-    return;
-  }
-
-  worklogAiToggle.disabled = true;
-  worklogAiToggle.textContent = "요약 생성 중...";
-
-  try {
-    await ensureWorklogAiSummaries();
-    worklogAiMode = true;
-    worklogAiToggle.textContent = "원본 보기";
-  } catch (error) {
-    console.error(error);
-    alert("AI 요약을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
-    worklogAiToggle.textContent = "AI 요약";
-  } finally {
-    worklogAiToggle.disabled = false;
-    renderWorklog();
-  }
-}
-
-async function ensureWorklogAiSummaries() {
-  const items = [];
-
-  worklogPeople.forEach((person) => {
-    person.rows.forEach((row) => {
-      if (row.content && !worklogAiSummaryCache.has(row.id)) {
-        items.push({ id: row.id, text: row.content });
-      }
-    });
-  });
-
-  if (items.length === 0) {
-    return;
-  }
-
-  if (!supabaseClient) {
-    throw new Error("Supabase 연결 설정이 없어 요약을 요청할 수 없습니다.");
-  }
-
-  const { data, error } = await supabaseClient.functions.invoke("summarize-worklog", {
-    body: { items }
-  });
-
-  if (error) {
-    throw error;
-  }
-
-  if (!data || !data.ok) {
-    throw new Error((data && data.error) || "요약 실패");
-  }
-
-  Object.entries(data.summaries || {}).forEach(([id, summary]) => {
-    worklogAiSummaryCache.set(id, summary);
-  });
-
-  await saveWorklogToStorage();
 }
 
 wcSearchInput.addEventListener("input", renderWcResults);
@@ -1518,7 +1393,6 @@ worklogFileInput.addEventListener("change", () => {
   }
 });
 worklogFilterInput.addEventListener("input", renderWorklog);
-worklogAiToggle.addEventListener("click", toggleWorklogAi);
 
 let worklogDragDepth = 0;
 

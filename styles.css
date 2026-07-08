@@ -1013,40 +1013,6 @@ body.detail-open {
   line-height: 1.75;
 }
 
-.worklog-content .worklog-tag {
-  width: fit-content;
-  margin: 0 0 10px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  color: var(--accent);
-  font-size: 13px;
-  font-weight: 800;
-  background: var(--accent-soft);
-}
-
-.worklog-content .worklog-line {
-  position: relative;
-  margin: 0 0 8px;
-  padding-left: 14px;
-}
-
-.worklog-content .worklog-line::before {
-  content: "•";
-  position: absolute;
-  left: 0;
-  color: var(--accent);
-}
-
-.worklog-content .worklog-conclusion {
-  margin: 10px 0 0;
-  padding: 10px 14px;
-  border-left: 3px solid var(--accent);
-  color: var(--text);
-  font-weight: 700;
-  background: var(--accent-soft);
-  border-radius: 0 8px 8px 0;
-}
-
 .worklog-figure {
   color: #b3591e;
   font-weight: 800;
@@ -1065,6 +1031,12 @@ body.detail-open {
 
   .worklog-topbar-actions input {
     width: 100%;
+  }
+
+  .worklog-load-button,
+  .worklog-clear-button,
+  .worklog-close {
+    display: none;
   }
 }
 
