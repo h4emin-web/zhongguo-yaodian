@@ -128,6 +128,17 @@ body.detail-open {
   border-radius: 8px;
   background: #ffffff;
   box-shadow: var(--shadow);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-6px);
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.tools-menu:hover .tools-dropdown,
+.tools-menu:focus-within .tools-dropdown {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 
 .tools-item {

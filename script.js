@@ -32,9 +32,9 @@ const worklogClose = document.querySelector(".worklog-close");
 const worklogLoadButton = document.querySelector(".worklog-load-button");
 const worklogFileInput = document.querySelector(".worklog-file-input");
 const worklogFilterInput = document.querySelector("#worklog-filter-input");
-const worklogFormatToggle = document.querySelector(".worklog-format-toggle");
 const worklogAiToggle = document.querySelector(".worklog-ai-toggle");
 const worklogClearButton = document.querySelector(".worklog-clear-button");
+const toolsMenu = document.querySelector(".tools-menu");
 const toolsTrigger = document.querySelector(".tools-trigger");
 const toolsDropdown = document.querySelector(".tools-dropdown");
 const marginCalculatorItem = document.querySelector('.tools-item[data-tool="margin-calculator"]');
@@ -76,7 +76,6 @@ let globalSearchToken = 0;
 let currentGlobalKeyword = "";
 let currentGlobalMatches = { wc: [], mfds: [], cnph: [] };
 let worklogPeople = [];
-let worklogFormatMode = false;
 let worklogAiMode = false;
 const worklogAiSummaryCache = new Map();
 
@@ -158,27 +157,17 @@ document.addEventListener("keydown", (event) => {
     closeWorklog();
   }
 
-  if (event.key === "Escape" && !toolsDropdown.hidden) {
+  if (event.key === "Escape" && document.activeElement && document.activeElement.closest(".tools-menu")) {
     closeToolsDropdown();
   }
 });
 
-toolsTrigger.addEventListener("click", (event) => {
-  event.stopPropagation();
-  const isOpen = !toolsDropdown.hidden;
-
-  if (isOpen) {
-    closeToolsDropdown();
-  } else {
-    toolsDropdown.hidden = false;
-    toolsTrigger.setAttribute("aria-expanded", "true");
-  }
+toolsMenu.addEventListener("mouseenter", () => {
+  toolsTrigger.setAttribute("aria-expanded", "true");
 });
 
-document.addEventListener("click", (event) => {
-  if (!toolsDropdown.hidden && !event.target.closest(".tools-menu")) {
-    closeToolsDropdown();
-  }
+toolsMenu.addEventListener("mouseleave", () => {
+  toolsTrigger.setAttribute("aria-expanded", "false");
 });
 
 marginCalculatorItem.addEventListener("click", () => {
@@ -795,8 +784,11 @@ function openImportCostCalculator() {
 }
 
 function closeToolsDropdown() {
-  toolsDropdown.hidden = true;
   toolsTrigger.setAttribute("aria-expanded", "false");
+
+  if (document.activeElement && document.activeElement.closest(".tools-menu")) {
+    document.activeElement.blur();
+  }
 }
 
 async function loadCnphData() {
@@ -1181,7 +1173,8 @@ function saveWorklogToStorage() {
   try {
     localStorage.setItem(WORKLOG_STORAGE_KEY, JSON.stringify({
       expiresAt: todayEndOfDayTimestamp(),
-      people: worklogPeople
+      people: worklogPeople,
+      aiSummaries: Object.fromEntries(worklogAiSummaryCache)
     }));
   } catch (error) {
     console.error(error);
@@ -1204,6 +1197,12 @@ function loadWorklogFromStorage() {
     }
 
     worklogPeople = saved.people;
+    worklogAiSummaryCache.clear();
+
+    Object.entries(saved.aiSummaries || {}).forEach(([id, summary]) => {
+      worklogAiSummaryCache.set(id, summary);
+    });
+
     return worklogPeople.length > 0;
   } catch (error) {
     console.error(error);
@@ -1230,8 +1229,9 @@ function clearWorklog() {
   }
 
   worklogPeople = [];
-  worklogFormatMode = false;
-  worklogFormatToggle.textContent = "깔끔하게 보기";
+  worklogAiMode = false;
+  worklogAiSummaryCache.clear();
+  worklogAiToggle.textContent = "AI 요약";
   worklogFilterInput.value = "";
   clearWorklogStorage();
   renderWorklog();
@@ -1297,8 +1297,6 @@ async function loadWorklogFile(file) {
       })
       .filter((person) => person.rows.length > 0);
 
-    worklogFormatMode = false;
-    worklogFormatToggle.textContent = "깔끔하게 보기";
     worklogAiMode = false;
     worklogAiSummaryCache.clear();
     worklogAiToggle.textContent = "AI 요약";
@@ -1412,10 +1410,6 @@ function worklogContentHtml(row) {
     return formatWorklogContent(worklogAiSummaryCache.get(row.id));
   }
 
-  if (worklogFormatMode) {
-    return formatWorklogContent(row.content);
-  }
-
   return escapeHtml(row.content);
 }
 
@@ -1482,16 +1476,8 @@ async function ensureWorklogAiSummaries() {
   Object.entries(data.summaries || {}).forEach(([id, summary]) => {
     worklogAiSummaryCache.set(id, summary);
   });
-}
 
-function toggleWorklogFormat() {
-  if (worklogPeople.length === 0) {
-    return;
-  }
-
-  worklogFormatMode = !worklogFormatMode;
-  worklogFormatToggle.textContent = worklogFormatMode ? "원본 보기" : "깔끔하게 보기";
-  renderWorklog();
+  saveWorklogToStorage();
 }
 
 wcSearchInput.addEventListener("input", renderWcResults);
@@ -1523,7 +1509,6 @@ worklogFileInput.addEventListener("change", () => {
   }
 });
 worklogFilterInput.addEventListener("input", renderWorklog);
-worklogFormatToggle.addEventListener("click", toggleWorklogFormat);
 worklogAiToggle.addEventListener("click", toggleWorklogAi);
 
 let worklogDragDepth = 0;
