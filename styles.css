@@ -763,7 +763,8 @@ body.detail-open {
 }
 
 .flag-cn,
-.flag-kr {
+.flag-kr,
+.flag-in {
   width: 1.15em;
   height: 0.77em;
   display: inline-block;

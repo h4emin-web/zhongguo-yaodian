@@ -94,7 +94,7 @@ function openDetail(card) {
   detailKicker.textContent = kicker;
   detailTitle.textContent = title;
   detailDescription.textContent = description;
-  showWcSearch(title.includes("WC & COPP"));
+  showWcSearch(title.includes("중국 WC & COPP"));
   showPoReceive(title.includes("PO 입고처리"));
   showMfdsSearch(title.includes("K-DMF 검색"));
   showCnphSearch(title.includes("중국 약전"));
@@ -104,7 +104,7 @@ function openDetail(card) {
   detailView.setAttribute("aria-hidden", "false");
   document.body.classList.add("detail-open");
 
-  if (title.includes("WC & COPP")) {
+  if (title.includes("중국 WC & COPP")) {
     loadWcData();
     wcSearchInput.focus();
   } else if (title.includes("PO 입고처리")) {
