@@ -523,7 +523,11 @@ async function renderGlobalSearch(keyword) {
     mfdsDirect.map((row) => ({ korean: row.ingredient }))
   ]);
 
-  const wcMatches = dedupeWcRows(unionByRef(wcDirect, expandByNamePools(wcRows, pools)));
+  const wcExpanded = dedupeWcRows(unionByRef(wcDirect, expandByNamePools(wcRows, pools)));
+  const wcMatches = [
+    ...latestByManufacturer(bySource(wcExpanded, "WC")),
+    ...latestByManufacturer(bySource(wcExpanded, "COPP"))
+  ];
   const cnphMatches = unionByRef(cnphDirect, expandByNamePools(cnphRows, pools));
   const usdmfMatches = unionByRef(
     usdmfDirect,
@@ -1359,6 +1363,40 @@ function renderWcSourceGroup(label, rows) {
   `;
 }
 
+function parseValidityDate(value) {
+  if (!value) {
+    return null;
+  }
+
+  const cleaned = String(value).replace(/(\d+)(st|nd|rd|th)/gi, "$1");
+  const parsed = new Date(cleaned);
+
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function latestByManufacturer(rows) {
+  const bestByKey = new Map();
+
+  rows.forEach((row) => {
+    const key = `${row.chinese}|${row.korean}|${row.english}|${row.manufacturer}`;
+    const existing = bestByKey.get(key);
+
+    if (!existing) {
+      bestByKey.set(key, row);
+      return;
+    }
+
+    const existingDate = parseValidityDate(existing.validity);
+    const rowDate = parseValidityDate(row.validity);
+
+    if (rowDate && (!existingDate || rowDate > existingDate)) {
+      bestByKey.set(key, row);
+    }
+  });
+
+  return Array.from(bestByKey.values());
+}
+
 function dedupeWcRows(rows) {
   const seen = new Set();
 
@@ -1383,16 +1421,18 @@ function renderWcResults() {
   }
 
   const matches = dedupeWcRows(wcRows.filter((row) => row._s.includes(keyword)));
-  currentWcResults = matches;
+  const wcOnly = latestByManufacturer(bySource(matches, "WC"));
+  const coppOnly = latestByManufacturer(bySource(matches, "COPP"));
+  currentWcResults = [...wcOnly, ...coppOnly];
 
-  if (matches.length === 0) {
+  if (currentWcResults.length === 0) {
     wcResults.innerHTML = '<p class="empty-result">검색 결과가 없습니다.</p>';
     return;
   }
 
   wcResults.innerHTML = [
-    renderWcSourceGroup("WC", bySource(matches, "WC")),
-    renderWcSourceGroup("COPP", bySource(matches, "COPP"))
+    renderWcSourceGroup("WC", wcOnly),
+    renderWcSourceGroup("COPP", coppOnly)
   ].join("");
 }
 
