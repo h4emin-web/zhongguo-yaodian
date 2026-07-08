@@ -82,7 +82,7 @@ let usdmfLoaded = false;
 let currentUsdmfResults = [];
 let globalSearchToken = 0;
 let currentGlobalKeyword = "";
-let currentGlobalMatches = { wc: [], mfds: [], cnph: [] };
+let currentGlobalMatches = { wc: [], mfds: [], cnph: [], usdmf: [] };
 let worklogPeople = [];
 let worklogDateLabel = "";
 
@@ -275,7 +275,7 @@ searchInput.addEventListener("input", () => {
 });
 
 async function ensureGlobalSearchData() {
-  await Promise.all([loadWcData(), loadMfdsData(), loadCnphData()]);
+  await Promise.all([loadWcData(), loadMfdsData(), loadCnphData(), loadUsdmfData()]);
 }
 
 const GLOBAL_ITEM_RENDER_LIMIT = 150;
@@ -321,6 +321,29 @@ const FLAG_KR_SVG = `<svg class="flag-kr" viewBox="0 0 30 20" xmlns="http://www.
       <rect x="0.3" y="1.05" width="1.7" height="0.7"/>
     </g>
   </g>
+</svg>`;
+
+const FLAG_US_SVG = `<svg class="flag-us" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+  <rect y="0.00" width="30" height="2.86" fill="#B22234"/>
+  <rect y="2.86" width="30" height="2.86" fill="#FFFFFF"/>
+  <rect y="5.71" width="30" height="2.86" fill="#B22234"/>
+  <rect y="8.57" width="30" height="2.86" fill="#FFFFFF"/>
+  <rect y="11.43" width="30" height="2.86" fill="#B22234"/>
+  <rect y="14.29" width="30" height="2.86" fill="#FFFFFF"/>
+  <rect y="17.14" width="30" height="2.86" fill="#B22234"/>
+  <rect width="12" height="11.43" fill="#3C3B6E"/>
+  <circle cx="1.20" cy="1.00" r="0.35" fill="#FFFFFF"/>
+  <circle cx="4.40" cy="1.00" r="0.35" fill="#FFFFFF"/>
+  <circle cx="7.60" cy="1.00" r="0.35" fill="#FFFFFF"/>
+  <circle cx="10.80" cy="1.00" r="0.35" fill="#FFFFFF"/>
+  <circle cx="1.20" cy="5.71" r="0.35" fill="#FFFFFF"/>
+  <circle cx="4.40" cy="5.71" r="0.35" fill="#FFFFFF"/>
+  <circle cx="7.60" cy="5.71" r="0.35" fill="#FFFFFF"/>
+  <circle cx="10.80" cy="5.71" r="0.35" fill="#FFFFFF"/>
+  <circle cx="1.20" cy="10.43" r="0.35" fill="#FFFFFF"/>
+  <circle cx="4.40" cy="10.43" r="0.35" fill="#FFFFFF"/>
+  <circle cx="7.60" cy="10.43" r="0.35" fill="#FFFFFF"/>
+  <circle cx="10.80" cy="10.43" r="0.35" fill="#FFFFFF"/>
 </svg>`;
 
 function globalSearchGroup(label, matches, itemRenderer, flagSvg) {
@@ -378,6 +401,54 @@ function bySource(rows, source) {
   return rows.filter((row) => row.source === source);
 }
 
+function globalUsdmfItem(row) {
+  return `
+    <article class="wc-result-item">
+      <p><strong>원료명</strong><span>${escapeHtml(row.english)}${row.korean ? ` / ${escapeHtml(row.korean)}` : ""}</span></p>
+      <p><strong>제조사</strong><span>${escapeHtml(row.manufacturer)}</span></p>
+      <p><strong>DMF번호</strong><span>${escapeHtml(row.dmfNumber)}</span></p>
+      <p><strong>구분</strong><span>Type ${escapeHtml(row.type)} · ${escapeHtml(row.status)}</span></p>
+      <p><strong>제출일</strong><span>${escapeHtml(row.regDate)}</span></p>
+    </article>
+  `;
+}
+
+function collectNamePools(rowGroups) {
+  const chinese = new Set();
+  const korean = new Set();
+  const english = new Set();
+
+  rowGroups.forEach((rows) => {
+    rows.forEach((row) => {
+      if (row.chinese) {
+        chinese.add(row.chinese);
+      }
+
+      if (row.korean) {
+        korean.add(row.korean);
+      }
+
+      if (row.english) {
+        english.add(row.english.toLowerCase());
+      }
+    });
+  });
+
+  return { chinese, korean, english };
+}
+
+function expandByNamePools(rows, pools) {
+  return rows.filter((row) => {
+    return (row.chinese && pools.chinese.has(row.chinese)) ||
+      (row.korean && pools.korean.has(row.korean)) ||
+      (row.english && pools.english.has(row.english.toLowerCase()));
+  });
+}
+
+function unionByRef(...groups) {
+  return Array.from(new Set(groups.flat()));
+}
+
 async function renderGlobalSearch(keyword) {
   const token = ++globalSearchToken;
   currentGlobalKeyword = keyword;
@@ -386,7 +457,7 @@ async function renderGlobalSearch(keyword) {
     globalSearchHead.hidden = true;
     globalSearchResults.hidden = true;
     globalSearchResults.innerHTML = "";
-    currentGlobalMatches = { wc: [], mfds: [], cnph: [] };
+    currentGlobalMatches = { wc: [], mfds: [], cnph: [], usdmf: [] };
     return;
   }
 
@@ -400,17 +471,28 @@ async function renderGlobalSearch(keyword) {
     return;
   }
 
-  const wcMatches = dedupeWcRows(wcRows.filter((row) => row._s.includes(keyword)));
+  const wcDirect = wcRows.filter((row) => row._s.includes(keyword));
+  const cnphDirect = cnphRows.filter((row) => row._s.includes(keyword));
+  const usdmfDirect = usdmfRows.filter((row) => row._s.includes(keyword));
   const mfdsMatches = mfdsRows.filter((row) => row._s.includes(keyword));
-  const cnphMatches = cnphRows.filter((row) => row._s.includes(keyword));
 
-  currentGlobalMatches = { wc: wcMatches, mfds: mfdsMatches, cnph: cnphMatches };
+  const pools = collectNamePools([wcDirect, cnphDirect, usdmfDirect]);
+
+  const wcMatches = dedupeWcRows(unionByRef(wcDirect, expandByNamePools(wcRows, pools)));
+  const cnphMatches = unionByRef(cnphDirect, expandByNamePools(cnphRows, pools));
+  const usdmfMatches = unionByRef(
+    usdmfDirect,
+    usdmfRows.filter((row) => row.english && pools.english.has(row.english.toLowerCase()))
+  );
+
+  currentGlobalMatches = { wc: wcMatches, mfds: mfdsMatches, cnph: cnphMatches, usdmf: usdmfMatches };
 
   globalSearchResults.innerHTML = [
     globalSearchGroup("K-DMF", mfdsMatches, globalMfdsItem, FLAG_KR_SVG),
     globalSearchGroup("중국 약전", cnphMatches, globalCnphItem, FLAG_CN_SVG),
     globalSearchGroup("WC", bySource(wcMatches, "WC"), globalWcItem, FLAG_CN_SVG),
-    globalSearchGroup("COPP", bySource(wcMatches, "COPP"), globalWcItem, FLAG_CN_SVG)
+    globalSearchGroup("COPP", bySource(wcMatches, "COPP"), globalWcItem, FLAG_CN_SVG),
+    globalSearchGroup("미국 DMF", usdmfMatches, globalUsdmfItem, FLAG_US_SVG)
   ].join("");
 }
 
@@ -525,6 +607,14 @@ async function exportGlobalResults() {
 
   addExportSection(worksheet, "WC", wcColumnHeaders, bySource(currentGlobalMatches.wc, "WC"), wcRowMapper);
   addExportSection(worksheet, "COPP", wcColumnHeaders, bySource(currentGlobalMatches.wc, "COPP"), wcRowMapper);
+
+  addExportSection(
+    worksheet,
+    "미국 DMF",
+    ["영어명", "한국어명", "제조사", "DMF번호", "TYPE", "STATUS", "제출일"],
+    currentGlobalMatches.usdmf,
+    (row) => [row.english, row.korean, row.manufacturer, row.dmfNumber, row.type, row.status, row.regDate]
+  );
 
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], {
