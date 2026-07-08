@@ -410,7 +410,7 @@ async function exportGlobalResults() {
   }
 
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = "Haemin WorkSpace";
+  workbook.creator = "WorkSpace";
   workbook.created = new Date();
 
   const worksheet = workbook.addWorksheet("종합검색 결과");
@@ -587,7 +587,7 @@ async function exportMfdsResults() {
   }
 
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = "Haemin WorkSpace";
+  workbook.creator = "WorkSpace";
   workbook.created = new Date();
 
   const worksheet = workbook.addWorksheet("성분명 검색결과");
@@ -857,7 +857,7 @@ async function exportCnphResults() {
   }
 
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = "Haemin WorkSpace";
+  workbook.creator = "WorkSpace";
   workbook.created = new Date();
 
   const worksheet = workbook.addWorksheet("중국 약전 검색결과");
@@ -1080,7 +1080,7 @@ async function exportWcResults() {
   }
 
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = "Haemin WorkSpace";
+  workbook.creator = "WorkSpace";
   workbook.created = new Date();
 
   const worksheet = workbook.addWorksheet("WC COPP 검색결과");
