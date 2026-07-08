@@ -9,16 +9,19 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Methods": "POST, OPTIONS"
 };
 
-const BATCH_SIZE = 25;
+const BATCH_SIZE = 40;
 
 function buildPrompt(items: { id: string; text: string }[]): string {
-  return `아래는 업무일지 항목들입니다. 각 항목의 "text"를 한국어로 2~4문장 이내로 간결하게 요약하세요.
+  return `아래는 업무일지 항목들입니다. 각 항목의 "text"를 다음 규칙에 따라 처리하세요.
+
+목표는 "요약(축약)"이 아니라 "정리(가독성 개선)"입니다. 내용을 줄이지 마세요.
 
 규칙:
-- 반드시 원문(text)에 실제로 적힌 내용만 사용하세요. 원문에 없는 회사명, 제품명, 사이트명, 숫자, 사실을 절대 지어내거나 추측해서 넣지 마세요.
+- 원문에 있는 모든 정보, 숫자, 단가, 회사명, 결론을 하나도 빠짐없이 그대로 유지하세요. 표현도 원문 그대로 최대한 유지하고, 절대 다른 말로 바꾸거나 생략하지 마세요.
+- 문맥 없이 여러 내용이 한 문장으로 길게 이어져 있으면, 자연스러운 문장 단위로 줄바꿈해서 나누기만 하세요. 문장을 합치거나 재구성하지 말고, 순서와 표현을 원문 그대로 유지한 채 줄만 나누세요.
+- 원문이 이미 짧거나(1~2문장), 이미 줄바꿈으로 잘 정리되어 있으면 절대 손대지 말고 원문 그대로 돌려주세요.
+- 원문에 없는 문장, 해석, 결론, 예측을 추가하지 마세요.
 - 회사명, 원료명, 단가, 숫자는 원문 표기 그대로 정확히 옮기세요 (오타 수정 금지, 다른 단어로 바꾸기 금지).
-- 결론이나 다음 액션이 원문에 있으면 마지막에 남기세요. 없으면 지어내지 마세요.
-- 불필요한 수식어와 반복만 줄이고, 원문에 없는 문장은 추가하지 마세요.
 - 각 항목의 id는 입력과 동일하게 그대로 응답하세요.
 - 오직 JSON 배열만 응답하세요. 다른 설명 텍스트는 포함하지 마세요.
 - 형식: [{"id": "...", "summary": "..."}]
@@ -95,7 +98,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const model = Deno.env.get("GEMINI_MODEL") || "gemini-2.5-flash";
+    const model = Deno.env.get("GEMINI_MODEL") || "gemini-2.5-flash-lite";
     const summaries: Record<string, string> = {};
 
     for (let i = 0; i < items.length; i += BATCH_SIZE) {
