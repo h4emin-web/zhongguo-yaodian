@@ -415,10 +415,26 @@ function globalUsdmfItem(row) {
 
 const NAME_POOL_MIN_LENGTH = 2;
 
+// 실제 데이터의 "영어명"란에는 원료명 대신 이런 제형/행정 용어만 덜렁 들어있는 경우가 많다
+// (예: "tablet", "/tablet"). 이런 값은 원료를 특정하지 못하므로 이름 연결에서 제외한다.
+const GENERIC_NAME_NOISE = new Set([
+  "tablet", "tablets", "/tablet", "/tablets",
+  "injection", "injections", "/injection", "/injections",
+  "capsule", "capsules", "/capsule", "/capsules",
+  "solution", "bulk drug", "api", "not applicable",
+  "n/a", "na", "powder", "granule", "granules",
+  "suspension", "syrup", "ointment", "cream", "gel",
+  "patch", "drops", "spray"
+]);
+
+function isUsableName(value) {
+  return Boolean(value) && value.length >= NAME_POOL_MIN_LENGTH && !GENERIC_NAME_NOISE.has(value);
+}
+
 function addToNamePool(list, seen, rawValue) {
   const value = rawValue.trim();
 
-  if (value.length < NAME_POOL_MIN_LENGTH || seen.has(value)) {
+  if (!isUsableName(value) || seen.has(value)) {
     return;
   }
 
@@ -454,7 +470,7 @@ function collectNamePools(rowGroups) {
 }
 
 function sharesName(value, pool) {
-  if (!value || value.length < NAME_POOL_MIN_LENGTH) {
+  if (!isUsableName(value)) {
     return false;
   }
 
