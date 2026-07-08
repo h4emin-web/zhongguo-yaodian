@@ -474,15 +474,24 @@ async function renderGlobalSearch(keyword) {
   const wcDirect = wcRows.filter((row) => row._s.includes(keyword));
   const cnphDirect = cnphRows.filter((row) => row._s.includes(keyword));
   const usdmfDirect = usdmfRows.filter((row) => row._s.includes(keyword));
-  const mfdsMatches = mfdsRows.filter((row) => row._s.includes(keyword));
+  const mfdsDirect = mfdsRows.filter((row) => row._s.includes(keyword));
 
-  const pools = collectNamePools([wcDirect, cnphDirect, usdmfDirect]);
+  const pools = collectNamePools([
+    wcDirect,
+    cnphDirect,
+    usdmfDirect,
+    mfdsDirect.map((row) => ({ korean: row.ingredient }))
+  ]);
 
   const wcMatches = dedupeWcRows(unionByRef(wcDirect, expandByNamePools(wcRows, pools)));
   const cnphMatches = unionByRef(cnphDirect, expandByNamePools(cnphRows, pools));
   const usdmfMatches = unionByRef(
     usdmfDirect,
     usdmfRows.filter((row) => row.english && pools.english.has(row.english.toLowerCase()))
+  );
+  const mfdsMatches = unionByRef(
+    mfdsDirect,
+    mfdsRows.filter((row) => row.ingredient && pools.korean.has(row.ingredient))
   );
 
   currentGlobalMatches = { wc: wcMatches, mfds: mfdsMatches, cnph: cnphMatches, usdmf: usdmfMatches };
