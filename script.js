@@ -413,23 +413,39 @@ function globalUsdmfItem(row) {
   `;
 }
 
+const NAME_POOL_MIN_LENGTH = 2;
+
+function addToNamePool(list, seen, rawValue) {
+  const value = rawValue.trim();
+
+  if (value.length < NAME_POOL_MIN_LENGTH || seen.has(value)) {
+    return;
+  }
+
+  seen.add(value);
+  list.push(value);
+}
+
 function collectNamePools(rowGroups) {
-  const chinese = new Set();
-  const korean = new Set();
-  const english = new Set();
+  const chinese = [];
+  const korean = [];
+  const english = [];
+  const seenChinese = new Set();
+  const seenKorean = new Set();
+  const seenEnglish = new Set();
 
   rowGroups.forEach((rows) => {
     rows.forEach((row) => {
       if (row.chinese) {
-        chinese.add(row.chinese);
+        addToNamePool(chinese, seenChinese, row.chinese);
       }
 
       if (row.korean) {
-        korean.add(row.korean);
+        addToNamePool(korean, seenKorean, row.korean);
       }
 
       if (row.english) {
-        english.add(row.english.toLowerCase());
+        addToNamePool(english, seenEnglish, row.english.toLowerCase());
       }
     });
   });
@@ -437,11 +453,19 @@ function collectNamePools(rowGroups) {
   return { chinese, korean, english };
 }
 
+function sharesName(value, pool) {
+  if (!value || value.length < NAME_POOL_MIN_LENGTH) {
+    return false;
+  }
+
+  return pool.some((entry) => value.includes(entry) || entry.includes(value));
+}
+
 function expandByNamePools(rows, pools) {
   return rows.filter((row) => {
-    return (row.chinese && pools.chinese.has(row.chinese)) ||
-      (row.korean && pools.korean.has(row.korean)) ||
-      (row.english && pools.english.has(row.english.toLowerCase()));
+    return sharesName(row.chinese, pools.chinese) ||
+      sharesName(row.korean, pools.korean) ||
+      (row.english && sharesName(row.english.toLowerCase().trim(), pools.english));
   });
 }
 
@@ -487,11 +511,11 @@ async function renderGlobalSearch(keyword) {
   const cnphMatches = unionByRef(cnphDirect, expandByNamePools(cnphRows, pools));
   const usdmfMatches = unionByRef(
     usdmfDirect,
-    usdmfRows.filter((row) => row.english && pools.english.has(row.english.toLowerCase()))
+    usdmfRows.filter((row) => row.english && sharesName(row.english.toLowerCase().trim(), pools.english))
   );
   const mfdsMatches = unionByRef(
     mfdsDirect,
-    mfdsRows.filter((row) => row.ingredient && pools.korean.has(row.ingredient))
+    mfdsRows.filter((row) => row.ingredient && sharesName(row.ingredient, pools.korean))
   );
 
   currentGlobalMatches = { wc: wcMatches, mfds: mfdsMatches, cnph: cnphMatches, usdmf: usdmfMatches };
