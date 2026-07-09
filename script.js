@@ -50,6 +50,11 @@ const marginCostInput = document.querySelector("#margin-cost-input");
 const marginPriceInput = document.querySelector("#margin-price-input");
 const marginResult = document.querySelector(".margin-calc-result");
 const importCostItem = document.querySelector('.tools-item[data-tool="import-cost-calculator"]');
+const importCertItem = document.querySelector('.tools-item[data-tool="import-cert-extractor"]');
+const importCertPanel = document.querySelector(".importcert-panel");
+const importCertLoadButton = document.querySelector(".importcert-load-button");
+const importCertFileInput = document.querySelector(".importcert-file-input");
+const importCertResult = document.querySelector(".importcert-result");
 const importCostPanel = document.querySelector(".import-cost-panel");
 const importPriceInput = document.querySelector("#import-price-input");
 const importPriceCurrency = document.querySelector("#import-price-currency");
@@ -115,6 +120,7 @@ function openDetail(card) {
   showUsdmfSearch(title.includes("미국 DMF"));
   showIndiawcSearch(title.includes("인도 WC"));
   showImportCostCalc(false);
+  showImportCertPanel(false);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
   document.body.classList.add("detail-open");
@@ -265,6 +271,21 @@ importCostItem.addEventListener("click", () => {
     el.addEventListener("input", renderImportCostResult);
     el.addEventListener("change", renderImportCostResult);
   });
+
+importCertItem.addEventListener("click", () => {
+  closeToolsDropdown();
+  openImportCertTool();
+});
+
+importCertLoadButton.addEventListener("click", () => importCertFileInput.click());
+importCertFileInput.addEventListener("change", () => {
+  const file = importCertFileInput.files[0];
+  importCertFileInput.value = "";
+
+  if (file) {
+    extractLastPdfPage(file);
+  }
+});
 
 let globalSearchDebounce = null;
 
@@ -1021,11 +1042,82 @@ function openImportCostCalculator() {
   showCnphSearch(false);
   showUsdmfSearch(false);
   showIndiawcSearch(false);
+  showImportCertPanel(false);
   showImportCostCalc(true);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
   document.body.classList.add("detail-open");
   importPriceInput.focus();
+}
+
+function showImportCertPanel(isImportCert) {
+  importCertPanel.hidden = !isImportCert;
+
+  if (isImportCert) {
+    importCertResult.innerHTML = "";
+  }
+}
+
+async function extractLastPdfPage(file) {
+  if (!window.PDFLib) {
+    alert("PDF 처리 도구를 불러오지 못했습니다.");
+    return;
+  }
+
+  importCertResult.innerHTML = '<p class="empty-result">처리 중입니다.</p>';
+
+  try {
+    const buffer = await file.arrayBuffer();
+    const { PDFDocument } = window.PDFLib;
+    const srcDoc = await PDFDocument.load(buffer);
+    const pageCount = srcDoc.getPageCount();
+
+    if (pageCount === 0) {
+      throw new Error("빈 PDF입니다.");
+    }
+
+    const newDoc = await PDFDocument.create();
+    const [copiedPage] = await newDoc.copyPages(srcDoc, [pageCount - 1]);
+    newDoc.addPage(copiedPage);
+
+    const bytes = await newDoc.save();
+    const blob = new Blob([bytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const baseName = file.name.replace(/\.pdf$/i, "");
+
+    link.href = url;
+    link.download = `${baseName}_마지막장.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+
+    importCertResult.innerHTML = `<p class="empty-result">완료됐습니다 (전체 ${pageCount}장 중 마지막 장 추출).</p>`;
+  } catch (error) {
+    console.error(error);
+    importCertResult.innerHTML = '<p class="empty-result">PDF 처리 중 오류가 발생했습니다. 파일을 확인해주세요.</p>';
+  }
+}
+
+function openImportCertTool() {
+  lastFocusedCard = toolsTrigger;
+  modalLocked = false;
+  detailKicker.textContent = "Tools";
+  detailTitle.textContent = "수입신고필증";
+  detailDescription.textContent = "PDF를 올리면 마지막 장만 추출해서 새 PDF로 만들어 드립니다.";
+  showWcSearch(false);
+  showPoReceive(false);
+  showMfdsSearch(false);
+  showCnphSearch(false);
+  showUsdmfSearch(false);
+  showIndiawcSearch(false);
+  showImportCostCalc(false);
+  showImportCertPanel(true);
+  detailView.classList.add("is-open");
+  detailView.setAttribute("aria-hidden", "false");
+  document.body.classList.add("detail-open");
+  importCertLoadButton.focus();
 }
 
 function closeToolsDropdown() {

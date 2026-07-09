@@ -581,6 +581,14 @@ body.detail-open {
   box-shadow: 0 0 0 4px rgba(62, 110, 168, 0.12);
 }
 
+.importcert-load-button {
+  margin-top: 8px;
+}
+
+.importcert-result {
+  margin-top: 20px;
+}
+
 .margin-calc-result {
   margin-top: 20px;
 }
