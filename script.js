@@ -46,6 +46,7 @@ const worklogClearButton = document.querySelector(".worklog-clear-button");
 const toolsMenu = document.querySelector(".tools-menu");
 const toolsTrigger = document.querySelector(".tools-trigger");
 const toolsDropdown = document.querySelector(".tools-dropdown");
+const marginCostInput = document.querySelector("#margin-cost-input");
 const marginPriceInput = document.querySelector("#margin-price-input");
 const marginResult = document.querySelector(".margin-calc-result");
 const importCostItem = document.querySelector('.tools-item[data-tool="import-cost-calculator"]');
@@ -251,6 +252,7 @@ toolsMenu.addEventListener("mouseleave", () => {
   toolsTrigger.setAttribute("aria-expanded", "false");
 });
 
+marginCostInput.addEventListener("input", renderMarginResult);
 marginPriceInput.addEventListener("input", renderMarginResult);
 
 importCostItem.addEventListener("click", () => {
@@ -925,22 +927,16 @@ function showCnphSearch(isCnphSearch) {
   }
 }
 
-let currentImportCostPerKg = null;
-
 function renderMarginResult() {
+  const cost = parseFloat(marginCostInput.value);
   const price = parseFloat(marginPriceInput.value);
 
-  if (!Number.isFinite(currentImportCostPerKg) || currentImportCostPerKg <= 0) {
-    marginResult.innerHTML = '<p class="empty-result">먼저 위에서 예상수입원가를 계산하세요.</p>';
+  if (!Number.isFinite(cost) || cost <= 0 || !Number.isFinite(price)) {
+    marginResult.innerHTML = '<p class="empty-result">예상수입원가와 납품가를 입력하세요.</p>';
     return;
   }
 
-  if (!Number.isFinite(price)) {
-    marginResult.innerHTML = '<p class="empty-result">납품가를 입력하세요.</p>';
-    return;
-  }
-
-  const marginPercent = ((price - currentImportCostPerKg) / currentImportCostPerKg) * 100;
+  const marginPercent = ((price - cost) / cost) * 100;
   const isHigh = marginPercent >= 10;
   const sign = marginPercent > 0 ? "+" : "";
 
@@ -962,8 +958,8 @@ function showImportCostCalc(isImportCost) {
     importRateInput.value = "";
     importQtyInput.value = "";
     importDutyInput.value = "";
+    marginCostInput.value = "";
     marginPriceInput.value = "";
-    currentImportCostPerKg = null;
     renderImportCostResult();
   }
 }
@@ -980,8 +976,6 @@ function renderImportCostResult() {
 
   if (!Number.isFinite(price) || price <= 0 || !Number.isFinite(rate) || rate <= 0 || !Number.isFinite(qtyRaw) || qtyRaw <= 0) {
     importCostResult.innerHTML = '<p class="empty-result">단가, 환율, 수량을 입력하세요.</p>';
-    currentImportCostPerKg = null;
-    renderMarginResult();
     return;
   }
 
@@ -1011,7 +1005,7 @@ function renderImportCostResult() {
     <p class="import-cost-final">예상수입원가 ${rounded.toLocaleString()}원/kg</p>
   `;
 
-  currentImportCostPerKg = rounded;
+  marginCostInput.value = rounded;
   renderMarginResult();
 }
 

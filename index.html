@@ -372,7 +372,12 @@
         <div class="import-cost-result" aria-live="polite"></div>
 
         <div class="margin-calc-section">
-          <div class="margin-calc-inputs margin-calc-inputs-single">
+          <p class="wc-search-meta">위 계산 결과가 자동으로 채워지며, 원가 계산 없이 마진율만 보려면 직접 입력해도 됩니다.</p>
+          <div class="margin-calc-inputs">
+            <div class="margin-calc-field">
+              <label for="margin-cost-input">예상수입원가</label>
+              <input id="margin-cost-input" type="number" inputmode="decimal" placeholder="예: 10300">
+            </div>
             <div class="margin-calc-field">
               <label for="margin-price-input">납품가</label>
               <input id="margin-price-input" type="number" inputmode="decimal" placeholder="예: 9500">
