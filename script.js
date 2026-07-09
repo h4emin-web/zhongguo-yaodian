@@ -52,7 +52,6 @@ const marginResult = document.querySelector(".margin-calc-result");
 const importCostItem = document.querySelector('.tools-item[data-tool="import-cost-calculator"]');
 const importCertItem = document.querySelector('.tools-item[data-tool="import-cert-extractor"]');
 const importCertPanel = document.querySelector(".importcert-panel");
-const importCertFolderButton = document.querySelector(".importcert-folder-button");
 const importCertDropzone = document.querySelector(".importcert-dropzone");
 const importCertFileInput = document.querySelector(".importcert-file-input");
 const importCertResult = document.querySelector(".importcert-result");
@@ -276,22 +275,6 @@ importCostItem.addEventListener("click", () => {
 importCertItem.addEventListener("click", () => {
   closeToolsDropdown();
   openImportCertTool();
-});
-
-importCertFolderButton.addEventListener("click", async () => {
-  if (!window.showDirectoryPicker) {
-    alert("이 브라우저는 폴더 저장 기능을 지원하지 않습니다 (Chrome/Edge에서 사용해주세요).");
-    return;
-  }
-
-  try {
-    await pickImportCertBaseDir();
-    importCertResult.innerHTML = '<p class="empty-result">저장 폴더가 설정되었습니다.</p>';
-  } catch (error) {
-    if (error.name !== "AbortError") {
-      console.error(error);
-    }
-  }
 });
 
 importCertDropzone.addEventListener("click", () => importCertFileInput.click());
@@ -1114,90 +1097,13 @@ function showImportCertPanel(isImportCert) {
   }
 }
 
-const IMPORTCERT_DB_NAME = "haeminImportCert";
-const IMPORTCERT_DB_STORE = "handles";
-const IMPORTCERT_DB_KEY = "baseDir";
-
-let importCertBaseDirHandle = null;
-
-function openImportCertDb() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(IMPORTCERT_DB_NAME, 1);
-
-    request.onupgradeneeded = () => {
-      request.result.createObjectStore(IMPORTCERT_DB_STORE);
-    };
-
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-}
-
-async function saveImportCertDirHandle(handle) {
-  const db = await openImportCertDb();
-
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(IMPORTCERT_DB_STORE, "readwrite");
-    tx.objectStore(IMPORTCERT_DB_STORE).put(handle, IMPORTCERT_DB_KEY);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-async function loadImportCertDirHandle() {
-  const db = await openImportCertDb();
-
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(IMPORTCERT_DB_STORE, "readonly");
-    const request = tx.objectStore(IMPORTCERT_DB_STORE).get(IMPORTCERT_DB_KEY);
-    request.onsuccess = () => resolve(request.result || null);
-    request.onerror = () => reject(request.error);
-  });
-}
-
-async function grantedOrRequested(handle) {
-  const options = { mode: "readwrite" };
-
-  if ((await handle.queryPermission(options)) === "granted") {
-    return true;
-  }
-
-  return (await handle.requestPermission(options)) === "granted";
-}
-
-async function pickImportCertBaseDir() {
-  const handle = await window.showDirectoryPicker({ mode: "readwrite" });
-  importCertBaseDirHandle = handle;
-  await saveImportCertDirHandle(handle);
-  return handle;
-}
-
-async function ensureImportCertBaseDir() {
-  if (importCertBaseDirHandle && (await grantedOrRequested(importCertBaseDirHandle))) {
-    return importCertBaseDirHandle;
-  }
-
-  const stored = await loadImportCertDirHandle();
-
-  if (stored && (await grantedOrRequested(stored))) {
-    importCertBaseDirHandle = stored;
-    return stored;
-  }
-
-  return pickImportCertBaseDir();
-}
-
-// "Z26-00575 Mecobalamin 23kg 선적서류.pdf" -> 폴더명 "Z26-00575 Mecobalamin 23kg",
-// 파일명 "Z26-00575 Mecobalamin 23kg 수입신고필증.pdf"
-function deriveImportCertNames(originalName) {
+// "Z26-00575 Mecobalamin 23kg 선적서류.pdf" -> "Z26-00575 Mecobalamin 23kg 수입신고필증.pdf"
+function deriveImportCertFileName(originalName) {
   const withoutExt = originalName.replace(/\.pdf$/i, "");
   const match = withoutExt.match(/^(.*?)\s*선적서류\s*$/);
   const basePrefix = (match ? match[1] : withoutExt).trim();
 
-  return {
-    folderName: basePrefix,
-    fileName: `${basePrefix} 수입신고필증.pdf`
-  };
+  return `${basePrefix} 수입신고필증.pdf`;
 }
 
 function downloadPdfBytes(bytes, fileName) {
@@ -1221,7 +1127,7 @@ async function extractLastPdfPage(file) {
 
   importCertResult.innerHTML = '<p class="empty-result">처리 중입니다.</p>';
 
-  const { folderName, fileName } = deriveImportCertNames(file.name);
+  const fileName = deriveImportCertFileName(file.name);
 
   try {
     const buffer = await file.arrayBuffer();
@@ -1238,24 +1144,6 @@ async function extractLastPdfPage(file) {
     newDoc.addPage(copiedPage);
 
     const bytes = await newDoc.save();
-
-    if (window.showDirectoryPicker) {
-      try {
-        const baseDir = await ensureImportCertBaseDir();
-        const subDir = await baseDir.getDirectoryHandle(folderName, { create: true });
-        const fileHandle = await subDir.getFileHandle(fileName, { create: true });
-        const writable = await fileHandle.createWritable();
-
-        await writable.write(bytes);
-        await writable.close();
-
-        importCertResult.innerHTML = `<p class="empty-result">저장 완료: "${escapeHtml(folderName)}" 폴더에 "${escapeHtml(fileName)}"</p>`;
-        return;
-      } catch (dirError) {
-        console.error(dirError);
-        importCertResult.innerHTML = '<p class="empty-result">폴더에 저장하지 못해 대신 다운로드합니다.</p>';
-      }
-    }
 
     downloadPdfBytes(bytes, fileName);
     importCertResult.innerHTML = `<p class="empty-result">다운로드 완료: "${escapeHtml(fileName)}" (전체 ${pageCount}장 중 마지막 장 추출)</p>`;
