@@ -581,18 +581,39 @@ body.detail-open {
   box-shadow: 0 0 0 4px rgba(62, 110, 168, 0.12);
 }
 
-.importcert-panel {
-  border-radius: 8px;
-  transition: background-color 150ms ease, box-shadow 150ms ease;
+.importcert-dropzone {
+  margin-top: 16px;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #cfd8e5;
+  border-radius: 12px;
+  background: #fbfcff;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
 }
 
-.importcert-panel.is-dragover {
-  background-color: rgba(62, 110, 168, 0.06);
+.importcert-dropzone:hover,
+.importcert-dropzone:focus-visible {
+  outline: none;
+  border-color: rgba(62, 110, 168, 0.5);
+}
+
+.importcert-dropzone.is-dragover {
+  background-color: rgba(62, 110, 168, 0.08);
+  border-color: var(--accent);
   box-shadow: 0 0 0 2px var(--accent) inset;
 }
 
-.importcert-load-button {
-  margin-top: 8px;
+.importcert-dropzone-text {
+  margin: 0;
+  padding: 0 24px;
+  color: var(--muted);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.6;
+  text-align: center;
 }
 
 .importcert-result {

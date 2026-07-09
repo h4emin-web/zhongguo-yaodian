@@ -52,7 +52,7 @@ const marginResult = document.querySelector(".margin-calc-result");
 const importCostItem = document.querySelector('.tools-item[data-tool="import-cost-calculator"]');
 const importCertItem = document.querySelector('.tools-item[data-tool="import-cert-extractor"]');
 const importCertPanel = document.querySelector(".importcert-panel");
-const importCertLoadButton = document.querySelector(".importcert-load-button");
+const importCertDropzone = document.querySelector(".importcert-dropzone");
 const importCertFileInput = document.querySelector(".importcert-file-input");
 const importCertResult = document.querySelector(".importcert-result");
 const importCostPanel = document.querySelector(".import-cost-panel");
@@ -277,7 +277,14 @@ importCertItem.addEventListener("click", () => {
   openImportCertTool();
 });
 
-importCertLoadButton.addEventListener("click", () => importCertFileInput.click());
+importCertDropzone.addEventListener("click", () => importCertFileInput.click());
+importCertDropzone.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    importCertFileInput.click();
+  }
+});
+
 importCertFileInput.addEventListener("change", () => {
   const file = importCertFileInput.files[0];
   importCertFileInput.value = "";
@@ -289,28 +296,28 @@ importCertFileInput.addEventListener("change", () => {
 
 let importCertDragDepth = 0;
 
-importCertPanel.addEventListener("dragenter", (event) => {
+importCertDropzone.addEventListener("dragenter", (event) => {
   event.preventDefault();
   importCertDragDepth++;
-  importCertPanel.classList.add("is-dragover");
+  importCertDropzone.classList.add("is-dragover");
 });
 
-importCertPanel.addEventListener("dragover", (event) => {
+importCertDropzone.addEventListener("dragover", (event) => {
   event.preventDefault();
 });
 
-importCertPanel.addEventListener("dragleave", () => {
+importCertDropzone.addEventListener("dragleave", () => {
   importCertDragDepth = Math.max(0, importCertDragDepth - 1);
 
   if (importCertDragDepth === 0) {
-    importCertPanel.classList.remove("is-dragover");
+    importCertDropzone.classList.remove("is-dragover");
   }
 });
 
-importCertPanel.addEventListener("drop", (event) => {
+importCertDropzone.addEventListener("drop", (event) => {
   event.preventDefault();
   importCertDragDepth = 0;
-  importCertPanel.classList.remove("is-dragover");
+  importCertDropzone.classList.remove("is-dragover");
 
   const file = event.dataTransfer.files && event.dataTransfer.files[0];
 
@@ -1149,7 +1156,7 @@ function openImportCertTool() {
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
   document.body.classList.add("detail-open");
-  importCertLoadButton.focus();
+  importCertDropzone.focus();
 }
 
 function closeToolsDropdown() {
