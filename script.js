@@ -497,12 +497,25 @@ function collectNamePools(rowGroups) {
   return { chinese, korean, english };
 }
 
+// 우파다시티닙 vs 유파다시티닙처럼, 외래어 표기 시 첫 음절 모음만 다르게 옮긴 같은
+// 원료명을 잡기 위한 매칭. 길이가 같고 첫 글자를 뺀 나머지가 완전히 동일할 때만
+// 인정한다 (중간이나 끝 글자가 다르면 실제로 다른 원료일 가능성이 높아 제외).
+function isFuzzyNameMatch(a, b) {
+  if (a.length !== b.length || a.length < 4 || a === b) {
+    return false;
+  }
+
+  return a.slice(1) === b.slice(1);
+}
+
 function sharesName(value, pool) {
   if (!isUsableName(value)) {
     return false;
   }
 
-  return pool.some((entry) => value.includes(entry) || entry.includes(value));
+  return pool.some((entry) => {
+    return value.includes(entry) || entry.includes(value) || isFuzzyNameMatch(value, entry);
+  });
 }
 
 function expandByNamePools(rows, pools) {
