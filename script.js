@@ -1013,7 +1013,7 @@ function openImportCostCalculator() {
   lastFocusedCard = toolsTrigger;
   modalLocked = true;
   detailKicker.textContent = "Tools";
-  detailTitle.textContent = "예상수입원가 · 마진율 계산기";
+  detailTitle.textContent = "예상수입원가 마진율";
   detailDescription.textContent = "단가, 환율, 수량, 운송방식, 관세를 입력해 예상수입원가를 확인하고, 납품가까지 입력하면 마진율도 볼 수 있습니다.";
   showWcSearch(false);
   showPoReceive(false);
