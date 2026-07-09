@@ -544,6 +544,16 @@ body.detail-open {
   margin-top: 8px;
 }
 
+.margin-calc-inputs-single {
+  grid-template-columns: minmax(160px, 260px);
+}
+
+.margin-calc-section {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
 .margin-calc-field label {
   display: block;
   margin-bottom: 10px;

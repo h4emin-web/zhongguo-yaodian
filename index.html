@@ -23,8 +23,7 @@
       <div class="tools-menu">
         <button class="tools-trigger" type="button" aria-haspopup="true" aria-expanded="false">Tools</button>
         <div class="tools-dropdown">
-          <button class="tools-item" type="button" data-tool="margin-calculator">마진율 계산기</button>
-          <button class="tools-item" type="button" data-tool="import-cost-calculator">예상수입원가 계산기</button>
+          <button class="tools-item" type="button" data-tool="import-cost-calculator">예상수입원가 · 마진율 계산기</button>
         </div>
       </div>
       <a href="#">Archive</a>
@@ -327,24 +326,9 @@
         <input id="indiawc-search-input" type="search" placeholder="English로 검색" autocomplete="off">
         <div class="wc-results indiawc-results" aria-live="polite"></div>
       </div>
-      <div class="wc-search-panel margin-calc-panel" hidden>
-        <label>마진율 계산기</label>
-        <p class="wc-search-meta">예상수입원가와 납품가를 입력하면 마진율을 계산합니다.</p>
-        <div class="margin-calc-inputs">
-          <div class="margin-calc-field">
-            <label for="margin-cost-input">예상수입원가</label>
-            <input id="margin-cost-input" type="number" inputmode="decimal" placeholder="예: 10300">
-          </div>
-          <div class="margin-calc-field">
-            <label for="margin-price-input">납품가</label>
-            <input id="margin-price-input" type="number" inputmode="decimal" placeholder="예: 9500">
-          </div>
-        </div>
-        <div class="margin-calc-result" aria-live="polite"></div>
-      </div>
       <div class="wc-search-panel import-cost-panel" hidden>
-        <label>예상수입원가 계산기</label>
-        <p class="wc-search-meta">단가, 환율, 수량, 운송방식, 관세를 입력하면 kg당 예상수입원가를 계산합니다.</p>
+        <label>예상수입원가 · 마진율 계산기</label>
+        <p class="wc-search-meta">단가, 환율, 수량, 운송방식, 관세를 입력하면 예상수입원가가 나오고, 아래에 납품가까지 입력하면 마진율도 함께 확인할 수 있습니다.</p>
         <div class="import-cost-inputs">
           <div class="margin-calc-field">
             <label for="import-price-input">단가</label>
@@ -386,6 +370,16 @@
           </div>
         </div>
         <div class="import-cost-result" aria-live="polite"></div>
+
+        <div class="margin-calc-section">
+          <div class="margin-calc-inputs margin-calc-inputs-single">
+            <div class="margin-calc-field">
+              <label for="margin-price-input">납품가</label>
+              <input id="margin-price-input" type="number" inputmode="decimal" placeholder="예: 9500">
+            </div>
+          </div>
+          <div class="margin-calc-result" aria-live="polite"></div>
+        </div>
       </div>
       <div class="po-receive-panel" hidden>
         <label for="po-receive-input">PO 번호</label>

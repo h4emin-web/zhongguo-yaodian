@@ -46,9 +46,6 @@ const worklogClearButton = document.querySelector(".worklog-clear-button");
 const toolsMenu = document.querySelector(".tools-menu");
 const toolsTrigger = document.querySelector(".tools-trigger");
 const toolsDropdown = document.querySelector(".tools-dropdown");
-const marginCalculatorItem = document.querySelector('.tools-item[data-tool="margin-calculator"]');
-const marginCalcPanel = document.querySelector(".margin-calc-panel");
-const marginCostInput = document.querySelector("#margin-cost-input");
 const marginPriceInput = document.querySelector("#margin-price-input");
 const marginResult = document.querySelector(".margin-calc-result");
 const importCostItem = document.querySelector('.tools-item[data-tool="import-cost-calculator"]');
@@ -72,6 +69,7 @@ const supabaseClient = hasSupabaseKey && window.supabase
   : null;
 
 let lastFocusedCard = null;
+let modalLocked = false;
 let wcRows = [];
 let wcLoaded = false;
 let currentWcResults = [];
@@ -105,6 +103,7 @@ function openDetail(card) {
   const description = card.querySelector("p:last-child").textContent;
 
   lastFocusedCard = card;
+  modalLocked = false;
   detailKicker.textContent = kicker;
   detailTitle.textContent = title;
   detailDescription.textContent = description;
@@ -114,7 +113,6 @@ function openDetail(card) {
   showCnphSearch(title.includes("중국 약전"));
   showUsdmfSearch(title.includes("미국 DMF"));
   showIndiawcSearch(title.includes("인도 WC"));
-  showMarginCalc(false);
   showImportCostCalc(false);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
@@ -143,6 +141,7 @@ function openDetail(card) {
 }
 
 function closeDetail() {
+  modalLocked = false;
   detailView.classList.remove("is-open");
   detailView.setAttribute("aria-hidden", "true");
   document.body.classList.remove("detail-open");
@@ -225,13 +224,13 @@ document.querySelectorAll(".card-share-button").forEach((button) => {
 closeButton.addEventListener("click", closeDetail);
 
 detailView.addEventListener("click", (event) => {
-  if (!detailPanel.contains(event.target)) {
+  if (!modalLocked && !detailPanel.contains(event.target)) {
     closeDetail();
   }
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && detailView.classList.contains("is-open")) {
+  if (event.key === "Escape" && !modalLocked && detailView.classList.contains("is-open")) {
     closeDetail();
   }
 
@@ -252,12 +251,6 @@ toolsMenu.addEventListener("mouseleave", () => {
   toolsTrigger.setAttribute("aria-expanded", "false");
 });
 
-marginCalculatorItem.addEventListener("click", () => {
-  closeToolsDropdown();
-  openMarginCalculator();
-});
-
-marginCostInput.addEventListener("input", renderMarginResult);
 marginPriceInput.addEventListener("input", renderMarginResult);
 
 importCostItem.addEventListener("click", () => {
@@ -932,49 +925,26 @@ function showCnphSearch(isCnphSearch) {
   }
 }
 
-function showMarginCalc(isMargin) {
-  marginCalcPanel.hidden = !isMargin;
-
-  if (isMargin) {
-    marginCostInput.value = "";
-    marginPriceInput.value = "";
-    renderMarginResult();
-  }
-}
+let currentImportCostPerKg = null;
 
 function renderMarginResult() {
-  const cost = parseFloat(marginCostInput.value);
   const price = parseFloat(marginPriceInput.value);
 
-  if (!Number.isFinite(cost) || cost <= 0 || !Number.isFinite(price)) {
-    marginResult.innerHTML = '<p class="empty-result">예상수입원가와 납품가를 입력하세요.</p>';
+  if (!Number.isFinite(currentImportCostPerKg) || currentImportCostPerKg <= 0) {
+    marginResult.innerHTML = '<p class="empty-result">먼저 위에서 예상수입원가를 계산하세요.</p>';
     return;
   }
 
-  const marginPercent = ((price - cost) / cost) * 100;
+  if (!Number.isFinite(price)) {
+    marginResult.innerHTML = '<p class="empty-result">납품가를 입력하세요.</p>';
+    return;
+  }
+
+  const marginPercent = ((price - currentImportCostPerKg) / currentImportCostPerKg) * 100;
   const isHigh = marginPercent >= 10;
   const sign = marginPercent > 0 ? "+" : "";
 
   marginResult.innerHTML = `<p class="${isHigh ? "margin-high" : "margin-low"}">마진율 ${sign}${marginPercent.toFixed(2)}%</p>`;
-}
-
-function openMarginCalculator() {
-  lastFocusedCard = toolsTrigger;
-  detailKicker.textContent = "Tools";
-  detailTitle.textContent = "마진율 계산기";
-  detailDescription.textContent = "예상수입원가와 납품가를 입력해 마진율을 확인하세요.";
-  showWcSearch(false);
-  showPoReceive(false);
-  showMfdsSearch(false);
-  showCnphSearch(false);
-  showUsdmfSearch(false);
-  showIndiawcSearch(false);
-  showImportCostCalc(false);
-  showMarginCalc(true);
-  detailView.classList.add("is-open");
-  detailView.setAttribute("aria-hidden", "false");
-  document.body.classList.add("detail-open");
-  marginCostInput.focus();
 }
 
 const SHIPPING_RATES = {
@@ -992,6 +962,8 @@ function showImportCostCalc(isImportCost) {
     importRateInput.value = "";
     importQtyInput.value = "";
     importDutyInput.value = "";
+    marginPriceInput.value = "";
+    currentImportCostPerKg = null;
     renderImportCostResult();
   }
 }
@@ -1008,6 +980,8 @@ function renderImportCostResult() {
 
   if (!Number.isFinite(price) || price <= 0 || !Number.isFinite(rate) || rate <= 0 || !Number.isFinite(qtyRaw) || qtyRaw <= 0) {
     importCostResult.innerHTML = '<p class="empty-result">단가, 환율, 수량을 입력하세요.</p>';
+    currentImportCostPerKg = null;
+    renderMarginResult();
     return;
   }
 
@@ -1036,20 +1010,23 @@ function renderImportCostResult() {
     </div>
     <p class="import-cost-final">예상수입원가 ${rounded.toLocaleString()}원/kg</p>
   `;
+
+  currentImportCostPerKg = rounded;
+  renderMarginResult();
 }
 
 function openImportCostCalculator() {
   lastFocusedCard = toolsTrigger;
+  modalLocked = true;
   detailKicker.textContent = "Tools";
-  detailTitle.textContent = "예상수입원가 계산기";
-  detailDescription.textContent = "단가, 환율, 수량, 운송방식, 관세를 입력해 kg당 예상수입원가를 확인하세요.";
+  detailTitle.textContent = "예상수입원가 · 마진율 계산기";
+  detailDescription.textContent = "단가, 환율, 수량, 운송방식, 관세를 입력해 예상수입원가를 확인하고, 납품가까지 입력하면 마진율도 볼 수 있습니다.";
   showWcSearch(false);
   showPoReceive(false);
   showMfdsSearch(false);
   showCnphSearch(false);
   showUsdmfSearch(false);
   showIndiawcSearch(false);
-  showMarginCalc(false);
   showImportCostCalc(true);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
