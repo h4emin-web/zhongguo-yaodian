@@ -287,6 +287,38 @@ importCertFileInput.addEventListener("change", () => {
   }
 });
 
+let importCertDragDepth = 0;
+
+importCertPanel.addEventListener("dragenter", (event) => {
+  event.preventDefault();
+  importCertDragDepth++;
+  importCertPanel.classList.add("is-dragover");
+});
+
+importCertPanel.addEventListener("dragover", (event) => {
+  event.preventDefault();
+});
+
+importCertPanel.addEventListener("dragleave", () => {
+  importCertDragDepth = Math.max(0, importCertDragDepth - 1);
+
+  if (importCertDragDepth === 0) {
+    importCertPanel.classList.remove("is-dragover");
+  }
+});
+
+importCertPanel.addEventListener("drop", (event) => {
+  event.preventDefault();
+  importCertDragDepth = 0;
+  importCertPanel.classList.remove("is-dragover");
+
+  const file = event.dataTransfer.files && event.dataTransfer.files[0];
+
+  if (file) {
+    extractLastPdfPage(file);
+  }
+});
+
 let globalSearchDebounce = null;
 
 searchInput.addEventListener("input", () => {

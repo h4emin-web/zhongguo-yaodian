@@ -581,6 +581,16 @@ body.detail-open {
   box-shadow: 0 0 0 4px rgba(62, 110, 168, 0.12);
 }
 
+.importcert-panel {
+  border-radius: 8px;
+  transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.importcert-panel.is-dragover {
+  background-color: rgba(62, 110, 168, 0.06);
+  box-shadow: 0 0 0 2px var(--accent) inset;
+}
+
 .importcert-load-button {
   margin-top: 8px;
 }
