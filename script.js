@@ -113,7 +113,7 @@ function openDetail(card) {
   showMfdsSearch(title.includes("K-DMF 검색"));
   showCnphSearch(title.includes("중국 약전"));
   showUsdmfSearch(title.includes("미국 DMF"));
-  showIndiawcSearch(title.includes("인도 WC & COPP"));
+  showIndiawcSearch(title.includes("인도 WC"));
   showMarginCalc(false);
   showImportCostCalc(false);
   detailView.classList.add("is-open");
@@ -134,7 +134,7 @@ function openDetail(card) {
   } else if (title.includes("미국 DMF")) {
     loadUsdmfData();
     usdmfSearchInput.focus();
-  } else if (title.includes("인도 WC & COPP")) {
+  } else if (title.includes("인도 WC")) {
     loadIndiawcData();
     indiawcSearchInput.focus();
   } else {
@@ -593,7 +593,7 @@ async function renderGlobalSearch(keyword) {
     globalSearchGroup("WC", bySource(wcMatches, "WC"), globalWcItem, FLAG_CN_SVG),
     globalSearchGroup("COPP", bySource(wcMatches, "COPP"), globalWcItem, FLAG_CN_SVG),
     globalSearchGroup("미국 DMF", usdmfMatches, globalUsdmfItem, FLAG_US_SVG),
-    globalSearchGroup("인도 WC & COPP", indiawcMatches, globalIndiawcItem, FLAG_IN_SVG)
+    globalSearchGroup("인도 WC", indiawcMatches, globalIndiawcItem, FLAG_IN_SVG)
   ].join("");
 }
 
@@ -719,7 +719,7 @@ async function exportGlobalResults() {
 
   addExportSection(
     worksheet,
-    "인도 WC & COPP",
+    "인도 WC",
     ["제조사", "품목", "WC번호", "발급일"],
     currentGlobalMatches.indiawc,
     (row) => [row.manufacturer, row.english, row.wcNumber, row.releaseDate]
