@@ -691,10 +691,33 @@ body.detail-open {
   margin-top: 20px;
 }
 
+.import-cost-columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-bottom: 14px;
+}
+
 .import-cost-breakdown {
+  flex: 1 1 220px;
   display: grid;
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 0;
+}
+
+.import-cost-summary {
+  flex: 1 1 220px;
+  display: grid;
+  gap: 8px;
+  padding-left: 24px;
+  border-left: 1px solid var(--line);
+}
+
+.import-cost-summary p {
+  margin: 0;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
 }
 
 .import-cost-breakdown p {
@@ -1185,5 +1208,12 @@ body.detail-open {
   .margin-calc-inputs,
   .import-cost-inputs {
     grid-template-columns: 1fr;
+  }
+
+  .import-cost-summary {
+    padding-left: 0;
+    padding-top: 14px;
+    border-left: 0;
+    border-top: 1px solid var(--line);
   }
 }

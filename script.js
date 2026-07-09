@@ -1057,10 +1057,16 @@ function renderImportCostResult() {
   const rounded = formatWonFloor100(finalPrice);
 
   importCostResult.innerHTML = `
-    <div class="import-cost-breakdown">
-      <p>원화단가<span>${Math.round(baseKrw).toLocaleString()}원/kg</span></p>
-      <p>관세반영<span>${Math.round(dutyApplied).toLocaleString()}원/kg</span></p>
-      <p>운송비<span>${Math.round(shippingPerKg).toLocaleString()}원/kg (총 ${Math.round(shippingTotal).toLocaleString()}원)</span></p>
+    <div class="import-cost-columns">
+      <div class="import-cost-breakdown">
+        <p>원화단가<span>${Math.round(baseKrw).toLocaleString()}원/kg</span></p>
+        <p>관세반영<span>${Math.round(dutyApplied).toLocaleString()}원/kg</span></p>
+        <p>운송비<span>${Math.round(shippingPerKg).toLocaleString()}원/kg (총 ${Math.round(shippingTotal).toLocaleString()}원)</span></p>
+      </div>
+      <div class="import-cost-summary">
+        <p>단가 : ${importPriceCurrency.value} ${price}/kg</p>
+        <p>예상수입원가 : ${rounded.toLocaleString()}원/kg (@${rate.toLocaleString()})</p>
+      </div>
     </div>
     <p class="import-cost-final">예상수입원가 ${rounded.toLocaleString()}원/kg</p>
   `;
