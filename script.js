@@ -26,6 +26,10 @@ const usdmfSearchPanel = document.querySelector(".usdmf-search-panel");
 const usdmfSearchInput = document.querySelector("#usdmf-search-input");
 const usdmfResults = document.querySelector(".usdmf-results");
 const usdmfExcelExportButton = document.querySelector(".usdmf-excel-export");
+const indiawcSearchPanel = document.querySelector(".indiawc-search-panel");
+const indiawcSearchInput = document.querySelector("#indiawc-search-input");
+const indiawcResults = document.querySelector(".indiawc-results");
+const indiawcExcelExportButton = document.querySelector(".indiawc-excel-export");
 const cnphCriteriaToggle = document.querySelector(".cnph-criteria-toggle");
 const cnphCriteria = document.querySelector(".cnph-criteria");
 const globalSearchHead = document.querySelector(".global-search-head");
@@ -80,9 +84,12 @@ let currentCnphResults = [];
 let usdmfRows = [];
 let usdmfLoaded = false;
 let currentUsdmfResults = [];
+let indiawcRows = [];
+let indiawcLoaded = false;
+let currentIndiawcResults = [];
 let globalSearchToken = 0;
 let currentGlobalKeyword = "";
-let currentGlobalMatches = { wc: [], mfds: [], cnph: [], usdmf: [] };
+let currentGlobalMatches = { wc: [], mfds: [], cnph: [], usdmf: [], indiawc: [] };
 let worklogPeople = [];
 let worklogDateLabel = "";
 
@@ -106,6 +113,7 @@ function openDetail(card) {
   showMfdsSearch(title.includes("K-DMF 검색"));
   showCnphSearch(title.includes("중국 약전"));
   showUsdmfSearch(title.includes("미국 DMF"));
+  showIndiawcSearch(title.includes("인도 WC & COPP"));
   showMarginCalc(false);
   showImportCostCalc(false);
   detailView.classList.add("is-open");
@@ -126,6 +134,9 @@ function openDetail(card) {
   } else if (title.includes("미국 DMF")) {
     loadUsdmfData();
     usdmfSearchInput.focus();
+  } else if (title.includes("인도 WC & COPP")) {
+    loadIndiawcData();
+    indiawcSearchInput.focus();
   } else {
     closeButton.focus();
   }
@@ -275,7 +286,7 @@ searchInput.addEventListener("input", () => {
 });
 
 async function ensureGlobalSearchData() {
-  await Promise.all([loadWcData(), loadMfdsData(), loadCnphData(), loadUsdmfData()]);
+  await Promise.all([loadWcData(), loadMfdsData(), loadCnphData(), loadUsdmfData(), loadIndiawcData()]);
 }
 
 const GLOBAL_ITEM_RENDER_LIMIT = 150;
@@ -346,6 +357,14 @@ const FLAG_US_SVG = `<svg class="flag-us" viewBox="0 0 30 20" xmlns="http://www.
   <circle cx="10.80" cy="10.43" r="0.35" fill="#FFFFFF"/>
 </svg>`;
 
+const FLAG_IN_SVG = `<svg class="flag-in" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+  <rect width="30" height="20" fill="#FF9933"/>
+  <rect y="6.67" width="30" height="6.67" fill="#FFFFFF"/>
+  <rect y="13.33" width="30" height="6.67" fill="#138808"/>
+  <circle cx="15" cy="10" r="2.2" fill="none" stroke="#000080" stroke-width="0.3"/>
+  <circle cx="15" cy="10" r="0.35" fill="#000080"/>
+</svg>`;
+
 function globalSearchGroup(label, matches, itemRenderer, flagSvg) {
   const isRegistered = matches.length > 0;
   const shown = matches.slice(0, GLOBAL_ITEM_RENDER_LIMIT);
@@ -409,6 +428,15 @@ function globalUsdmfItem(row) {
       <p><strong>DMF번호</strong><span>${escapeHtml(row.dmfNumber)}</span></p>
       <p><strong>구분</strong><span>Type ${escapeHtml(row.type)} · ${escapeHtml(row.status)}</span></p>
       <p><strong>제출일</strong><span>${escapeHtml(row.regDate)}</span></p>
+    </article>
+  `;
+}
+
+function globalIndiawcItem(row) {
+  return `
+    <article class="wc-result-item">
+      <p><strong>제조사</strong><span>${escapeHtml(row.manufacturer)}</span></p>
+      <p><strong>품목</strong><span>${escapeHtml(row.english)}</span></p>
     </article>
   `;
 }
@@ -497,7 +525,7 @@ async function renderGlobalSearch(keyword) {
     globalSearchHead.hidden = true;
     globalSearchResults.hidden = true;
     globalSearchResults.innerHTML = "";
-    currentGlobalMatches = { wc: [], mfds: [], cnph: [], usdmf: [] };
+    currentGlobalMatches = { wc: [], mfds: [], cnph: [], usdmf: [], indiawc: [] };
     return;
   }
 
@@ -514,12 +542,14 @@ async function renderGlobalSearch(keyword) {
   const wcDirect = wcRows.filter((row) => row._s.includes(keyword));
   const cnphDirect = cnphRows.filter((row) => row._s.includes(keyword));
   const usdmfDirect = usdmfRows.filter((row) => row._s.includes(keyword));
+  const indiawcDirect = indiawcRows.filter((row) => row._s.includes(keyword));
   const mfdsDirect = mfdsRows.filter((row) => row._s.includes(keyword));
 
   const pools = collectNamePools([
     wcDirect,
     cnphDirect,
     usdmfDirect,
+    indiawcDirect,
     mfdsDirect.map((row) => ({ korean: row.ingredient }))
   ]);
 
@@ -533,19 +563,24 @@ async function renderGlobalSearch(keyword) {
     usdmfDirect,
     usdmfRows.filter((row) => row.english && sharesName(row.english.toLowerCase().trim(), pools.english))
   );
+  const indiawcMatches = unionByRef(
+    indiawcDirect,
+    indiawcRows.filter((row) => row.english && sharesName(row.english.toLowerCase().trim(), pools.english))
+  );
   const mfdsMatches = unionByRef(
     mfdsDirect,
     mfdsRows.filter((row) => row.ingredient && sharesName(row.ingredient, pools.korean))
   );
 
-  currentGlobalMatches = { wc: wcMatches, mfds: mfdsMatches, cnph: cnphMatches, usdmf: usdmfMatches };
+  currentGlobalMatches = { wc: wcMatches, mfds: mfdsMatches, cnph: cnphMatches, usdmf: usdmfMatches, indiawc: indiawcMatches };
 
   globalSearchResults.innerHTML = [
     globalSearchGroup("K-DMF", mfdsMatches, globalMfdsItem, FLAG_KR_SVG),
     globalSearchGroup("중국 약전", cnphMatches, globalCnphItem, FLAG_CN_SVG),
     globalSearchGroup("WC", bySource(wcMatches, "WC"), globalWcItem, FLAG_CN_SVG),
     globalSearchGroup("COPP", bySource(wcMatches, "COPP"), globalWcItem, FLAG_CN_SVG),
-    globalSearchGroup("미국 DMF", usdmfMatches, globalUsdmfItem, FLAG_US_SVG)
+    globalSearchGroup("미국 DMF", usdmfMatches, globalUsdmfItem, FLAG_US_SVG),
+    globalSearchGroup("인도 WC & COPP", indiawcMatches, globalIndiawcItem, FLAG_IN_SVG)
   ].join("");
 }
 
@@ -667,6 +702,14 @@ async function exportGlobalResults() {
     ["영어명", "한국어명", "제조사", "DMF번호", "TYPE", "STATUS", "제출일"],
     currentGlobalMatches.usdmf,
     (row) => [row.english, row.korean, row.manufacturer, row.dmfNumber, row.type, row.status, row.regDate]
+  );
+
+  addExportSection(
+    worksheet,
+    "인도 WC & COPP",
+    ["제조사", "품목", "WC번호", "발급일"],
+    currentGlobalMatches.indiawc,
+    (row) => [row.manufacturer, row.english, row.wcNumber, row.releaseDate]
   );
 
   const buffer = await workbook.xlsx.writeBuffer();
@@ -912,6 +955,7 @@ function openMarginCalculator() {
   showMfdsSearch(false);
   showCnphSearch(false);
   showUsdmfSearch(false);
+  showIndiawcSearch(false);
   showImportCostCalc(false);
   showMarginCalc(true);
   detailView.classList.add("is-open");
@@ -991,6 +1035,7 @@ function openImportCostCalculator() {
   showMfdsSearch(false);
   showCnphSearch(false);
   showUsdmfSearch(false);
+  showIndiawcSearch(false);
   showMarginCalc(false);
   showImportCostCalc(true);
   detailView.classList.add("is-open");
@@ -1263,6 +1308,138 @@ async function exportUsdmfResults() {
 
   link.href = url;
   link.download = `미국DMF_검색결과_${dateText}.xlsx`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function showIndiawcSearch(isIndiawcSearch) {
+  indiawcSearchPanel.hidden = !isIndiawcSearch;
+
+  if (isIndiawcSearch) {
+    indiawcSearchInput.value = "";
+    indiawcResults.innerHTML = '<p class="empty-result">검색어를 입력하세요.</p>';
+  }
+}
+
+async function loadIndiawcData() {
+  if (indiawcLoaded) {
+    return;
+  }
+
+  indiawcResults.innerHTML = '<p class="empty-result">데이터를 불러오는 중입니다.</p>';
+
+  try {
+    const dataUrl = supabaseConfig.indiaWcDataUrl || "data/india-wc.json";
+    const response = await fetch(dataUrl);
+
+    if (!response.ok) {
+      throw new Error(`Failed to load India WC data: ${response.status}`);
+    }
+
+    indiawcRows = await response.json();
+    indiawcRows.forEach((row) => {
+      row._s = row.english.toLowerCase();
+    });
+    indiawcLoaded = true;
+    indiawcResults.innerHTML = '<p class="empty-result">검색어를 입력하세요.</p>';
+  } catch (error) {
+    console.error(error);
+    indiawcResults.innerHTML = '<p class="empty-result">데이터를 불러오지 못했습니다.</p>';
+  }
+}
+
+function renderIndiawcResults() {
+  const keyword = indiawcSearchInput.value.trim().toLowerCase();
+
+  if (!keyword) {
+    indiawcResults.innerHTML = '<p class="empty-result">검색어를 입력하세요.</p>';
+    return;
+  }
+
+  const results = indiawcRows
+    .filter((row) => row._s.includes(keyword))
+    .slice(0, 80);
+
+  currentIndiawcResults = results;
+
+  if (results.length === 0) {
+    indiawcResults.innerHTML = '<p class="empty-result">검색 결과가 없습니다.</p>';
+    return;
+  }
+
+  indiawcResults.innerHTML = results.map((row) => `
+    <article class="wc-result-item">
+      <p><strong>제조사</strong><span>${escapeHtml(row.manufacturer)}</span></p>
+      <p><strong>품목</strong><span>${escapeHtml(row.english)}</span></p>
+    </article>
+  `).join("");
+}
+
+async function exportIndiawcResults() {
+  if (!window.ExcelJS) {
+    alert("엑셀 추출 도구를 불러오지 못했습니다.");
+    return;
+  }
+
+  if (currentIndiawcResults.length === 0) {
+    alert("추출할 검색 결과가 없습니다.");
+    return;
+  }
+
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = "WorkSpace";
+  workbook.created = new Date();
+
+  const worksheet = workbook.addWorksheet("인도 WC 검색결과");
+  worksheet.columns = [
+    { header: "제조사", key: "manufacturer", width: 40 },
+    { header: "품목", key: "english", width: 42 },
+    { header: "WC번호", key: "wcNumber", width: 16 },
+    { header: "발급일", key: "releaseDate", width: 16 }
+  ];
+
+  currentIndiawcResults.forEach((row) => worksheet.addRow(row));
+
+  worksheet.eachRow((row, rowNumber) => {
+    row.eachCell((cell) => {
+      cell.font = {
+        name: EXPORT_FONT_NAME,
+        size: rowNumber === 1 ? 11 : 10,
+        bold: rowNumber === 1
+      };
+      cell.alignment = {
+        vertical: "middle",
+        wrapText: true
+      };
+      cell.border = {
+        top: { style: "thin", color: { argb: "FFD8E0EA" } },
+        left: { style: "thin", color: { argb: "FFD8E0EA" } },
+        bottom: { style: "thin", color: { argb: "FFD8E0EA" } },
+        right: { style: "thin", color: { argb: "FFD8E0EA" } }
+      };
+    });
+  });
+
+  worksheet.getRow(1).height = 24;
+  worksheet.getRow(1).fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: "FFE9F1FB" }
+  };
+  worksheet.views = [{ state: "frozen", ySplit: 1 }];
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  const dateText = new Date().toISOString().slice(0, 10);
+
+  link.href = url;
+  link.download = `인도WC_검색결과_${dateText}.xlsx`;
   document.body.appendChild(link);
   link.click();
   link.remove();
@@ -1789,6 +1966,8 @@ cnphSearchInput.addEventListener("input", renderCnphResults);
 cnphExcelExportButton.addEventListener("click", exportCnphResults);
 usdmfSearchInput.addEventListener("input", renderUsdmfResults);
 usdmfExcelExportButton.addEventListener("click", exportUsdmfResults);
+indiawcSearchInput.addEventListener("input", renderIndiawcResults);
+indiawcExcelExportButton.addEventListener("click", exportIndiawcResults);
 cnphCriteriaToggle.addEventListener("click", () => {
   cnphCriteria.hidden = !cnphCriteria.hidden;
 });

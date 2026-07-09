@@ -4,5 +4,6 @@ window.HAEMIN_SUPABASE = {
   wcDataUrl: "https://mecdxdhkiseggcnzlaso.supabase.co/storage/v1/object/public/haemin-workspace/wc-copp.json",
   mfdsDataUrl: "https://mecdxdhkiseggcnzlaso.supabase.co/storage/v1/object/public/haemin-workspace/mfds-review.json",
   cnphDataUrl: "https://mecdxdhkiseggcnzlaso.supabase.co/storage/v1/object/public/haemin-workspace/china-pharmacopoeia.json",
-  usdmfDataUrl: "https://mecdxdhkiseggcnzlaso.supabase.co/storage/v1/object/public/haemin-workspace/us-dmf.json"
+  usdmfDataUrl: "https://mecdxdhkiseggcnzlaso.supabase.co/storage/v1/object/public/haemin-workspace/us-dmf.json",
+  indiaWcDataUrl: "https://mecdxdhkiseggcnzlaso.supabase.co/storage/v1/object/public/haemin-workspace/india-wc.json"
 };
