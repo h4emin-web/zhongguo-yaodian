@@ -1098,10 +1098,12 @@ function showImportCertPanel(isImportCert) {
 }
 
 // "Z26-00575 Mecobalamin 23kg 선적서류.pdf" -> "Z26-00575 Mecobalamin 23kg 수입신고필증.pdf"
+// "Z26-00381 Methyl salicylate 16000kg 정산서.pdf" -> "...16000kg 수입신고필증.pdf"
+const IMPORTCERT_SUFFIX_PATTERN = /\s*(?:선적서류|선적서|정산서|계산서|명세서)\s*$/;
+
 function deriveImportCertFileName(originalName) {
   const withoutExt = originalName.replace(/\.pdf$/i, "");
-  const match = withoutExt.match(/^(.*?)\s*선적서류\s*$/);
-  const basePrefix = (match ? match[1] : withoutExt).trim();
+  const basePrefix = withoutExt.replace(IMPORTCERT_SUFFIX_PATTERN, "").trim();
 
   return `${basePrefix} 수입신고필증.pdf`;
 }
