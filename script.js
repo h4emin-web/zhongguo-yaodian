@@ -55,6 +55,18 @@ const importCertPanel = document.querySelector(".importcert-panel");
 const importCertDropzone = document.querySelector(".importcert-dropzone");
 const importCertFileInput = document.querySelector(".importcert-file-input");
 const importCertResult = document.querySelector(".importcert-result");
+const autoSettlementItem = document.querySelector('.tools-item[data-tool="auto-settlement"]');
+const autoSettlementPanel = document.querySelector(".auto-settlement-panel");
+const autoSettlementManager = document.querySelector("#auto-settlement-manager");
+const autoSettlementExchange = document.querySelector("#auto-settlement-exchange");
+const autoSettlementAmount = document.querySelector("#auto-settlement-amount");
+const autoSettlementQuantity = document.querySelector("#auto-settlement-quantity");
+const autoSettlementFileInput = document.querySelector(".auto-settlement-file");
+const autoOfferFileInput = document.querySelector(".auto-offer-file");
+const autoSettlementUpload = document.querySelector(".auto-settlement-upload");
+const autoOfferUpload = document.querySelector(".auto-offer-upload");
+const autoSettlementExport = document.querySelector(".auto-settlement-export");
+const autoSettlementResult = document.querySelector(".auto-settlement-result");
 const importCostPanel = document.querySelector(".import-cost-panel");
 const importPriceInput = document.querySelector("#import-price-input");
 const importPriceCurrency = document.querySelector("#import-price-currency");
@@ -96,6 +108,28 @@ let currentGlobalKeyword = "";
 let currentGlobalMatches = { wc: [], mfds: [], cnph: [], usdmf: [], indiawc: [] };
 let worklogPeople = [];
 let worklogDateLabel = "";
+let autoSettlementState = {
+  settlementFile: "",
+  offerFile: "",
+  poNo: "",
+  targetFile: "",
+  boardingDate: "",
+  instockDate: "",
+  targetMonth: "",
+  quantity: "",
+  exchangeRate: "",
+  amount: "",
+  unitPrice: ""
+};
+
+const AUTO_SETTLEMENT_TARGET_FILES = [
+  "1.수입정산서C3-1(26년)-전서진,나지훈,보비.xlsm",
+  "2.수입정산서C3-1(26년)-김수빈,이금매(4월~).xlsm",
+  "3.수입정산서C3-1(26년)-박성윤,송하형,강해민.xlsm",
+  "4.수입정산서C3-1(26년)-엄세희,이승엽,이금매(1~3월).xlsm",
+  "5.수입정산서C3-1(26년)-주영웅,민승우,유일환.xlsm",
+  "6.수입정산서C3-1(26년)-곽상희, 송예근.xlsm"
+];
 
 function openDetail(card) {
   const title = card.querySelector("h2").textContent;
@@ -121,6 +155,7 @@ function openDetail(card) {
   showIndiawcSearch(title.includes("인도 WC"));
   showImportCostCalc(false);
   showImportCertPanel(false);
+  showAutoSettlementPanel(false);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
   document.body.classList.add("detail-open");
@@ -275,6 +310,11 @@ importCostItem.addEventListener("click", () => {
 importCertItem.addEventListener("click", () => {
   closeToolsDropdown();
   openImportCertTool();
+});
+
+autoSettlementItem.addEventListener("click", () => {
+  closeToolsDropdown();
+  openAutoSettlementTool();
 });
 
 importCertDropzone.addEventListener("click", () => importCertFileInput.click());
@@ -1088,6 +1128,7 @@ function openImportCostCalculator() {
   showUsdmfSearch(false);
   showIndiawcSearch(false);
   showImportCertPanel(false);
+  showAutoSettlementPanel(false);
   showImportCostCalc(true);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
@@ -1100,6 +1141,14 @@ function showImportCertPanel(isImportCert) {
 
   if (isImportCert) {
     importCertResult.innerHTML = "";
+  }
+}
+
+function showAutoSettlementPanel(isAutoSettlement) {
+  autoSettlementPanel.hidden = !isAutoSettlement;
+
+  if (isAutoSettlement) {
+    renderAutoSettlementResult();
   }
 }
 
@@ -1174,11 +1223,269 @@ function openImportCertTool() {
   showUsdmfSearch(false);
   showIndiawcSearch(false);
   showImportCostCalc(false);
+  showAutoSettlementPanel(false);
   showImportCertPanel(true);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
   document.body.classList.add("detail-open");
   importCertDropzone.focus();
+}
+
+function openAutoSettlementTool() {
+  lastFocusedCard = toolsTrigger;
+  modalLocked = false;
+  detailKicker.textContent = "Tools";
+  detailTitle.textContent = "자동정산";
+  detailDescription.textContent = "정산서와 오퍼리스트를 기준으로 PO, 선적일자, 입고월, 환율, 단가 입력값을 정리합니다.";
+  showWcSearch(false);
+  showPoReceive(false);
+  showMfdsSearch(false);
+  showCnphSearch(false);
+  showUsdmfSearch(false);
+  showIndiawcSearch(false);
+  showImportCostCalc(false);
+  showImportCertPanel(false);
+  showAutoSettlementPanel(true);
+  detailView.classList.add("is-open");
+  detailView.setAttribute("aria-hidden", "false");
+  document.body.classList.add("detail-open");
+  autoSettlementManager.focus();
+}
+
+function extractPoNo(text) {
+  const match = String(text || "").match(/[A-Z]\d{2}-\d{5}(?:\(\d+\))?/i);
+  return match ? match[0].toUpperCase() : "";
+}
+
+function extractKgQuantity(text) {
+  const match = String(text || "").match(/([\d,]+(?:\.\d+)?)\s*kg/i);
+  return match ? match[1].replace(/,/g, "") : "";
+}
+
+function normalizeExcelValue(value) {
+  if (value == null) {
+    return "";
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString().slice(0, 10);
+  }
+
+  if (typeof value === "object") {
+    if (value.text) {
+      return String(value.text);
+    }
+
+    if (value.result != null) {
+      return normalizeExcelValue(value.result);
+    }
+
+    if (Array.isArray(value.richText)) {
+      return value.richText.map((part) => part.text || "").join("");
+    }
+  }
+
+  return String(value).trim();
+}
+
+function getMonthLabelFromDate(value) {
+  const text = normalizeExcelValue(value);
+  const match = text.match(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+
+  if (!match) {
+    return "";
+  }
+
+  return `${Number(match[2])}월`;
+}
+
+function findAutoSettlementTargetFile(managerName) {
+  const keyword = String(managerName || "").trim();
+
+  if (!keyword) {
+    return "";
+  }
+
+  return AUTO_SETTLEMENT_TARGET_FILES.find((fileName) => fileName.includes(keyword)) || "";
+}
+
+function updateAutoSettlementCalculations() {
+  const managerName = autoSettlementManager.value.trim();
+  const exchangeRate = Number(autoSettlementExchange.value);
+  const amount = Number(autoSettlementAmount.value);
+  const quantity = Number(autoSettlementQuantity.value || autoSettlementState.quantity);
+
+  autoSettlementState.targetFile = findAutoSettlementTargetFile(managerName);
+  autoSettlementState.exchangeRate = autoSettlementExchange.value.trim();
+  autoSettlementState.amount = autoSettlementAmount.value.trim();
+  autoSettlementState.quantity = autoSettlementQuantity.value.trim() || autoSettlementState.quantity;
+  autoSettlementState.unitPrice = amount > 0 && quantity > 0 ? (amount / quantity).toFixed(4) : "";
+
+  renderAutoSettlementResult();
+}
+
+async function readAutoSettlementFile(file) {
+  autoSettlementState.settlementFile = file.name;
+  autoSettlementState.poNo = extractPoNo(file.name);
+  const quantityFromName = extractKgQuantity(file.name);
+
+  if (quantityFromName && !autoSettlementQuantity.value) {
+    autoSettlementQuantity.value = quantityFromName;
+    autoSettlementState.quantity = quantityFromName;
+  }
+
+  updateAutoSettlementCalculations();
+}
+
+async function readAutoOfferFile(file) {
+  if (!window.ExcelJS) {
+    alert("엑셀 처리 도구를 불러오지 못했습니다.");
+    return;
+  }
+
+  autoSettlementState.offerFile = file.name;
+  renderAutoSettlementResult("오퍼리스트를 읽는 중입니다.");
+
+  try {
+    const buffer = await file.arrayBuffer();
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(buffer);
+    const poNo = autoSettlementState.poNo;
+    let found = null;
+
+    workbook.eachSheet((worksheet) => {
+      if (found || !poNo) {
+        return;
+      }
+
+      worksheet.eachRow((row) => {
+        if (found) {
+          return;
+        }
+
+        const rowText = row.values.map(normalizeExcelValue).join(" ");
+
+        if (rowText.includes(poNo)) {
+          found = {
+            sheet: worksheet.name,
+            rowNumber: row.number,
+            boardingDate: normalizeExcelValue(row.getCell(24).value),
+            instockDate: normalizeExcelValue(row.getCell(25).value)
+          };
+        }
+      });
+    });
+
+    if (found) {
+      autoSettlementState.boardingDate = found.boardingDate;
+      autoSettlementState.instockDate = found.instockDate;
+      autoSettlementState.targetMonth = getMonthLabelFromDate(found.instockDate);
+    } else {
+      autoSettlementState.boardingDate = "";
+      autoSettlementState.instockDate = "";
+      autoSettlementState.targetMonth = "";
+    }
+
+    renderAutoSettlementResult(found ? "" : "오퍼리스트에서 PO를 찾지 못했습니다. Excel에서 데이터가 표시된 상태로 저장한 파일인지 확인해주세요.");
+  } catch (error) {
+    console.error(error);
+    renderAutoSettlementResult("오퍼리스트를 읽는 중 오류가 발생했습니다.");
+  }
+}
+
+function renderAutoSettlementResult(message = "") {
+  if (!autoSettlementResult) {
+    return;
+  }
+
+  const rows = [
+    ["담당자 파일", autoSettlementState.targetFile || "담당자 이름 입력 후 확인"],
+    ["정산서 파일", autoSettlementState.settlementFile || "업로드 필요"],
+    ["PO 번호", autoSettlementState.poNo || "정산서 파일명에서 추출 예정"],
+    ["오퍼리스트", autoSettlementState.offerFile || "업로드 필요"],
+    ["선적일자(Boarding)", autoSettlementState.boardingDate || "오퍼리스트 X열에서 확인"],
+    ["입고일자(Instock)", autoSettlementState.instockDate || "오퍼리스트 Y열에서 확인"],
+    ["작성 시트", autoSettlementState.targetMonth || "Instock 월 기준"],
+    ["ERP 환율", autoSettlementState.exchangeRate || "수동 입력 필요"],
+    ["물품대 금액", autoSettlementState.amount || "수동 입력 필요"],
+    ["수량", autoSettlementState.quantity || "정산서 파일명 또는 수동 입력"],
+    ["단가", autoSettlementState.unitPrice || "물품대 금액 / 수량"]
+  ];
+
+  autoSettlementResult.innerHTML = `
+    ${message ? `<p class="status-error">${escapeHtml(message)}</p>` : ""}
+    <div class="auto-settlement-summary">
+      ${rows.map(([label, value]) => `
+        <p><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value)}</span></p>
+      `).join("")}
+    </div>
+    <p class="wc-search-meta">브라우저는 네트워크 폴더 파일을 직접 열 수 없어서 정산서/오퍼리스트 파일을 업로드해 읽습니다. ERP 환율은 현재 수동 입력 방식입니다.</p>
+  `;
+}
+
+async function exportAutoSettlementSummary() {
+  if (!window.ExcelJS) {
+    alert("엑셀 처리 도구를 불러오지 못했습니다.");
+    return;
+  }
+
+  updateAutoSettlementCalculations();
+
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = "WorkSpace";
+  workbook.created = new Date();
+  const worksheet = workbook.addWorksheet("자동정산 입력값");
+
+  worksheet.columns = [
+    { header: "항목", key: "label", width: 24 },
+    { header: "값", key: "value", width: 56 }
+  ];
+
+  [
+    ["담당자", autoSettlementManager.value.trim()],
+    ["담당자 파일", autoSettlementState.targetFile],
+    ["정산서 파일", autoSettlementState.settlementFile],
+    ["PO 번호", autoSettlementState.poNo],
+    ["오퍼리스트", autoSettlementState.offerFile],
+    ["선적일자(Boarding)", autoSettlementState.boardingDate],
+    ["입고일자(Instock)", autoSettlementState.instockDate],
+    ["작성 시트", autoSettlementState.targetMonth],
+    ["ERP 환율", autoSettlementState.exchangeRate],
+    ["물품대 금액", autoSettlementState.amount],
+    ["수량", autoSettlementState.quantity],
+    ["단가", autoSettlementState.unitPrice]
+  ].forEach(([label, value]) => worksheet.addRow({ label, value }));
+
+  worksheet.eachRow((row, rowNumber) => {
+    row.eachCell((cell) => {
+      cell.font = { name: EXPORT_FONT_NAME, size: rowNumber === 1 ? 11 : 10, bold: rowNumber === 1 };
+      cell.alignment = { vertical: "middle", wrapText: true };
+      cell.border = {
+        top: { style: "thin", color: { argb: "FFD8E0EA" } },
+        left: { style: "thin", color: { argb: "FFD8E0EA" } },
+        bottom: { style: "thin", color: { argb: "FFD8E0EA" } },
+        right: { style: "thin", color: { argb: "FFD8E0EA" } }
+      };
+    });
+  });
+
+  worksheet.getRow(1).fill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: "FFE9F1FB" }
+  };
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = `자동정산_${autoSettlementState.poNo || "입력값"}.xlsx`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 function closeToolsDropdown() {
@@ -2114,6 +2421,29 @@ poReceiveInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     event.preventDefault();
     submitPoReceive();
+  }
+});
+autoSettlementManager.addEventListener("input", updateAutoSettlementCalculations);
+autoSettlementExchange.addEventListener("input", updateAutoSettlementCalculations);
+autoSettlementAmount.addEventListener("input", updateAutoSettlementCalculations);
+autoSettlementQuantity.addEventListener("input", updateAutoSettlementCalculations);
+autoSettlementUpload.addEventListener("click", () => autoSettlementFileInput.click());
+autoOfferUpload.addEventListener("click", () => autoOfferFileInput.click());
+autoSettlementExport.addEventListener("click", exportAutoSettlementSummary);
+autoSettlementFileInput.addEventListener("change", () => {
+  const file = autoSettlementFileInput.files[0];
+  autoSettlementFileInput.value = "";
+
+  if (file) {
+    readAutoSettlementFile(file);
+  }
+});
+autoOfferFileInput.addEventListener("change", () => {
+  const file = autoOfferFileInput.files[0];
+  autoOfferFileInput.value = "";
+
+  if (file) {
+    readAutoOfferFile(file);
   }
 });
 worklogClose.addEventListener("click", closeWorklog);

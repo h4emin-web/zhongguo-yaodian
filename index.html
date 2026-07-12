@@ -26,6 +26,7 @@
         <div class="tools-dropdown">
           <button class="tools-item" type="button" data-tool="import-cost-calculator">예상수입원가 마진율</button>
           <button class="tools-item" type="button" data-tool="import-cert-extractor">수입신고필증</button>
+          <button class="tools-item" type="button" data-tool="auto-settlement">자동정산</button>
         </div>
       </div>
       <a href="#">Archive</a>
@@ -396,6 +397,36 @@
           <p class="importcert-dropzone-text">여기로 PDF를 끌어다 놓거나<br>클릭해서 올리세요</p>
         </div>
         <div class="importcert-result" aria-live="polite"></div>
+      </div>
+      <div class="wc-search-panel auto-settlement-panel" hidden>
+        <label>자동정산</label>
+        <p class="wc-search-meta">정산서 파일명에서 PO 번호를 읽고, 오퍼리스트의 Boarding/Instock 날짜와 ERP 환율 입력값을 바탕으로 수입정산서 입력값을 정리합니다.</p>
+        <div class="auto-settlement-grid">
+          <div class="margin-calc-field">
+            <label for="auto-settlement-manager">담당자 이름</label>
+            <input id="auto-settlement-manager" type="text" placeholder="예: 강해민" autocomplete="off">
+          </div>
+          <div class="margin-calc-field">
+            <label for="auto-settlement-exchange">ERP 환율</label>
+            <input id="auto-settlement-exchange" type="number" inputmode="decimal" placeholder="예: 1541.50">
+          </div>
+          <div class="margin-calc-field">
+            <label for="auto-settlement-amount">물품대 금액</label>
+            <input id="auto-settlement-amount" type="number" inputmode="decimal" placeholder="예: 20000">
+          </div>
+          <div class="margin-calc-field">
+            <label for="auto-settlement-quantity">수량</label>
+            <input id="auto-settlement-quantity" type="number" inputmode="decimal" placeholder="예: 1000">
+          </div>
+        </div>
+        <div class="auto-settlement-actions">
+          <input type="file" class="auto-settlement-file" accept=".xlsx,.xlsm" hidden>
+          <input type="file" class="auto-offer-file" accept=".xlsx,.xlsm" hidden>
+          <button class="excel-export auto-settlement-upload" type="button">정산서 업로드</button>
+          <button class="excel-export auto-offer-upload" type="button">오퍼리스트 업로드</button>
+          <button class="excel-export auto-settlement-export" type="button">입력값 엑셀 추출</button>
+        </div>
+        <div class="auto-settlement-result" aria-live="polite"></div>
       </div>
       <div class="po-receive-panel" hidden>
         <label for="po-receive-input">PO 번호</label>
