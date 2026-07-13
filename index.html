@@ -400,7 +400,7 @@
       </div>
       <div class="wc-search-panel auto-settlement-panel" hidden>
         <label>자동정산</label>
-        <p class="wc-search-meta">정산서 파일명에서 PO 번호를 읽고, 오퍼리스트의 Boarding/Instock 날짜와 ERP 환율 입력값을 바탕으로 수입정산서 입력값을 정리합니다.</p>
+        <p class="wc-search-meta">정산서 파일명에서 PO 번호를 읽고, 직접 입력한 선적일자/입고일자와 ERP 환율 입력값을 바탕으로 수입정산서 입력값을 정리합니다.</p>
         <div class="auto-settlement-grid">
           <div class="margin-calc-field">
             <label for="auto-settlement-manager">담당자 이름</label>
@@ -418,12 +418,18 @@
             <label for="auto-settlement-quantity">수량</label>
             <input id="auto-settlement-quantity" type="number" inputmode="decimal" placeholder="예: 1000">
           </div>
+          <div class="margin-calc-field">
+            <label for="auto-settlement-boarding">선적일자</label>
+            <input id="auto-settlement-boarding" type="date">
+          </div>
+          <div class="margin-calc-field">
+            <label for="auto-settlement-instock">입고일자</label>
+            <input id="auto-settlement-instock" type="date">
+          </div>
         </div>
         <div class="auto-settlement-actions">
           <input type="file" class="auto-settlement-file" accept=".xlsx,.xlsm" hidden>
-          <input type="file" class="auto-offer-file" accept=".xlsx,.xlsm" hidden>
           <button class="excel-export auto-settlement-upload" type="button">정산서 업로드</button>
-          <button class="excel-export auto-offer-upload" type="button">오퍼리스트 업로드</button>
           <button class="excel-export auto-settlement-export" type="button">입력값 엑셀 추출</button>
         </div>
         <div class="auto-settlement-result" aria-live="polite"></div>

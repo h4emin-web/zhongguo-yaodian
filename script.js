@@ -61,10 +61,10 @@ const autoSettlementManager = document.querySelector("#auto-settlement-manager")
 const autoSettlementExchange = document.querySelector("#auto-settlement-exchange");
 const autoSettlementAmount = document.querySelector("#auto-settlement-amount");
 const autoSettlementQuantity = document.querySelector("#auto-settlement-quantity");
+const autoSettlementBoarding = document.querySelector("#auto-settlement-boarding");
+const autoSettlementInstock = document.querySelector("#auto-settlement-instock");
 const autoSettlementFileInput = document.querySelector(".auto-settlement-file");
-const autoOfferFileInput = document.querySelector(".auto-offer-file");
 const autoSettlementUpload = document.querySelector(".auto-settlement-upload");
-const autoOfferUpload = document.querySelector(".auto-offer-upload");
 const autoSettlementExport = document.querySelector(".auto-settlement-export");
 const autoSettlementResult = document.querySelector(".auto-settlement-result");
 const importCostPanel = document.querySelector(".import-cost-panel");
@@ -110,7 +110,6 @@ let worklogPeople = [];
 let worklogDateLabel = "";
 let autoSettlementState = {
   settlementFile: "",
-  offerFile: "",
   poNo: "",
   targetFile: "",
   boardingDate: "",
@@ -1236,7 +1235,7 @@ function openAutoSettlementTool() {
   modalLocked = false;
   detailKicker.textContent = "Tools";
   detailTitle.textContent = "자동정산";
-  detailDescription.textContent = "정산서와 오퍼리스트를 기준으로 PO, 선적일자, 입고월, 환율, 단가 입력값을 정리합니다.";
+  detailDescription.textContent = "정산서 파일명과 직접 입력한 선적일자, 입고일자, 환율을 기준으로 수입정산서 입력값을 정리합니다.";
   showWcSearch(false);
   showPoReceive(false);
   showMfdsSearch(false);
@@ -1311,7 +1310,6 @@ function findAutoSettlementTargetFile(managerName) {
 
 function updateAutoSettlementCalculations() {
   const managerName = autoSettlementManager.value.trim();
-  const exchangeRate = Number(autoSettlementExchange.value);
   const amount = Number(autoSettlementAmount.value);
   const quantity = Number(autoSettlementQuantity.value || autoSettlementState.quantity);
 
@@ -1319,6 +1317,9 @@ function updateAutoSettlementCalculations() {
   autoSettlementState.exchangeRate = autoSettlementExchange.value.trim();
   autoSettlementState.amount = autoSettlementAmount.value.trim();
   autoSettlementState.quantity = autoSettlementQuantity.value.trim() || autoSettlementState.quantity;
+  autoSettlementState.boardingDate = autoSettlementBoarding.value;
+  autoSettlementState.instockDate = autoSettlementInstock.value;
+  autoSettlementState.targetMonth = getMonthLabelFromDate(autoSettlementInstock.value);
   autoSettlementState.unitPrice = amount > 0 && quantity > 0 ? (amount / quantity).toFixed(4) : "";
 
   renderAutoSettlementResult();
@@ -1337,62 +1338,6 @@ async function readAutoSettlementFile(file) {
   updateAutoSettlementCalculations();
 }
 
-async function readAutoOfferFile(file) {
-  if (!window.ExcelJS) {
-    alert("엑셀 처리 도구를 불러오지 못했습니다.");
-    return;
-  }
-
-  autoSettlementState.offerFile = file.name;
-  renderAutoSettlementResult("오퍼리스트를 읽는 중입니다.");
-
-  try {
-    const buffer = await file.arrayBuffer();
-    const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(buffer);
-    const poNo = autoSettlementState.poNo;
-    let found = null;
-
-    workbook.eachSheet((worksheet) => {
-      if (found || !poNo) {
-        return;
-      }
-
-      worksheet.eachRow((row) => {
-        if (found) {
-          return;
-        }
-
-        const rowText = row.values.map(normalizeExcelValue).join(" ");
-
-        if (rowText.includes(poNo)) {
-          found = {
-            sheet: worksheet.name,
-            rowNumber: row.number,
-            boardingDate: normalizeExcelValue(row.getCell(24).value),
-            instockDate: normalizeExcelValue(row.getCell(25).value)
-          };
-        }
-      });
-    });
-
-    if (found) {
-      autoSettlementState.boardingDate = found.boardingDate;
-      autoSettlementState.instockDate = found.instockDate;
-      autoSettlementState.targetMonth = getMonthLabelFromDate(found.instockDate);
-    } else {
-      autoSettlementState.boardingDate = "";
-      autoSettlementState.instockDate = "";
-      autoSettlementState.targetMonth = "";
-    }
-
-    renderAutoSettlementResult(found ? "" : "오퍼리스트에서 PO를 찾지 못했습니다. Excel에서 데이터가 표시된 상태로 저장한 파일인지 확인해주세요.");
-  } catch (error) {
-    console.error(error);
-    renderAutoSettlementResult("오퍼리스트를 읽는 중 오류가 발생했습니다.");
-  }
-}
-
 function renderAutoSettlementResult(message = "") {
   if (!autoSettlementResult) {
     return;
@@ -1402,10 +1347,9 @@ function renderAutoSettlementResult(message = "") {
     ["담당자 파일", autoSettlementState.targetFile || "담당자 이름 입력 후 확인"],
     ["정산서 파일", autoSettlementState.settlementFile || "업로드 필요"],
     ["PO 번호", autoSettlementState.poNo || "정산서 파일명에서 추출 예정"],
-    ["오퍼리스트", autoSettlementState.offerFile || "업로드 필요"],
-    ["선적일자(Boarding)", autoSettlementState.boardingDate || "오퍼리스트 X열에서 확인"],
-    ["입고일자(Instock)", autoSettlementState.instockDate || "오퍼리스트 Y열에서 확인"],
-    ["작성 시트", autoSettlementState.targetMonth || "Instock 월 기준"],
+    ["선적일자", autoSettlementState.boardingDate || "직접 입력 필요"],
+    ["입고일자", autoSettlementState.instockDate || "직접 입력 필요"],
+    ["작성 시트", autoSettlementState.targetMonth || "입고일자 월 기준"],
     ["ERP 환율", autoSettlementState.exchangeRate || "수동 입력 필요"],
     ["물품대 금액", autoSettlementState.amount || "수동 입력 필요"],
     ["수량", autoSettlementState.quantity || "정산서 파일명 또는 수동 입력"],
@@ -1419,7 +1363,7 @@ function renderAutoSettlementResult(message = "") {
         <p><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value)}</span></p>
       `).join("")}
     </div>
-    <p class="wc-search-meta">브라우저는 네트워크 폴더 파일을 직접 열 수 없어서 정산서/오퍼리스트 파일을 업로드해 읽습니다. ERP 환율은 현재 수동 입력 방식입니다.</p>
+    <p class="wc-search-meta">브라우저는 네트워크 폴더 파일을 직접 열 수 없어서 정산서 파일만 업로드해 읽습니다. 선적일자, 입고일자, ERP 환율은 직접 입력 방식입니다.</p>
   `;
 }
 
@@ -1446,9 +1390,8 @@ async function exportAutoSettlementSummary() {
     ["담당자 파일", autoSettlementState.targetFile],
     ["정산서 파일", autoSettlementState.settlementFile],
     ["PO 번호", autoSettlementState.poNo],
-    ["오퍼리스트", autoSettlementState.offerFile],
-    ["선적일자(Boarding)", autoSettlementState.boardingDate],
-    ["입고일자(Instock)", autoSettlementState.instockDate],
+    ["선적일자", autoSettlementState.boardingDate],
+    ["입고일자", autoSettlementState.instockDate],
     ["작성 시트", autoSettlementState.targetMonth],
     ["ERP 환율", autoSettlementState.exchangeRate],
     ["물품대 금액", autoSettlementState.amount],
@@ -2427,8 +2370,9 @@ autoSettlementManager.addEventListener("input", updateAutoSettlementCalculations
 autoSettlementExchange.addEventListener("input", updateAutoSettlementCalculations);
 autoSettlementAmount.addEventListener("input", updateAutoSettlementCalculations);
 autoSettlementQuantity.addEventListener("input", updateAutoSettlementCalculations);
+autoSettlementBoarding.addEventListener("input", updateAutoSettlementCalculations);
+autoSettlementInstock.addEventListener("input", updateAutoSettlementCalculations);
 autoSettlementUpload.addEventListener("click", () => autoSettlementFileInput.click());
-autoOfferUpload.addEventListener("click", () => autoOfferFileInput.click());
 autoSettlementExport.addEventListener("click", exportAutoSettlementSummary);
 autoSettlementFileInput.addEventListener("change", () => {
   const file = autoSettlementFileInput.files[0];
@@ -2436,14 +2380,6 @@ autoSettlementFileInput.addEventListener("change", () => {
 
   if (file) {
     readAutoSettlementFile(file);
-  }
-});
-autoOfferFileInput.addEventListener("change", () => {
-  const file = autoOfferFileInput.files[0];
-  autoOfferFileInput.value = "";
-
-  if (file) {
-    readAutoOfferFile(file);
   }
 });
 worklogClose.addEventListener("click", closeWorklog);
