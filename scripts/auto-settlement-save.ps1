@@ -248,8 +248,17 @@ try {
   $unitPriceFormula = '=ROUND(H{0}/VALUE(SUBSTITUTE(SUBSTITUTE(LOWER(TRIM(B{1})),"kg",""),",","")),0)' -f ($startRow + 13), ($startRow + 2)
   $targetSheet.Cells.Item($startRow + 4, 6).Formula = $unitPriceFormula
   $targetSheet.Cells.Item($startRow + 4, 6).NumberFormat = "#,##0"
+  $excel.CalculateFull() | Out-Null
 
   $targetWorkbook.Save()
+
+  $unitPrice = [math]::Round((Convert-ToNumber ($targetSheet.Cells.Item($startRow + 4, 6).Value2)), 0)
+  $purchaseUnitPrice = if ($quantityValue -gt 0) {
+    [math]::Round(($totalForeign / $quantityValue), 4)
+  } else {
+    0
+  }
+  $krwAmount = [math]::Round((Convert-ToNumber ($targetSheet.Cells.Item($startRow + 13, 8).Value2)), 0)
 
   $result = [ordered]@{
     targetFile = $targetFile.Name
@@ -257,6 +266,13 @@ try {
     sheetName = $sheetName
     startRow = $startRow
     poNo = $PoNo
+    productCode = [string]$targetSheet.Cells.Item($startRow + 1, 6).Text
+    quantity = $quantityValue
+    exchangeRate = $exchange
+    unitPrice = $unitPrice
+    purchaseUnitPrice = $purchaseUnitPrice
+    foreignAmount = $totalForeign
+    krwAmount = $krwAmount
     remittanceAmount = [math]::Round($exchange * $totalForeign, 2)
   }
 

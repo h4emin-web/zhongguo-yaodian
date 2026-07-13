@@ -180,6 +180,58 @@ async function saveAutoSettlement(req, res) {
   }
 }
 
+function requireEcountEnv() {
+  const missing = ["ECOUNT_COM_CODE", "ECOUNT_USER_ID", "ECOUNT_PASSWORD"].filter((key) => !process.env[key]);
+
+  if (missing.length) {
+    throw new Error(`${missing.join(", ")} environment variables are required.`);
+  }
+}
+
+async function startEcountPurchaseFill(req, res) {
+  try {
+    requireEcountEnv();
+    const payload = await readBody(req);
+    const required = ["productCode", "quantity", "exchangeRate", "unitPrice", "foreignAmount", "krwAmount"];
+    const missing = required.filter((key) => payload[key] === undefined || payload[key] === null || payload[key] === "");
+
+    if (missing.length) {
+      throw new Error(`${missing.join(", ")} values are required.`);
+    }
+
+    const tempDir = await mkdtemp(join(tmpdir(), "haemin-ecount-purchase-"));
+    const payloadPath = join(tempDir, "payload.json");
+    await writeFile(payloadPath, JSON.stringify(payload), "utf8");
+
+    const child = spawn(process.execPath, [
+      join(ROOT, "scripts", "ecount-purchase-fill.mjs"),
+      payloadPath
+    ], {
+      cwd: ROOT,
+      detached: true,
+      stdio: "ignore",
+      windowsHide: false,
+      env: {
+        ...process.env,
+        HEADLESS: "false",
+        KEEP_OPEN_MS: process.env.ECOUNT_PURCHASE_KEEP_OPEN_MS || "1800000"
+      }
+    });
+
+    child.unref();
+    json(res, {
+      ok: true,
+      pid: child.pid,
+      message: "ECOUNT purchase automation started. Save is not clicked automatically."
+    });
+  } catch (error) {
+    json(res, {
+      ok: false,
+      error: error instanceof Error ? error.message : String(error)
+    }, 500);
+  }
+}
+
 async function serveFile(req, res) {
   const url = new URL(req.url, `http://localhost:${PORT}`);
   const pathname = decodeURIComponent(url.pathname === "/" ? "/index.html" : url.pathname);
@@ -225,6 +277,11 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "POST" && req.url === "/api/auto-settlement/save") {
     await saveAutoSettlement(req, res);
+    return;
+  }
+
+  if (req.method === "POST" && req.url === "/api/ecount-purchase/fill") {
+    await startEcountPurchaseFill(req, res);
     return;
   }
 
