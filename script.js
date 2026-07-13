@@ -1242,7 +1242,7 @@ function openAutoSettlementTool() {
   modalLocked = false;
   detailKicker.textContent = "Tools";
   detailTitle.textContent = "자동정산";
-  detailDescription.textContent = "정산서 파일명과 직접 입력한 선적일자, 입고일자, 환율을 기준으로 수입정산서 입력값을 정리합니다.";
+  detailDescription.textContent = "정산서 파일명과 오퍼발행내역의 Boarding/Instock 날짜, 환율을 기준으로 수입정산서와 ERP 구매입력을 처리합니다.";
   showWcSearch(false);
   showPoReceive(false);
   showMfdsSearch(false);
@@ -1379,8 +1379,6 @@ async function saveAutoSettlementToWorkbook() {
   const missing = [
     ["담당자 이름", payload.managerName],
     ["PO 번호", payload.poNo],
-    ["선적일자", payload.boardingDate],
-    ["입고일자", payload.instockDate],
     ["ERP 환율", payload.exchangeRate]
   ].filter(([, value]) => !value);
 
@@ -1409,6 +1407,10 @@ async function saveAutoSettlementToWorkbook() {
 
     autoSettlementState.targetFile = data.targetFile || autoSettlementState.targetFile;
     autoSettlementState.targetMonth = data.sheetName || autoSettlementState.targetMonth;
+    autoSettlementState.boardingDate = data.boardingDate || autoSettlementState.boardingDate;
+    autoSettlementState.instockDate = data.instockDate || autoSettlementState.instockDate;
+    autoSettlementBoarding.value = autoSettlementState.boardingDate;
+    autoSettlementInstock.value = autoSettlementState.instockDate;
     autoSettlementState.productCode = data.productCode || autoSettlementState.productCode;
     autoSettlementState.quantity = data.quantity || autoSettlementState.quantity;
     autoSettlementState.exchangeRate = data.exchangeRate || autoSettlementState.exchangeRate;
@@ -1444,8 +1446,8 @@ function renderAutoSettlementResult(message = "") {
   const rows = [
     ["담당자 파일", autoSettlementState.targetFile || "담당자 이름 입력 후 확인"],
     ["PO 번호", autoSettlementState.poNo || "정산서 파일명에서 추출 예정"],
-    ["선적일자", autoSettlementState.boardingDate || "직접 입력 필요"],
-    ["입고일자", autoSettlementState.instockDate || "직접 입력 필요"],
+    ["선적일자", autoSettlementState.boardingDate || "오퍼발행내역 자동 조회"],
+    ["입고일자", autoSettlementState.instockDate || "오퍼발행내역 자동 조회"],
     ["작성 시트", autoSettlementState.targetMonth || "입고일자 월 기준"],
     ["ERP 환율", autoSettlementState.exchangeRate || "수동 입력 필요"],
     ["수량", autoSettlementState.quantity || "정산서 파일명 또는 수동 입력"],
@@ -1463,7 +1465,7 @@ function renderAutoSettlementResult(message = "") {
         <p><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value)}</span></p>
       `).join("")}
     </div>
-    <p class="wc-search-meta">브라우저는 네트워크 폴더 파일을 직접 열 수 없어서 정산서 파일만 업로드해 읽습니다. 선적일자, 입고일자, ERP 환율은 직접 입력 방식입니다.</p>
+    <p class="wc-search-meta">선적일자와 입고일자는 오퍼발행내역에서 PO 번호로 자동 조회합니다. 직접 입력하면 입력값을 우선 사용합니다.</p>
   `;
 }
 

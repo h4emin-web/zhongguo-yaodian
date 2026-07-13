@@ -2,8 +2,8 @@
   [Parameter(Mandatory = $true)][string]$SettlementPath,
   [Parameter(Mandatory = $true)][string]$ManagerName,
   [Parameter(Mandatory = $true)][string]$PoNo,
-  [Parameter(Mandatory = $true)][string]$BoardingDate,
-  [Parameter(Mandatory = $true)][string]$InstockDate,
+  [string]$BoardingDate = "",
+  [string]$InstockDate = "",
   [Parameter(Mandatory = $true)][string]$ExchangeRate,
   [string]$Quantity = ""
 )
@@ -137,6 +137,26 @@ function Set-NumberCell($sheet, [int]$row, [int]$column, $value) {
   $sheet.Cells.Item($row, $column).Formula = $number.ToString([System.Globalization.CultureInfo]::InvariantCulture)
 }
 
+function Convert-ToDateValue([string]$value, [string]$label) {
+  $text = ([string]$value).Trim()
+
+  if (-not $text) {
+    throw "$label 값이 비어 있습니다."
+  }
+
+  $normalized = $text -replace "[./]", "-"
+
+  if ($normalized -match "(\d{4})-(\d{1,2})-(\d{1,2})") {
+    return [datetime]::ParseExact(
+      ("{0}-{1:00}-{2:00}" -f [int]$matches[1], [int]$matches[2], [int]$matches[3]),
+      "yyyy-MM-dd",
+      [System.Globalization.CultureInfo]::InvariantCulture
+    )
+  }
+
+  return [datetime]::Parse($text, [System.Globalization.CultureInfo]::InvariantCulture)
+}
+
 if (-not (Test-Path -LiteralPath $SettlementPath)) {
   throw "정산서 파일을 찾을 수 없습니다: $SettlementPath"
 }
@@ -158,9 +178,6 @@ if (-not $targetFile) {
   throw "담당자 '$ManagerName' 이 포함된 수입정산서 파일을 찾지 못했습니다."
 }
 
-$boarding = [datetime]::Parse($BoardingDate, [System.Globalization.CultureInfo]::InvariantCulture)
-$instock = [datetime]::Parse($InstockDate, [System.Globalization.CultureInfo]::InvariantCulture)
-$sheetName = "$($instock.Month)월"
 $exchange = Convert-ToNumber $ExchangeRate
 
 if ($exchange -le 0) {
@@ -176,6 +193,14 @@ try {
   $excel.Visible = $false
   $excel.DisplayAlerts = $false
   $excel.AutomationSecurity = 1
+
+  if (-not $BoardingDate -or -not $InstockDate) {
+    throw "Boarding/Instock 날짜가 비어 있습니다. 오퍼발행내역 자동 조회 후 다시 실행해주세요."
+  }
+
+  $boarding = Convert-ToDateValue $BoardingDate "Boarding"
+  $instock = Convert-ToDateValue $InstockDate "Instock"
+  $sheetName = "$($instock.Month)월"
 
   $sourceWorkbook = $excel.Workbooks.Open($SettlementPath, $false, $true)
   $sourceSheet = $sourceWorkbook.Worksheets.Item(1)
@@ -266,6 +291,8 @@ try {
     sheetName = $sheetName
     startRow = $startRow
     poNo = $PoNo
+    boardingDate = $boarding.ToString("yyyy-MM-dd")
+    instockDate = $instock.ToString("yyyy-MM-dd")
     productCode = [string]$targetSheet.Cells.Item($startRow + 1, 6).Text
     quantity = $quantityValue
     exchangeRate = $exchange

@@ -1,13 +1,19 @@
 import { createServer } from "node:http";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import { spawn } from "node:child_process";
 import { extname, join, normalize } from "node:path";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
+import XLSX from "xlsx";
 import { lookupExchangeRate } from "./ecount-exchange-rate.mjs";
 
 const PORT = Number(process.env.PORT || "4173");
 const ROOT = process.cwd();
 const POWERSHELL = process.env.POWERSHELL || "powershell.exe";
+const DEFAULT_OFFER_LIST_PATHS = [
+  join(process.env.USERPROFILE || homedir(), "Desktop", "오퍼발행내역C8-2(양식수정).xlsm"),
+  "Z:\\동진파마\\공유문서(Main)\\A60-오퍼리스트\\오퍼발행내역C8-2(양식수정).xlsm"
+];
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -137,6 +143,74 @@ function runPowerShell(scriptPath, args) {
   });
 }
 
+function resolveOfferListPath() {
+  const candidates = [
+    process.env.OFFER_LIST_PATH,
+    ...DEFAULT_OFFER_LIST_PATHS
+  ].filter(Boolean);
+  const offerListPath = candidates.find((candidate) => existsSync(candidate));
+
+  if (!offerListPath) {
+    throw new Error(`오퍼발행내역 파일을 찾지 못했습니다: ${candidates.join(" / ")}`);
+  }
+
+  return offerListPath;
+}
+
+function formatOfferDate(value, label) {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.toISOString().slice(0, 10);
+  }
+
+  if (typeof value === "number") {
+    const parsed = XLSX.SSF.parse_date_code(value);
+
+    if (parsed) {
+      return `${parsed.y}-${String(parsed.m).padStart(2, "0")}-${String(parsed.d).padStart(2, "0")}`;
+    }
+  }
+
+  const text = String(value || "").trim();
+  const match = text.replace(/[./]/g, "-").match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+
+  if (match) {
+    return `${match[1]}-${String(Number(match[2])).padStart(2, "0")}-${String(Number(match[3])).padStart(2, "0")}`;
+  }
+
+  throw new Error(`${label} 날짜를 해석하지 못했습니다: ${text || "(빈 값)"}`);
+}
+
+function lookupOfferDates(poNo) {
+  const offerListPath = resolveOfferListPath();
+  const workbook = XLSX.readFile(offerListPath, {
+    cellDates: true,
+    cellNF: false,
+    cellText: false
+  });
+  const sheet = workbook.Sheets["PO메인"] || workbook.Sheets[workbook.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(sheet, {
+    header: 1,
+    defval: "",
+    raw: true
+  });
+
+  for (let index = 2; index < rows.length; index += 1) {
+    const row = rows[index];
+    const candidate = String(row[0] || "").trim();
+
+    if (candidate === poNo) {
+      return {
+        boardingDate: formatOfferDate(row[23], "Boarding"),
+        instockDate: formatOfferDate(row[24], "Instock"),
+        offerListPath,
+        offerListRow: index + 1
+      };
+    }
+  }
+
+  throw new Error(`오퍼발행내역에서 PO '${poNo}' 를 찾지 못했습니다.`);
+}
+
 function runNode(scriptPath, args, env = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [
@@ -228,17 +302,24 @@ async function saveAutoSettlement(req, res) {
       : ".xlsx";
     const settlementPath = join(tempDir, `settlement-upload${extension}`);
     await writeFile(settlementPath, file.buffer);
+    const offerDates = (!fields.boardingDate || !fields.instockDate)
+      ? lookupOfferDates(fields.poNo || "")
+      : null;
+    const boardingDate = fields.boardingDate || offerDates?.boardingDate || "";
+    const instockDate = fields.instockDate || offerDates?.instockDate || "";
 
     const output = await runPowerShell(join(ROOT, "scripts", "auto-settlement-save.ps1"), [
       "-SettlementPath", settlementPath,
       "-ManagerName", fields.managerName || "",
       "-PoNo", fields.poNo || "",
-      "-BoardingDate", fields.boardingDate || "",
-      "-InstockDate", fields.instockDate || "",
+      "-BoardingDate", boardingDate,
+      "-InstockDate", instockDate,
       "-ExchangeRate", fields.exchangeRate || "",
       "-Quantity", fields.quantity || ""
     ]);
     const result = JSON.parse(output);
+    result.offerListPath = offerDates?.offerListPath || "";
+    result.offerListRow = offerDates?.offerListRow || null;
     let ecount = null;
 
     if (process.env.AUTO_SETTLEMENT_ECOUNT_SAVE === "1") {
