@@ -1461,8 +1461,17 @@ async function fetchAutoSettlementExchangeRate() {
       data = await response.json();
       error = response.ok ? null : data;
     } else {
-      autoExchangeResult.innerHTML = '<p class="status-error">ERP 자동조회는 로컬 서버에서만 가능합니다. npm run local로 실행한 http://localhost:4173 에서 사용해주세요.</p>';
-      return;
+      if (!supabaseClient) {
+        autoExchangeResult.innerHTML = '<p class="status-error">Supabase 연결 설정이 없어 ERP 조회를 할 수 없습니다.</p>';
+        return;
+      }
+
+      const result = await supabaseClient.functions.invoke("ecount-exchange-rate", {
+        body: { poNo }
+      });
+
+      data = result.data;
+      error = result.error;
     }
 
     if (error) {
