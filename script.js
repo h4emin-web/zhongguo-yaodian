@@ -1449,8 +1449,9 @@ async function fetchAutoSettlementExchangeRate() {
   try {
     let data;
     let error;
+    const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
 
-    if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+    if (isLocal) {
       const response = await fetch("/api/ecount-rate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1460,17 +1461,8 @@ async function fetchAutoSettlementExchangeRate() {
       data = await response.json();
       error = response.ok ? null : data;
     } else {
-      if (!supabaseClient) {
-        autoExchangeResult.innerHTML = '<p class="status-error">Supabase 연결 설정이 없어 ERP 조회를 할 수 없습니다.</p>';
-        return;
-      }
-
-      const result = await supabaseClient.functions.invoke("ecount-exchange-rate", {
-        body: { poNo }
-      });
-
-      data = result.data;
-      error = result.error;
+      autoExchangeResult.innerHTML = '<p class="status-error">ERP 자동조회는 로컬 서버에서만 가능합니다. npm run local로 실행한 http://localhost:4173 에서 사용해주세요.</p>';
+      return;
     }
 
     if (error) {
@@ -1487,7 +1479,12 @@ async function fetchAutoSettlementExchangeRate() {
     autoExchangeResult.innerHTML = `<p class="status-ok">ERP 환율 ${escapeHtml(data.exchangeRate)} 적용 완료</p>`;
   } catch (error) {
     console.error(error);
-    autoExchangeResult.innerHTML = '<p class="status-error">ERP 환율 조회 중 오류가 발생했습니다.</p>';
+    const message = error && typeof error === "object" && "error" in error
+      ? error.error
+      : error instanceof Error
+        ? error.message
+        : String(error);
+    autoExchangeResult.innerHTML = `<p class="status-error">ERP 환율 조회 실패: ${escapeHtml(message)}</p>`;
   } finally {
     autoExchangeFetch.disabled = false;
   }
