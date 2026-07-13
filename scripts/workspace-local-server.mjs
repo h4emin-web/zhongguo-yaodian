@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { extname, join, normalize } from "node:path";
 import { homedir, tmpdir } from "node:os";
 import XLSX from "xlsx";
@@ -181,6 +181,35 @@ function formatOfferDate(value, label) {
 }
 
 function lookupOfferDates(poNo) {
+  try {
+    const args = [
+      "-NoProfile",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      join(ROOT, "scripts", "offer-list-lookup.ps1"),
+      "-PoNo",
+      poNo
+    ];
+
+    if (process.env.OFFER_LIST_PATH) {
+      args.push("-WorkbookPath", process.env.OFFER_LIST_PATH);
+    }
+
+    const child = spawnSync(POWERSHELL, args, {
+      cwd: ROOT,
+      encoding: "utf8",
+      windowsHide: true,
+      timeout: 120000
+    });
+
+    if (child.status === 0 && child.stdout.trim()) {
+      const output = child.stdout.trim().split(/\r?\n/).filter(Boolean).pop();
+      return JSON.parse(output);
+    }
+  } catch {
+  }
+
   const offerListPath = resolveOfferListPath();
   const workbook = XLSX.readFile(offerListPath, {
     cellDates: true,
