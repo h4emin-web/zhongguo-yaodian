@@ -66,7 +66,6 @@ const autoSettlementFileInput = document.querySelector(".auto-settlement-file");
 const autoSettlementUpload = document.querySelector(".auto-settlement-upload");
 const autoSettlementSave = document.querySelector(".auto-settlement-save");
 const autoSettlementDropzone = document.querySelector(".auto-settlement-dropzone");
-const autoSettlementExport = document.querySelector(".auto-settlement-export");
 const autoExchangeFetch = document.querySelector(".auto-exchange-fetch");
 const autoExchangeResult = document.querySelector(".auto-exchange-result");
 const autoSettlementResult = document.querySelector(".auto-settlement-result");
@@ -1408,7 +1407,7 @@ async function saveAutoSettlementToWorkbook() {
     autoSettlementState.targetMonth = data.sheetName || autoSettlementState.targetMonth;
     renderAutoSettlementResult();
     autoSettlementResult.insertAdjacentHTML("afterbegin", `
-      <p class="status-ok">저장 완료: ${escapeHtml(data.targetFile)} / ${escapeHtml(data.sheetName)} ${escapeHtml(String(data.startRow))}행</p>
+      <p class="status-ok">복사본 업로드 완료: ${escapeHtml(data.targetFile)} / ${escapeHtml(data.sheetName)} ${escapeHtml(String(data.startRow))}행</p>
     `);
   } catch (error) {
     console.error(error);
@@ -2532,7 +2531,6 @@ autoSettlementDropzone.addEventListener("drop", (event) => {
   autoSettlementDropzone.classList.remove("is-dragover");
   handleAutoSettlementFile(event.dataTransfer.files && event.dataTransfer.files[0]);
 });
-autoSettlementExport.addEventListener("click", exportAutoSettlementSummary);
 autoSettlementFileInput.addEventListener("change", () => {
   const file = autoSettlementFileInput.files[0];
   autoSettlementFileInput.value = "";

@@ -15,10 +15,20 @@ trap {
   exit 1
 }
 
+$DefaultTestTargetPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "3.수입정산서C3-1(26년)-박성윤,송하형,강해민 - 복사본.xlsm"
+$TargetPath = if ($env:AUTO_SETTLEMENT_TARGET_PATH) {
+  $env:AUTO_SETTLEMENT_TARGET_PATH
+} elseif ($env:AUTO_SETTLEMENT_REAL_TARGET -eq "1") {
+  ""
+} else {
+  $DefaultTestTargetPath
+}
 $TargetDir = if ($env:AUTO_SETTLEMENT_TARGET_DIR) {
   $env:AUTO_SETTLEMENT_TARGET_DIR
-} else {
+} elseif ($env:AUTO_SETTLEMENT_REAL_TARGET -eq "1") {
   "Z:\동진파마\공유문서(Main)\A61-OFFER자료(강동연)\수입정산서\수입정산서-마케팅지원팀\2026년\1. 수입정산서 신규파일"
+} else {
+  ""
 }
 
 function Convert-ToNumber($value) {
@@ -131,10 +141,18 @@ if (-not (Test-Path -LiteralPath $SettlementPath)) {
   throw "정산서 파일을 찾을 수 없습니다: $SettlementPath"
 }
 
-$targetFile = Get-ChildItem -LiteralPath $TargetDir -File |
-  Where-Object { $_.Extension -in ".xls", ".xlsx", ".xlsm" } |
-  Where-Object { $_.Name -like "*$ManagerName*" -and $_.Name -notlike "※*" } |
-  Select-Object -First 1
+$targetFile = if ($TargetPath) {
+  if (-not (Test-Path -LiteralPath $TargetPath)) {
+    throw "테스트용 수입정산서 복사본을 찾지 못했습니다: $TargetPath"
+  }
+
+  Get-Item -LiteralPath $TargetPath
+} else {
+  Get-ChildItem -LiteralPath $TargetDir -File |
+    Where-Object { $_.Extension -in ".xls", ".xlsx", ".xlsm" } |
+    Where-Object { $_.Name -like "*$ManagerName*" -and $_.Name -notlike "※*" } |
+    Select-Object -First 1
+}
 
 if (-not $targetFile) {
   throw "담당자 '$ManagerName' 이 포함된 수입정산서 파일을 찾지 못했습니다."
@@ -259,10 +277,3 @@ try {
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($excel) | Out-Null
   }
 }
-
-
-
-
-
-
-
