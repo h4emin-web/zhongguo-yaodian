@@ -95,26 +95,73 @@ async function login(page) {
   }
 }
 
+async function collectVisibleInputs(page) {
+  const inputs = [];
+
+  for (const frame of page.frames()) {
+    const handles = await frame.locator("input").elementHandles().catch(() => []);
+
+    for (let index = 0; index < handles.length; index += 1) {
+      const handle = handles[index];
+      const box = await handle.boundingBox().catch(() => null);
+
+      if (!box || box.width <= 0 || box.height <= 0) {
+        continue;
+      }
+
+      const meta = await handle.evaluate((input) => ({
+        value: input.value || "",
+        placeholder: input.getAttribute("placeholder") || "",
+        title: input.getAttribute("title") || "",
+        type: input.getAttribute("type") || ""
+      })).catch(() => null);
+
+      if (!meta) {
+        continue;
+      }
+
+      inputs.push({
+        frameUrl: frame.url(),
+        index,
+        ...meta,
+        x: box.x,
+        y: box.y,
+        width: box.width,
+        height: box.height
+      });
+    }
+  }
+
+  return inputs;
+}
+
 async function getVisibleProductInput(page, productCode) {
-  const productInput = await page.locator("input").evaluateAll((inputs, code) => {
-    return inputs
-      .map((input, index) => {
-        const rect = input.getBoundingClientRect();
-        return {
-          index,
-          value: input.value,
-          visible: rect.width > 0 && rect.height > 0,
-          x: rect.x,
-          y: rect.y,
-          width: rect.width,
-          height: rect.height
-        };
+  const normalizedCode = String(productCode).trim().toUpperCase();
+  let inputs = [];
+  let productInput = null;
+
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    inputs = await collectVisibleInputs(page);
+    productInput = inputs
+      .filter((input) => {
+        const value = String(input.value || "").trim().toUpperCase();
+        return value === normalizedCode && input.y > 430;
       })
-      .filter((input) => input.visible && input.value.trim() === code && input.y > 500)
-      .sort((a, b) => a.y - b.y)[0] || null;
-  }, productCode);
+      .sort((a, b) => {
+        const aRowScore = Math.abs(a.y - 690);
+        const bRowScore = Math.abs(b.y - 690);
+        return aRowScore - bRowScore || a.y - b.y;
+      })[0] || null;
+
+    if (productInput) {
+      return productInput;
+    }
+
+    await page.waitForTimeout(750);
+  }
 
   if (!productInput) {
+    await writeFile("tmp/ecount-purchase-fill-inputs.json", JSON.stringify(inputs, null, 2), "utf8").catch(() => {});
     throw new Error(`Could not locate product row input for ${productCode}.`);
   }
 
@@ -225,7 +272,12 @@ async function main() {
     await page.waitForTimeout(7000);
 
     setStep("fill form");
-    await fillPurchaseForm(page, payload);
+    try {
+      await fillPurchaseForm(page, payload);
+    } catch (error) {
+      await page.screenshot({ path: "tmp/ecount-purchase-fill-error.png", fullPage: true }).catch(() => {});
+      throw error;
+    }
     await page.screenshot({ path: "tmp/ecount-purchase-filled.png", fullPage: true });
 
     let saveResult = null;
