@@ -131,6 +131,20 @@ function Run-WorkbookMacro {
   $Excel.Run($macro) | Out-Null
 }
 
+function Find-OrderRow {
+  param($Sheet, [string]$OrderNo)
+
+  $lastRow = $Sheet.Range("A500000").End($xlUp).Row
+
+  for ($row = 3; $row -le $lastRow; $row++) {
+    if (([string]$Sheet.Cells.Item($row, 1).Text).Trim() -eq $OrderNo) {
+      return $row
+    }
+  }
+
+  return 0
+}
+
 function Start-EnterKeyHelper {
   $command = @"
 Start-Sleep -Milliseconds 1200
@@ -234,6 +248,7 @@ try {
     Select-Object -First 1
 
   $rowIndex = [int]$target.Row
+  $orderNo = [string]$target.OrderNo
   $before = [ordered]@{
     dueDate = [string]$sheet.Cells.Item($rowIndex, 12).Text
     unitPrice = [string]$sheet.Cells.Item($rowIndex, 10).Text
@@ -252,6 +267,28 @@ try {
     Run-WorkbookMacro $excel $workbook "출고수정선택"
     Start-EnterKeyHelper
     Run-WorkbookMacro $excel $workbook "출고수정"
+
+    Start-Sleep -Milliseconds 700
+    $sheet.Range("B1").Value2 = $ProductCode
+    Run-WorkbookMacro $excel $workbook "조회_메이커"
+
+    $verifiedRow = Find-OrderRow $sheet $orderNo
+
+    if ($verifiedRow -eq 0) {
+      throw "입출고 지시서 저장 후 오더번호 $orderNo 재조회에 실패했습니다."
+    }
+
+    $verifiedDueDate = (Convert-ToDateValue $sheet.Cells.Item($verifiedRow, 12).Text)
+    $verifiedUnitPrice = [math]::Round((Convert-ToNumber $sheet.Cells.Item($verifiedRow, 10).Text), 0)
+    $verifiedAmount = [math]::Round((Convert-ToNumber $sheet.Cells.Item($verifiedRow, 11).Text), 0)
+    $expectedUnitPrice = [math]::Round($UnitPrice, 0)
+    $expectedAmount = [math]::Round($Amount, 0)
+
+    if (-not $verifiedDueDate -or $verifiedDueDate.ToString("yyyy-MM-dd") -ne $dueDateValue.ToString("yyyy-MM-dd") -or $verifiedUnitPrice -ne $expectedUnitPrice -or $verifiedAmount -ne $expectedAmount) {
+      throw ("입출고 지시서 저장 후 값 확인에 실패했습니다. 오더번호={0}, 확인값=납기일 {1}, 단가 {2}, 금액 {3}" -f $orderNo, $(if ($verifiedDueDate) { $verifiedDueDate.ToString("yyyy-MM-dd") } else { "" }), $verifiedUnitPrice, $verifiedAmount)
+    }
+
+    $rowIndex = $verifiedRow
   }
 
   $result = [ordered]@{
@@ -259,7 +296,7 @@ try {
     sheetName = "출고지시"
     row = $rowIndex
     committed = [bool]$Commit
-    orderNo = $target.OrderNo
+    orderNo = $orderNo
     productCode = $ProductCode
     productName = $target.ProductName
     quantity = $Quantity

@@ -266,7 +266,6 @@ try {
 
   $targetSheet.Cells.Item($startRow + 11, 14).Value2 = $ManagerName
   $targetSheet.Cells.Item($startRow + 13, 14).Value2 = "정산완료"
-  $targetSheet.Cells.Item($startRow + 13, 15).Value2 = "O"
 
   $excel.CalculateFull() | Out-Null
 
