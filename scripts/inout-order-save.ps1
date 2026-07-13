@@ -198,8 +198,9 @@ try {
   $oldEnableEvents = $excel.EnableEvents
   $oldCalculation = $excel.Calculation
   $excel.DisplayAlerts = $false
-  $excel.ScreenUpdating = $false
-  $excel.EnableEvents = $false
+  # This workbook's save macros depend on the active selection/event flow.
+  $excel.ScreenUpdating = $true
+  $excel.EnableEvents = $true
   $excel.Calculation = $xlCalculationAutomatic
 
   $workbook = Find-Workbook $excel $resolvedPath
@@ -316,7 +317,11 @@ try {
     before = $before
   }
 
-  $result | ConvertTo-Json -Depth 5 -Compress
+  $resultJson = $result | ConvertTo-Json -Depth 5 -Compress
+  $debugPath = Join-Path (Join-Path (Get-Location) "tmp") "inout-order-save-result.json"
+  [System.IO.Directory]::CreateDirectory((Split-Path -Parent $debugPath)) | Out-Null
+  [System.IO.File]::WriteAllText($debugPath, $resultJson, [System.Text.Encoding]::UTF8)
+  $resultJson
 } finally {
   if ($workbook -and $openedWorkbook) {
     $workbook.Close($false)
@@ -325,8 +330,8 @@ try {
 
   if ($excel -and $createdExcel) {
     if ($null -ne $oldCalculation) { $excel.Calculation = $oldCalculation }
-    if ($null -ne $oldEnableEvents) { $excel.EnableEvents = $oldEnableEvents }
-    if ($null -ne $oldScreenUpdating) { $excel.ScreenUpdating = $oldScreenUpdating }
+    $excel.EnableEvents = $true
+    $excel.ScreenUpdating = $true
     if ($null -ne $oldDisplayAlerts) { $excel.DisplayAlerts = $oldDisplayAlerts }
     $excel.Quit()
   }
@@ -334,8 +339,8 @@ try {
   if ($excel) {
     if (-not $createdExcel) {
       if ($null -ne $oldCalculation) { $excel.Calculation = $oldCalculation }
-      if ($null -ne $oldEnableEvents) { $excel.EnableEvents = $oldEnableEvents }
-      if ($null -ne $oldScreenUpdating) { $excel.ScreenUpdating = $oldScreenUpdating }
+      $excel.EnableEvents = $true
+      $excel.ScreenUpdating = $true
       if ($null -ne $oldDisplayAlerts) { $excel.DisplayAlerts = $oldDisplayAlerts }
     }
     [Runtime.InteropServices.Marshal]::ReleaseComObject($excel) | Out-Null
