@@ -205,6 +205,7 @@ function Get-SettlementItems {
         Duty = $dutyValue
         Vat = $vat
         Ratio = 0
+        RatioNumerator = 0
         RatioBasis = ""
       }
     }
@@ -221,6 +222,7 @@ function Get-SettlementItems {
       Duty = $DefaultDuty
       Vat = $DefaultVat
       Ratio = 1
+      RatioNumerator = 10000
       RatioBasis = "single"
     }
   }
@@ -231,6 +233,7 @@ function Get-SettlementItems {
 
   if ($items.Count -eq 1) {
     $items[0].Ratio = 1
+    $items[0].RatioNumerator = 10000
     $items[0].RatioBasis = "single"
     return @($items)
   }
@@ -247,19 +250,21 @@ function Get-SettlementItems {
     throw "일괄 비율 계산 기준 금액이 0입니다."
   }
 
-  $ratioSum = 0
+  $numeratorSum = 0
 
   for ($index = 0; $index -lt $items.Count; $index += 1) {
     $basisValue = if ($basisName -eq "duty") { $items[$index].Duty } else { $items[$index].Vat }
-    $ratio = if ($index -eq $items.Count - 1) {
-      1 - $ratioSum
+    $numerator = if ($index -eq $items.Count - 1) {
+      10000 - $numeratorSum
     } else {
-      [math]::Round($basisValue / $basisTotal, 10)
+      [int][math]::Round(($basisValue / $basisTotal) * 10000, 0, [MidpointRounding]::AwayFromZero)
     }
+    $ratio = $numerator / 10000
 
     $items[$index].Ratio = $ratio
+    $items[$index].RatioNumerator = $numerator
     $items[$index].RatioBasis = $basisName
-    $ratioSum += $ratio
+    $numeratorSum += $numerator
   }
 
   return @($items)
@@ -369,8 +374,13 @@ try {
 
     Set-DateCell $targetSheet "F$($startRow + 2)" $boarding
     Set-DateCell $targetSheet "O$($startRow + 5)" $instock
-    Set-NumberCell $targetSheet $startRow 13 $ratio
-    $targetSheet.Cells.Item($startRow, 13).NumberFormat = "0.0000"
+    if ($BatchItemsJson) {
+      $ratioNumerator = [int](Convert-ToNumber $item.RatioNumerator)
+      $targetSheet.Cells.Item($startRow, 13).Formula = "=$ratioNumerator/10000"
+    } else {
+      Set-NumberCell $targetSheet $startRow 13 $ratio
+    }
+    $targetSheet.Cells.Item($startRow, 13).NumberFormat = "0.00"
     Set-NumberCell $targetSheet ($startRow + 5) 6 $exchange
     $targetSheet.Cells.Item($startRow + 1, 8).Formula = "=F$($startRow + 5)*B$($startRow + 4)"
     $targetSheet.Cells.Item($startRow + 1, 11).Formula = "=H$($startRow + 1)"
@@ -421,6 +431,7 @@ try {
       boardingDate = $boarding.ToString("yyyy-MM-dd")
       instockDate = $instock.ToString("yyyy-MM-dd")
       ratio = $ratio
+      ratioNumerator = [int](Convert-ToNumber $item.RatioNumerator)
       ratioBasis = $item.RatioBasis
       inputDuty = $item.Duty
       inputVat = $item.Vat
