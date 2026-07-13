@@ -205,7 +205,8 @@ function Get-SettlementItems {
         Duty = $dutyValue
         Vat = $vat
         Ratio = 0
-        RatioNumerator = 0
+        RatioBasisValue = 0
+        RatioBasisTotal = 0
         RatioBasis = ""
       }
     }
@@ -222,7 +223,8 @@ function Get-SettlementItems {
       Duty = $DefaultDuty
       Vat = $DefaultVat
       Ratio = 1
-      RatioNumerator = 10000
+      RatioBasisValue = 1
+      RatioBasisTotal = 1
       RatioBasis = "single"
     }
   }
@@ -233,7 +235,8 @@ function Get-SettlementItems {
 
   if ($items.Count -eq 1) {
     $items[0].Ratio = 1
-    $items[0].RatioNumerator = 10000
+    $items[0].RatioBasisValue = 1
+    $items[0].RatioBasisTotal = 1
     $items[0].RatioBasis = "single"
     return @($items)
   }
@@ -250,21 +253,14 @@ function Get-SettlementItems {
     throw "일괄 비율 계산 기준 금액이 0입니다."
   }
 
-  $numeratorSum = 0
-
   for ($index = 0; $index -lt $items.Count; $index += 1) {
     $basisValue = if ($basisName -eq "duty") { $items[$index].Duty } else { $items[$index].Vat }
-    $numerator = if ($index -eq $items.Count - 1) {
-      10000 - $numeratorSum
-    } else {
-      [int][math]::Round(($basisValue / $basisTotal) * 10000, 0, [MidpointRounding]::AwayFromZero)
-    }
-    $ratio = $numerator / 10000
+    $ratio = $basisValue / $basisTotal
 
     $items[$index].Ratio = $ratio
-    $items[$index].RatioNumerator = $numerator
+    $items[$index].RatioBasisValue = $basisValue
+    $items[$index].RatioBasisTotal = $basisTotal
     $items[$index].RatioBasis = $basisName
-    $numeratorSum += $numerator
   }
 
   return @($items)
@@ -375,8 +371,9 @@ try {
     Set-DateCell $targetSheet "F$($startRow + 2)" $boarding
     Set-DateCell $targetSheet "O$($startRow + 5)" $instock
     if ($BatchItemsJson) {
-      $ratioNumerator = [int](Convert-ToNumber $item.RatioNumerator)
-      $targetSheet.Cells.Item($startRow, 13).Formula = "=$ratioNumerator/10000"
+      $basisValueText = (Convert-ToNumber $item.RatioBasisValue).ToString([System.Globalization.CultureInfo]::InvariantCulture)
+      $basisTotalText = (Convert-ToNumber $item.RatioBasisTotal).ToString([System.Globalization.CultureInfo]::InvariantCulture)
+      $targetSheet.Cells.Item($startRow, 13).Formula = "=$basisValueText/$basisTotalText"
     } else {
       Set-NumberCell $targetSheet $startRow 13 $ratio
     }
@@ -431,7 +428,8 @@ try {
       boardingDate = $boarding.ToString("yyyy-MM-dd")
       instockDate = $instock.ToString("yyyy-MM-dd")
       ratio = $ratio
-      ratioNumerator = [int](Convert-ToNumber $item.RatioNumerator)
+      ratioBasisValue = Convert-ToNumber $item.RatioBasisValue
+      ratioBasisTotal = Convert-ToNumber $item.RatioBasisTotal
       ratioBasis = $item.RatioBasis
       inputDuty = $item.Duty
       inputVat = $item.Vat
