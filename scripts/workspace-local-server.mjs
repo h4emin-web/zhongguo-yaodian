@@ -257,6 +257,16 @@ function buildEcountPurchasePayload(result, autoSave = false) {
   };
 }
 
+function buildInoutOrderPayload(result) {
+  return {
+    productCode: result.productCode,
+    quantity: result.quantity,
+    dueDate: result.instockDate,
+    unitPrice: result.unitPrice,
+    amount: result.krwAmount
+  };
+}
+
 async function runEcountPurchaseFill(payload, options = {}) {
   requireEcountEnv();
   const required = ["productCode", "quantity", "exchangeRate", "unitPrice", "foreignAmount", "krwAmount"];
@@ -281,6 +291,34 @@ async function runEcountPurchaseFill(payload, options = {}) {
   } finally {
     await rm(tempDir, { recursive: true, force: true }).catch(() => {});
   }
+}
+
+async function runInoutOrderSave(payload, options = {}) {
+  const required = ["productCode", "quantity", "dueDate", "unitPrice", "amount"];
+  const missing = required.filter((key) => payload[key] === undefined || payload[key] === null || payload[key] === "");
+
+  if (missing.length) {
+    throw new Error(`${missing.join(", ")} values are required.`);
+  }
+
+  const args = [
+    "-ProductCode", String(payload.productCode),
+    "-Quantity", String(payload.quantity),
+    "-DueDate", String(payload.dueDate),
+    "-UnitPrice", String(payload.unitPrice),
+    "-Amount", String(payload.amount)
+  ];
+
+  if (process.env.INOUT_ORDER_PATH) {
+    args.push("-WorkbookPath", process.env.INOUT_ORDER_PATH);
+  }
+
+  if (options.commit) {
+    args.push("-Commit");
+  }
+
+  const output = await runPowerShell(join(ROOT, "scripts", "inout-order-save.ps1"), args);
+  return JSON.parse(output);
 }
 
 async function saveAutoSettlement(req, res) {
@@ -338,7 +376,27 @@ async function saveAutoSettlement(req, res) {
       }
     }
 
-    json(res, { ok: true, ...result, ecount });
+    let inout = null;
+
+    if (process.env.AUTO_SETTLEMENT_INOUT_SAVE === "1") {
+      try {
+        inout = await runInoutOrderSave(buildInoutOrderPayload(result), {
+          commit: true
+        });
+      } catch (error) {
+        json(res, {
+          ok: false,
+          excelSaved: true,
+          ecountSaved: Boolean(ecount?.saved),
+          ...result,
+          ecount,
+          error: `수입정산서 원본 저장${ecount?.saved ? "과 ERP 구매 저장" : ""}은 완료됐지만 입출고 지시서 저장에 실패했습니다: ${error instanceof Error ? error.message : String(error)}`
+        }, 500);
+        return;
+      }
+    }
+
+    json(res, { ok: true, ...result, ecount, inout });
   } catch (error) {
     json(res, {
       ok: false,

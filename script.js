@@ -1422,8 +1422,11 @@ async function saveAutoSettlementToWorkbook() {
     const ecountMessage = data.ecount
       ? ` / ERP 구매 ${data.ecount.saved ? "저장 완료" : "입력 완료"}: ${escapeHtml(data.ecount.visiblePurchaseNo || data.ecount.purchaseNo || "")}`
       : "";
+    const inoutMessage = data.inout
+      ? ` / 입출고 지시서 반영 완료: ${escapeHtml(data.inout.orderNo || "")}`
+      : "";
     autoSettlementResult.insertAdjacentHTML("afterbegin", `
-      <p class="status-ok">원본 저장 완료: ${escapeHtml(data.targetFile)} / ${escapeHtml(data.sheetName)} ${escapeHtml(String(data.startRow))}행${ecountMessage}</p>
+      <p class="status-ok">원본 저장 완료: ${escapeHtml(data.targetFile)} / ${escapeHtml(data.sheetName)} ${escapeHtml(String(data.startRow))}행${ecountMessage}${inoutMessage}</p>
     `);
   } catch (error) {
     console.error(error);
