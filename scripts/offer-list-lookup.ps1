@@ -57,6 +57,12 @@ function Convert-ToDateText {
   return $text
 }
 
+function Normalize-PoNo {
+  param($Value)
+
+  return ([string]$Value).Normalize([Text.NormalizationForm]::FormKC).Replace("‐", "-").Replace("‑", "-").Replace("‒", "-").Replace("–", "-").Replace("—", "-").Replace("−", "-").Replace(" ", "").Replace("`t", "").Trim().ToUpperInvariant()
+}
+
 function Get-DesktopPath {
   return [Environment]::GetFolderPath("Desktop")
 }
@@ -117,6 +123,7 @@ function Run-WorkbookMacro {
 }
 
 $resolvedPath = Resolve-OfferWorkbookPath $WorkbookPath
+$normalizedPoNo = Normalize-PoNo $PoNo
 $excel = Get-RunningExcel
 $createdExcel = $false
 $openedWorkbook = $false
@@ -143,7 +150,7 @@ try {
 
   $sheet = $workbook.Worksheets.Item("PO메인")
   $sheet.Activate() | Out-Null
-  $sheet.Range("B1").Value2 = $PoNo
+  $sheet.Range("B1").Value2 = $normalizedPoNo
 
   Run-WorkbookMacro $excel $workbook "PO복사"
 
@@ -151,7 +158,13 @@ try {
   $targetRow = 0
 
   for ($row = 3; $row -le $lastRow; $row++) {
-    if (([string]$sheet.Cells.Item($row, 1).Text).Trim().ToUpperInvariant() -eq $PoNo.Trim().ToUpperInvariant()) {
+    $candidates = @(
+      $sheet.Cells.Item($row, 1).Text,
+      $sheet.Cells.Item($row, 2).Text,
+      $sheet.Cells.Item($row, 3).Text
+    )
+
+    if (@($candidates | Where-Object { (Normalize-PoNo $_) -eq $normalizedPoNo }).Count -gt 0) {
       $targetRow = $row
       break
     }

@@ -180,8 +180,18 @@ function formatOfferDate(value, label) {
   throw new Error(`${label} 날짜를 해석하지 못했습니다: ${text || "(빈 값)"}`);
 }
 
+function normalizePoNo(value) {
+  return String(value || "")
+    .normalize("NFKC")
+    .replace(/[\u2010-\u2015\u2212]/g, "-")
+    .replace(/\s+/g, "")
+    .trim()
+    .toUpperCase();
+}
+
 function lookupOfferDates(poNo) {
   let powerShellLookupError = "";
+  const normalizedPoNo = normalizePoNo(poNo);
 
   try {
     const args = [
@@ -191,7 +201,7 @@ function lookupOfferDates(poNo) {
       "-File",
       join(ROOT, "scripts", "offer-list-lookup.ps1"),
       "-PoNo",
-      poNo
+      normalizedPoNo
     ];
 
     if (process.env.OFFER_LIST_PATH) {
@@ -239,7 +249,7 @@ function lookupOfferDates(poNo) {
     const row = rows[index];
     const candidate = [row[0], row[1], row[2]]
       .map((value) => String(value || "").trim().toUpperCase())
-      .find((value) => value === poNo.trim().toUpperCase());
+      .find((value) => normalizePoNo(value) === normalizedPoNo);
 
     if (candidate) {
       return {
