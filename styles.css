@@ -854,7 +854,8 @@ body.detail-open {
   min-height: 52px;
 }
 
-.auto-exchange-fetch:disabled {
+.auto-exchange-fetch:disabled,
+.auto-settlement-save:disabled {
   background: #9fb3cb;
   cursor: not-allowed;
 }
@@ -938,6 +939,27 @@ body.detail-open {
   color: var(--text);
   font-weight: 700;
   overflow-wrap: anywhere;
+}
+
+.auto-settlement-result .status-ok,
+.auto-settlement-result .status-error {
+  margin: 0 0 12px;
+  padding: 13px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.auto-settlement-result .status-ok {
+  color: #1f7a4d;
+  background: #e8f7ef;
+  border: 1px solid #bfe6d2;
+}
+
+.auto-settlement-result .status-error {
+  color: #b3261e;
+  background: #fbeaea;
+  border: 1px solid #f0c6c4;
 }
 
 .cnph-head-actions {

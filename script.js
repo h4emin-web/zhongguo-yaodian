@@ -64,6 +64,7 @@ const autoSettlementBoarding = document.querySelector("#auto-settlement-boarding
 const autoSettlementInstock = document.querySelector("#auto-settlement-instock");
 const autoSettlementFileInput = document.querySelector(".auto-settlement-file");
 const autoSettlementUpload = document.querySelector(".auto-settlement-upload");
+const autoSettlementSave = document.querySelector(".auto-settlement-save");
 const autoSettlementDropzone = document.querySelector(".auto-settlement-dropzone");
 const autoSettlementExport = document.querySelector(".auto-settlement-export");
 const autoExchangeFetch = document.querySelector(".auto-exchange-fetch");
@@ -120,6 +121,7 @@ let autoSettlementState = {
   quantity: "",
   exchangeRate: ""
 };
+let autoSettlementSelectedFile = null;
 
 const AUTO_SETTLEMENT_TARGET_FILES = [
   "1.수입정산서C3-1(26년)-전서진,나지훈,보비.xlsm",
@@ -1322,6 +1324,7 @@ function updateAutoSettlementCalculations() {
 }
 
 async function readAutoSettlementFile(file) {
+  autoSettlementSelectedFile = file;
   autoSettlementState.settlementFile = file.name;
   autoSettlementState.poNo = extractPoNo(file.name);
   const quantityFromName = extractKgQuantity(file.name);
@@ -1345,6 +1348,74 @@ function handleAutoSettlementFile(file) {
   }
 
   readAutoSettlementFile(file);
+}
+
+async function saveAutoSettlementToWorkbook() {
+  updateAutoSettlementCalculations();
+
+  const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+
+  if (!isLocal) {
+    renderAutoSettlementResult("공유폴더 엑셀 저장은 로컬 서버(http://localhost:4173)에서만 가능합니다.");
+    return;
+  }
+
+  if (!autoSettlementSelectedFile) {
+    renderAutoSettlementResult("정산서 엑셀 파일을 먼저 올려주세요.");
+    return;
+  }
+
+  const payload = {
+    managerName: autoSettlementManager.value.trim(),
+    poNo: autoSettlementState.poNo,
+    boardingDate: autoSettlementState.boardingDate,
+    instockDate: autoSettlementState.instockDate,
+    exchangeRate: autoSettlementState.exchangeRate,
+    quantity: autoSettlementState.quantity
+  };
+  const missing = [
+    ["담당자 이름", payload.managerName],
+    ["PO 번호", payload.poNo],
+    ["선적일자", payload.boardingDate],
+    ["입고일자", payload.instockDate],
+    ["ERP 환율", payload.exchangeRate]
+  ].filter(([, value]) => !value);
+
+  if (missing.length) {
+    renderAutoSettlementResult(`${missing.map(([label]) => label).join(", ")} 입력이 필요합니다.`);
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("settlementFile", autoSettlementSelectedFile, autoSettlementSelectedFile.name);
+  Object.entries(payload).forEach(([key, value]) => formData.append(key, value));
+
+  autoSettlementSave.disabled = true;
+  autoSettlementResult.innerHTML = '<p class="empty-result">수입정산서 파일을 열어 저장 중입니다.</p>';
+
+  try {
+    const response = await fetch("/api/auto-settlement/save", {
+      method: "POST",
+      body: formData
+    });
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.error || "수입정산서 저장에 실패했습니다.");
+    }
+
+    autoSettlementState.targetFile = data.targetFile || autoSettlementState.targetFile;
+    autoSettlementState.targetMonth = data.sheetName || autoSettlementState.targetMonth;
+    renderAutoSettlementResult();
+    autoSettlementResult.insertAdjacentHTML("afterbegin", `
+      <p class="status-ok">저장 완료: ${escapeHtml(data.targetFile)} / ${escapeHtml(data.sheetName)} ${escapeHtml(String(data.startRow))}행</p>
+    `);
+  } catch (error) {
+    console.error(error);
+    renderAutoSettlementResult(error instanceof Error ? error.message : String(error));
+  } finally {
+    autoSettlementSave.disabled = false;
+  }
 }
 
 function renderAutoSettlementResult(message = "") {
@@ -2441,6 +2512,7 @@ autoSettlementBoarding.addEventListener("input", updateAutoSettlementCalculation
 autoSettlementInstock.addEventListener("input", updateAutoSettlementCalculations);
 autoSettlementUpload.addEventListener("click", () => autoSettlementFileInput.click());
 autoExchangeFetch.addEventListener("click", fetchAutoSettlementExchangeRate);
+autoSettlementSave.addEventListener("click", saveAutoSettlementToWorkbook);
 autoSettlementDropzone.addEventListener("click", () => autoSettlementFileInput.click());
 autoSettlementDropzone.addEventListener("keydown", (event) => {
   if (event.key === "Enter" || event.key === " ") {
