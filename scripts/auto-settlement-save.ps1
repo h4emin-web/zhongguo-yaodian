@@ -373,7 +373,7 @@ try {
       throw "PO '$($item.PoNo)' 의 비율이 0입니다."
     }
 
-    $dutyBase = if ($item.Duty -gt 0) { $item.Duty / $ratio } else { 0 }
+    $dutyBase = if ($item.Duty -gt 0) { $item.Duty } else { 0 }
     $vatBase = if ($item.Vat -gt 0) { $item.Vat / $ratio } else { 0 }
 
     Set-DateCell $targetSheet "F$($startRow + 2)" $boarding
