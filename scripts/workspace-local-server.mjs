@@ -141,12 +141,14 @@ async function saveAutoSettlement(req, res) {
     const file = files.settlementFile;
 
     if (!file) {
-      throw new Error("정산서 파일이 필요합니다.");
+      throw new Error("Settlement file is required.");
     }
 
     tempDir = await mkdtemp(join(tmpdir(), "haemin-settlement-"));
-    const safeName = file.filename.replace(/[<>:"/\\|?*\x00-\x1F]/g, "_");
-    const settlementPath = join(tempDir, safeName);
+    const extension = [".xlsx", ".xlsm", ".xls"].includes(extname(file.filename).toLowerCase())
+      ? extname(file.filename).toLowerCase()
+      : ".xlsx";
+    const settlementPath = join(tempDir, `settlement-upload${extension}`);
     await writeFile(settlementPath, file.buffer);
 
     const output = await runPowerShell(join(ROOT, "scripts", "auto-settlement-save.ps1"), [
