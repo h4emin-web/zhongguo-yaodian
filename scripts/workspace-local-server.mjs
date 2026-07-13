@@ -279,7 +279,7 @@ function buildEcountPurchasePayload(result, autoSave = false) {
     productCode: result.productCode,
     quantity: result.quantity,
     exchangeRate: result.exchangeRate,
-    unitPrice: result.purchaseUnitPrice || result.unitPrice,
+    unitPrice: result.unitPrice,
     foreignAmount: result.foreignAmount,
     krwAmount: result.krwAmount,
     autoSave

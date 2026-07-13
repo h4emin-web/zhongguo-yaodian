@@ -1455,10 +1455,10 @@ function renderAutoSettlementResult(message = "") {
     ["ERP 환율", autoSettlementState.exchangeRate || "수동 입력 필요"],
     ["수량", autoSettlementState.quantity || "정산서 파일명 또는 수동 입력"],
     ["품목코드", autoSettlementState.productCode || "업로드 후 확인"],
-    ["ERP 단가", autoSettlementState.purchaseUnitPrice || "업로드 후 확인"],
+    ["ERP 단가", autoSettlementState.unitPrice || "업로드 후 확인"],
+    ["외화 단가", autoSettlementState.purchaseUnitPrice || "업로드 후 확인"],
     ["외화금액", autoSettlementState.foreignAmount || "업로드 후 확인"],
-    ["원화금액", autoSettlementState.krwAmount || "업로드 후 확인"],
-    ["엑셀 단가", autoSettlementState.unitPrice || "업로드 후 확인"]
+    ["원화금액", autoSettlementState.krwAmount || "업로드 후 확인"]
   ];
 
   autoSettlementResult.innerHTML = `
@@ -1481,7 +1481,7 @@ async function fillEcountPurchaseFromSettlement() {
     productCode: autoSettlementState.productCode,
     quantity: autoSettlementState.quantity,
     exchangeRate: autoSettlementState.exchangeRate,
-    unitPrice: autoSettlementState.purchaseUnitPrice || autoSettlementState.unitPrice,
+    unitPrice: autoSettlementState.unitPrice,
     foreignAmount: autoSettlementState.foreignAmount,
     krwAmount: autoSettlementState.krwAmount
   };

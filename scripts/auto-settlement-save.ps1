@@ -137,6 +137,14 @@ function Set-NumberCell($sheet, [int]$row, [int]$column, $value) {
   $sheet.Cells.Item($row, $column).Formula = $number.ToString([System.Globalization.CultureInfo]::InvariantCulture)
 }
 
+function Set-NumberCellIfPositive($sheet, [int]$row, [int]$column, $value) {
+  $number = Convert-ToNumber $value
+
+  if ($number -gt 0) {
+    $sheet.Cells.Item($row, $column).Formula = $number.ToString([System.Globalization.CultureInfo]::InvariantCulture)
+  }
+}
+
 function Convert-ToDateValue([string]$value, [string]$label) {
   $text = ([string]$value).Trim()
 
@@ -245,7 +253,7 @@ try {
   $targetSheet.Cells.Item($startRow + 1, 8).Formula = "=F$($startRow + 5)*B$($startRow + 4)"
   $targetSheet.Cells.Item($startRow + 1, 11).Formula = "=H$($startRow + 1)"
 
-  Set-NumberCell $targetSheet ($startRow + 2) 12 $duty
+  Set-NumberCellIfPositive $targetSheet ($startRow + 2) 12 $duty
   Set-NumberCell $targetSheet ($startRow + 2) 13 $importVat
   Set-NumberCell $targetSheet ($startRow + 3) 12 $port.Amount
   Set-NumberCell $targetSheet ($startRow + 3) 13 $port.Vat
