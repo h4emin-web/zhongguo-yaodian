@@ -245,8 +245,9 @@ try {
 
   $excel.CalculateFull() | Out-Null
 
-  $unitPriceFormula = '=H{0}/VALUE(SUBSTITUTE(SUBSTITUTE(LOWER(TRIM(B{1})),"kg",""),",",""))' -f ($startRow + 13), ($startRow + 2)
+  $unitPriceFormula = '=ROUND(H{0}/VALUE(SUBSTITUTE(SUBSTITUTE(LOWER(TRIM(B{1})),"kg",""),",","")),0)' -f ($startRow + 13), ($startRow + 2)
   $targetSheet.Cells.Item($startRow + 4, 6).Formula = $unitPriceFormula
+  $targetSheet.Cells.Item($startRow + 4, 6).NumberFormat = "#,##0"
 
   $targetWorkbook.Save()
 
