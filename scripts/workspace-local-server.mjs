@@ -279,9 +279,9 @@ function buildEcountPurchasePayload(result, autoSave = false) {
     productCode: result.productCode,
     quantity: result.quantity,
     exchangeRate: result.exchangeRate,
-    unitPrice: result.unitPrice,
-    foreignAmount: result.foreignAmount,
-    krwAmount: result.krwAmount,
+    unitPrice: result.erpUnitPrice ?? result.unitPrice,
+    foreignAmount: result.erpForeignAmount ?? result.foreignAmount,
+    krwAmount: result.erpKrwAmount ?? result.krwAmount,
     autoSave
   };
 }

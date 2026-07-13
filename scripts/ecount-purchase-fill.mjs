@@ -138,8 +138,8 @@ async function fillPurchaseForm(page, payload) {
   const productInput = await getVisibleProductInput(page, payload.productCode);
   const rowY = productInput.y + productInput.height / 2;
 
-  await fillTextAt(page, productInput.x + 685, rowY, normalizeAmount(payload.foreignAmount));
   await fillTextAt(page, productInput.x + 615, rowY, normalizeAmount(payload.unitPrice));
+  await fillTextAt(page, productInput.x + 685, rowY, normalizeAmount(payload.foreignAmount));
   await fillTextAt(page, productInput.x + 755, rowY, normalizeAmount(payload.krwAmount));
 }
 
@@ -247,6 +247,9 @@ async function main() {
       unitPrice: normalizeAmount(payload.unitPrice),
       foreignAmount: normalizeAmount(payload.foreignAmount),
       krwAmount: normalizeAmount(payload.krwAmount),
+      erpUnitPrice: normalizeAmount(payload.unitPrice),
+      erpForeignAmount: normalizeAmount(payload.foreignAmount),
+      erpKrwAmount: normalizeAmount(payload.krwAmount),
       dialogMessage: saveResult?.dialogMessage || "",
       note: autoSave
         ? "Values were entered and the purchase save button was clicked."

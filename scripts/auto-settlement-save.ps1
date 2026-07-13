@@ -446,6 +446,9 @@ try {
       purchaseUnitPrice = $purchaseUnitPrice
       foreignAmount = $totalForeign
       krwAmount = $krwAmount
+      erpUnitPrice = $unitPrice
+      erpForeignAmount = $totalForeign
+      erpKrwAmount = $krwAmount
       remittanceAmount = [math]::Round($exchange * $totalForeign, 2)
     }
   }
