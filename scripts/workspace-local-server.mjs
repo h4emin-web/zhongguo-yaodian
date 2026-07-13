@@ -441,33 +441,10 @@ async function saveAutoSettlement(req, res) {
     result.offerListPath = offerDates?.offerListPath || "";
     result.offerListRow = offerDates?.offerListRow || null;
     let ecount = null;
-    const resultItems = Array.isArray(result.items) ? result.items : [result];
-
-    if (process.env.AUTO_SETTLEMENT_ECOUNT_SAVE === "1") {
-      try {
-        ecount = [];
-
-        for (const item of resultItems) {
-          ecount.push(await runEcountPurchaseFill(buildEcountPurchasePayload(item, true), {
-            keepOpenMs: process.env.ECOUNT_PURCHASE_KEEP_OPEN_MS || "0"
-          }));
-        }
-
-        if (ecount.length === 1 && !Array.isArray(result.items)) {
-          ecount = ecount[0];
-        }
-      } catch (error) {
-        json(res, {
-          ok: false,
-          excelSaved: true,
-          ...result,
-          error: `수입정산서 원본은 저장됐지만 ERP 구매 저장에 실패했습니다: ${error instanceof Error ? error.message : String(error)}`
-        }, 500);
-        return;
-      }
-    }
-
+    let ecountError = "";
     let inout = null;
+    let inoutError = "";
+    const resultItems = Array.isArray(result.items) ? result.items : [result];
 
     if (process.env.AUTO_SETTLEMENT_INOUT_SAVE === "1") {
       try {
@@ -483,19 +460,48 @@ async function saveAutoSettlement(req, res) {
           inout = inout[0];
         }
       } catch (error) {
-        json(res, {
-          ok: false,
-          excelSaved: true,
-          ecountSaved: Boolean(ecount?.saved),
-          ...result,
-          ecount,
-          error: `수입정산서 원본 저장${ecount?.saved ? "과 ERP 구매 저장" : ""}은 완료됐지만 입출고 지시서 저장에 실패했습니다: ${error instanceof Error ? error.message : String(error)}`
-        }, 500);
-        return;
+        inoutError = error instanceof Error ? error.message : String(error);
       }
     }
 
-    json(res, { ok: true, ...result, ecount, inout });
+    if (process.env.AUTO_SETTLEMENT_ECOUNT_SAVE === "1") {
+      try {
+        ecount = [];
+
+        for (const item of resultItems) {
+          ecount.push(await runEcountPurchaseFill(buildEcountPurchasePayload(item, true), {
+            keepOpenMs: process.env.ECOUNT_PURCHASE_KEEP_OPEN_MS || "0"
+          }));
+        }
+
+        if (ecount.length === 1 && !Array.isArray(result.items)) {
+          ecount = ecount[0];
+        }
+      } catch (error) {
+        ecountError = error instanceof Error ? error.message : String(error);
+      }
+    }
+
+    if (inoutError) {
+      json(res, {
+        ok: false,
+        excelSaved: true,
+        ecountSaved: Boolean(ecount?.saved),
+        ...result,
+        ecount,
+        ecountError,
+        error: `수입정산서 원본 저장${ecount?.saved ? "과 ERP 구매 저장" : ""}은 완료됐지만 입출고 지시서 저장에 실패했습니다: ${inoutError}`
+      }, 500);
+      return;
+    }
+
+    json(res, {
+      ok: true,
+      ...result,
+      ecount,
+      inout,
+      warning: ecountError ? `ERP 구매 저장에 실패했습니다: ${ecountError}` : ""
+    });
   } catch (error) {
     json(res, {
       ok: false,

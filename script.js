@@ -1539,6 +1539,7 @@ async function saveAutoSettlementToWorkbook() {
       : `${escapeHtml(data.targetFile)} / ${escapeHtml(data.sheetName)} ${escapeHtml(String(data.startRow))}행`;
     autoSettlementResult.insertAdjacentHTML("afterbegin", `
       <p class="status-ok">원본 저장 완료: ${savedLabel}${ecountMessage}${inoutMessage}</p>
+      ${data.warning ? `<p class="status-error">${escapeHtml(data.warning)}</p>` : ""}
     `);
   } catch (error) {
     console.error(error);
