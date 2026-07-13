@@ -1353,11 +1353,9 @@ async function saveAutoSettlementToWorkbook() {
   updateAutoSettlementCalculations();
 
   const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
-
-  if (!isLocal) {
-    renderAutoSettlementResult("공유폴더 엑셀 저장은 로컬 서버(http://localhost:4173)에서만 가능합니다.");
-    return;
-  }
+  const automationUrl = isLocal
+    ? "/api/auto-settlement/save"
+    : "http://127.0.0.1:4173/api/auto-settlement/save";
 
   if (!autoSettlementSelectedFile) {
     renderAutoSettlementResult("정산서 엑셀 파일을 먼저 올려주세요.");
@@ -1393,7 +1391,7 @@ async function saveAutoSettlementToWorkbook() {
   autoSettlementResult.innerHTML = '<p class="empty-result">수입정산서 파일을 열어 저장 중입니다.</p>';
 
   try {
-    const response = await fetch("/api/auto-settlement/save", {
+    const response = await fetch(automationUrl, {
       method: "POST",
       body: formData
     });
@@ -1411,7 +1409,12 @@ async function saveAutoSettlementToWorkbook() {
     `);
   } catch (error) {
     console.error(error);
-    renderAutoSettlementResult(error instanceof Error ? error.message : String(error));
+    const message = error instanceof TypeError && !isLocal
+      ? "로컬 자동정산 실행기가 켜져 있어야 합니다. 실행 후 haemin.space에서 다시 업로드하세요."
+      : error instanceof Error
+        ? error.message
+        : String(error);
+    renderAutoSettlementResult(message);
   } finally {
     autoSettlementSave.disabled = false;
   }

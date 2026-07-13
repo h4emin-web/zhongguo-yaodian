@@ -8,6 +8,12 @@ import { lookupExchangeRate } from "./ecount-exchange-rate.mjs";
 const PORT = Number(process.env.PORT || "4173");
 const ROOT = process.cwd();
 const POWERSHELL = process.env.POWERSHELL || "powershell.exe";
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+  "Access-Control-Allow-Private-Network": "true"
+};
 
 const TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -21,7 +27,7 @@ const TYPES = {
 };
 
 function json(res, body, status = 200) {
-  res.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
+  res.writeHead(status, { ...CORS_HEADERS, "Content-Type": "application/json; charset=utf-8" });
   res.end(JSON.stringify(body));
 }
 
@@ -196,6 +202,12 @@ async function serveFile(req, res) {
 }
 
 const server = createServer(async (req, res) => {
+  if (req.method === "OPTIONS") {
+    res.writeHead(204, CORS_HEADERS);
+    res.end();
+    return;
+  }
+
   if (req.method === "POST" && req.url === "/api/ecount-rate") {
     try {
       const { poNo } = await readBody(req);
