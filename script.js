@@ -59,7 +59,6 @@ const autoSettlementItem = document.querySelector('.tools-item[data-tool="auto-s
 const autoSettlementPanel = document.querySelector(".auto-settlement-panel");
 const autoSettlementManager = document.querySelector("#auto-settlement-manager");
 const autoSettlementExchange = document.querySelector("#auto-settlement-exchange");
-const autoSettlementAmount = document.querySelector("#auto-settlement-amount");
 const autoSettlementQuantity = document.querySelector("#auto-settlement-quantity");
 const autoSettlementBoarding = document.querySelector("#auto-settlement-boarding");
 const autoSettlementInstock = document.querySelector("#auto-settlement-instock");
@@ -116,9 +115,7 @@ let autoSettlementState = {
   instockDate: "",
   targetMonth: "",
   quantity: "",
-  exchangeRate: "",
-  amount: "",
-  unitPrice: ""
+  exchangeRate: ""
 };
 
 const AUTO_SETTLEMENT_TARGET_FILES = [
@@ -1310,17 +1307,13 @@ function findAutoSettlementTargetFile(managerName) {
 
 function updateAutoSettlementCalculations() {
   const managerName = autoSettlementManager.value.trim();
-  const amount = Number(autoSettlementAmount.value);
-  const quantity = Number(autoSettlementQuantity.value || autoSettlementState.quantity);
 
   autoSettlementState.targetFile = findAutoSettlementTargetFile(managerName);
   autoSettlementState.exchangeRate = autoSettlementExchange.value.trim();
-  autoSettlementState.amount = autoSettlementAmount.value.trim();
   autoSettlementState.quantity = autoSettlementQuantity.value.trim() || autoSettlementState.quantity;
   autoSettlementState.boardingDate = autoSettlementBoarding.value;
   autoSettlementState.instockDate = autoSettlementInstock.value;
   autoSettlementState.targetMonth = getMonthLabelFromDate(autoSettlementInstock.value);
-  autoSettlementState.unitPrice = amount > 0 && quantity > 0 ? (amount / quantity).toFixed(4) : "";
 
   renderAutoSettlementResult();
 }
@@ -1351,9 +1344,7 @@ function renderAutoSettlementResult(message = "") {
     ["입고일자", autoSettlementState.instockDate || "직접 입력 필요"],
     ["작성 시트", autoSettlementState.targetMonth || "입고일자 월 기준"],
     ["ERP 환율", autoSettlementState.exchangeRate || "수동 입력 필요"],
-    ["물품대 금액", autoSettlementState.amount || "수동 입력 필요"],
-    ["수량", autoSettlementState.quantity || "정산서 파일명 또는 수동 입력"],
-    ["단가", autoSettlementState.unitPrice || "물품대 금액 / 수량"]
+    ["수량", autoSettlementState.quantity || "정산서 파일명 또는 수동 입력"]
   ];
 
   autoSettlementResult.innerHTML = `
@@ -1394,9 +1385,7 @@ async function exportAutoSettlementSummary() {
     ["입고일자", autoSettlementState.instockDate],
     ["작성 시트", autoSettlementState.targetMonth],
     ["ERP 환율", autoSettlementState.exchangeRate],
-    ["물품대 금액", autoSettlementState.amount],
-    ["수량", autoSettlementState.quantity],
-    ["단가", autoSettlementState.unitPrice]
+    ["수량", autoSettlementState.quantity]
   ].forEach(([label, value]) => worksheet.addRow({ label, value }));
 
   worksheet.eachRow((row, rowNumber) => {
@@ -2368,7 +2357,6 @@ poReceiveInput.addEventListener("keydown", (event) => {
 });
 autoSettlementManager.addEventListener("input", updateAutoSettlementCalculations);
 autoSettlementExchange.addEventListener("input", updateAutoSettlementCalculations);
-autoSettlementAmount.addEventListener("input", updateAutoSettlementCalculations);
 autoSettlementQuantity.addEventListener("input", updateAutoSettlementCalculations);
 autoSettlementBoarding.addEventListener("input", updateAutoSettlementCalculations);
 autoSettlementInstock.addEventListener("input", updateAutoSettlementCalculations);
