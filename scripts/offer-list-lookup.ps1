@@ -127,9 +127,11 @@ if (-not $excel) {
 }
 
 $workbook = $null
+$oldDisplayAlerts = $null
 
 try {
   $excel.Visible = $true
+  $oldDisplayAlerts = $excel.DisplayAlerts
   $excel.DisplayAlerts = $false
 
   $workbook = Find-Workbook $excel $resolvedPath
@@ -185,9 +187,21 @@ try {
 } finally {
   if ($workbook -and $openedWorkbook) {
     $workbook.Close($false)
+    [Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) | Out-Null
   }
 
   if ($excel -and $createdExcel) {
+    if ($null -ne $oldDisplayAlerts) { $excel.DisplayAlerts = $oldDisplayAlerts }
     $excel.Quit()
   }
+
+  if ($excel) {
+    if (-not $createdExcel) {
+      if ($null -ne $oldDisplayAlerts) { $excel.DisplayAlerts = $oldDisplayAlerts }
+    }
+    [Runtime.InteropServices.Marshal]::ReleaseComObject($excel) | Out-Null
+  }
+
+  [System.GC]::Collect()
+  [System.GC]::WaitForPendingFinalizers()
 }

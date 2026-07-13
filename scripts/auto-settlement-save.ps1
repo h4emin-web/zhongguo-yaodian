@@ -304,11 +304,19 @@ if ($BatchItemsPath) {
 $excel = $null
 $sourceWorkbook = $null
 $targetWorkbook = $null
+$oldDisplayAlerts = $null
+$oldScreenUpdating = $null
+$oldEnableEvents = $null
 
 try {
   $excel = New-Object -ComObject Excel.Application
   $excel.Visible = $false
+  $oldDisplayAlerts = $excel.DisplayAlerts
+  $oldScreenUpdating = $excel.ScreenUpdating
+  $oldEnableEvents = $excel.EnableEvents
   $excel.DisplayAlerts = $false
+  $excel.ScreenUpdating = $false
+  $excel.EnableEvents = $false
   $excel.AutomationSecurity = 1
 
   $sourceWorkbook = $excel.Workbooks.Open($SettlementPath, $false, $true)
@@ -404,12 +412,10 @@ try {
     $targetSheet.Cells.Item($startRow + 11, 14).Value2 = $ManagerName
     $targetSheet.Cells.Item($startRow + 13, 14).Value2 = "정산완료"
 
-    $excel.CalculateFull() | Out-Null
-
     $unitPriceFormula = '=ROUND(H{0}/VALUE(SUBSTITUTE(SUBSTITUTE(LOWER(TRIM(B{1})),"kg",""),",","")),0)' -f ($startRow + 13), ($startRow + 2)
     $targetSheet.Cells.Item($startRow + 4, 6).Formula = $unitPriceFormula
     $targetSheet.Cells.Item($startRow + 4, 6).NumberFormat = "#,##0"
-    $excel.CalculateFull() | Out-Null
+    $targetSheet.Range("F$($startRow + 4):K$($startRow + 14)").Calculate() | Out-Null
 
     $unitPrice = [math]::Round((Convert-ToNumber ($targetSheet.Cells.Item($startRow + 4, 6).Value2)), 0)
     $purchaseUnitPrice = if ($quantityValue -gt 0) {
@@ -460,12 +466,19 @@ try {
 } finally {
   if ($sourceWorkbook) {
     $sourceWorkbook.Close($false)
+    [System.Runtime.InteropServices.Marshal]::ReleaseComObject($sourceWorkbook) | Out-Null
   }
   if ($targetWorkbook) {
     $targetWorkbook.Close($true)
+    [System.Runtime.InteropServices.Marshal]::ReleaseComObject($targetWorkbook) | Out-Null
   }
   if ($excel) {
+    if ($null -ne $oldEnableEvents) { $excel.EnableEvents = $oldEnableEvents }
+    if ($null -ne $oldScreenUpdating) { $excel.ScreenUpdating = $oldScreenUpdating }
+    if ($null -ne $oldDisplayAlerts) { $excel.DisplayAlerts = $oldDisplayAlerts }
     $excel.Quit()
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($excel) | Out-Null
   }
+  [System.GC]::Collect()
+  [System.GC]::WaitForPendingFinalizers()
 }

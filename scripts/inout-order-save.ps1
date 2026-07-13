@@ -186,10 +186,20 @@ if (-not $excel) {
 }
 
 $workbook = $null
+$oldDisplayAlerts = $null
+$oldScreenUpdating = $null
+$oldEnableEvents = $null
+$oldCalculation = $null
 
 try {
   $excel.Visible = $true
+  $oldDisplayAlerts = $excel.DisplayAlerts
+  $oldScreenUpdating = $excel.ScreenUpdating
+  $oldEnableEvents = $excel.EnableEvents
+  $oldCalculation = $excel.Calculation
   $excel.DisplayAlerts = $false
+  $excel.ScreenUpdating = $false
+  $excel.EnableEvents = $false
   $excel.Calculation = $xlCalculationAutomatic
 
   $workbook = Find-Workbook $excel $resolvedPath
@@ -310,9 +320,27 @@ try {
 } finally {
   if ($workbook -and $openedWorkbook) {
     $workbook.Close($false)
+    [Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) | Out-Null
   }
 
   if ($excel -and $createdExcel) {
+    if ($null -ne $oldCalculation) { $excel.Calculation = $oldCalculation }
+    if ($null -ne $oldEnableEvents) { $excel.EnableEvents = $oldEnableEvents }
+    if ($null -ne $oldScreenUpdating) { $excel.ScreenUpdating = $oldScreenUpdating }
+    if ($null -ne $oldDisplayAlerts) { $excel.DisplayAlerts = $oldDisplayAlerts }
     $excel.Quit()
   }
+
+  if ($excel) {
+    if (-not $createdExcel) {
+      if ($null -ne $oldCalculation) { $excel.Calculation = $oldCalculation }
+      if ($null -ne $oldEnableEvents) { $excel.EnableEvents = $oldEnableEvents }
+      if ($null -ne $oldScreenUpdating) { $excel.ScreenUpdating = $oldScreenUpdating }
+      if ($null -ne $oldDisplayAlerts) { $excel.DisplayAlerts = $oldDisplayAlerts }
+    }
+    [Runtime.InteropServices.Marshal]::ReleaseComObject($excel) | Out-Null
+  }
+
+  [System.GC]::Collect()
+  [System.GC]::WaitForPendingFinalizers()
 }
