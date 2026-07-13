@@ -245,13 +245,8 @@ try {
 
   $excel.CalculateFull() | Out-Null
 
-  if ($quantityValue -gt 0) {
-    $calculatedTotal = Convert-ToNumber ($targetSheet.Cells.Item($startRow + 11, 8).Value2)
-    if ($calculatedTotal -le 0) {
-      $calculatedTotal = ($exchange * $totalForeign)
-    }
-    Set-NumberCell $targetSheet ($startRow + 4) 6 ($calculatedTotal / $quantityValue)
-  }
+  $unitPriceFormula = '=H{0}/VALUE(SUBSTITUTE(SUBSTITUTE(LOWER(TRIM(B{1})),"kg",""),",",""))' -f ($startRow + 13), ($startRow + 2)
+  $targetSheet.Cells.Item($startRow + 4, 6).Formula = $unitPriceFormula
 
   $targetWorkbook.Save()
 
