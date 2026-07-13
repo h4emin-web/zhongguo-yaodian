@@ -1443,18 +1443,35 @@ async function fetchAutoSettlementExchangeRate() {
     return;
   }
 
-  if (!supabaseClient) {
-    autoExchangeResult.innerHTML = '<p class="status-error">Supabase 연결 설정이 없어 ERP 조회를 할 수 없습니다.</p>';
-    return;
-  }
-
   autoExchangeFetch.disabled = true;
   autoExchangeResult.innerHTML = '<p class="empty-result">ERP에서 환율을 조회하는 중입니다.</p>';
 
   try {
-    const { data, error } = await supabaseClient.functions.invoke("ecount-exchange-rate", {
-      body: { poNo }
-    });
+    let data;
+    let error;
+
+    if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+      const response = await fetch("/api/ecount-rate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ poNo })
+      });
+
+      data = await response.json();
+      error = response.ok ? null : data;
+    } else {
+      if (!supabaseClient) {
+        autoExchangeResult.innerHTML = '<p class="status-error">Supabase 연결 설정이 없어 ERP 조회를 할 수 없습니다.</p>';
+        return;
+      }
+
+      const result = await supabaseClient.functions.invoke("ecount-exchange-rate", {
+        body: { poNo }
+      });
+
+      data = result.data;
+      error = result.error;
+    }
 
     if (error) {
       throw error;

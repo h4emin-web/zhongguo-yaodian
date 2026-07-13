@@ -1,0 +1,12 @@
+{
+  "name": "haemin-workspace",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "ecount:rate": "node scripts/ecount-exchange-rate.mjs",
+    "local": "node scripts/workspace-local-server.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.54.2"
+  }
+}
