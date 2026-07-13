@@ -324,28 +324,30 @@ try {
   $resultJson
 } finally {
   if ($workbook -and $openedWorkbook) {
-    $workbook.Close($false)
-    [Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) | Out-Null
+    try { $workbook.Close($false) } catch {}
+    try { [Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) | Out-Null } catch {}
   }
 
   if ($excel -and $createdExcel) {
-    if ($null -ne $oldCalculation) { $excel.Calculation = $oldCalculation }
-    $excel.EnableEvents = $true
-    $excel.ScreenUpdating = $true
-    if ($null -ne $oldDisplayAlerts) { $excel.DisplayAlerts = $oldDisplayAlerts }
-    $excel.Quit()
+    try { if ($null -ne $oldCalculation) { $excel.Calculation = $oldCalculation } } catch {}
+    try { $excel.EnableEvents = $true } catch {}
+    try { $excel.ScreenUpdating = $true } catch {}
+    try { if ($null -ne $oldDisplayAlerts) { $excel.DisplayAlerts = $oldDisplayAlerts } } catch {}
+    try { $excel.Quit() } catch {}
   }
 
   if ($excel) {
     if (-not $createdExcel) {
-      if ($null -ne $oldCalculation) { $excel.Calculation = $oldCalculation }
-      $excel.EnableEvents = $true
-      $excel.ScreenUpdating = $true
-      if ($null -ne $oldDisplayAlerts) { $excel.DisplayAlerts = $oldDisplayAlerts }
+      try { if ($null -ne $oldCalculation) { $excel.Calculation = $oldCalculation } } catch {}
+      try { $excel.EnableEvents = $true } catch {}
+      try { $excel.ScreenUpdating = $true } catch {}
+      try { if ($null -ne $oldDisplayAlerts) { $excel.DisplayAlerts = $oldDisplayAlerts } } catch {}
     }
-    [Runtime.InteropServices.Marshal]::ReleaseComObject($excel) | Out-Null
+    try { [Runtime.InteropServices.Marshal]::ReleaseComObject($excel) | Out-Null } catch {}
   }
 
-  [System.GC]::Collect()
-  [System.GC]::WaitForPendingFinalizers()
+  try {
+    [System.GC]::Collect()
+    [System.GC]::WaitForPendingFinalizers()
+  } catch {}
 }

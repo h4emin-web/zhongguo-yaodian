@@ -181,6 +181,8 @@ function formatOfferDate(value, label) {
 }
 
 function lookupOfferDates(poNo) {
+  let powerShellLookupError = "";
+
   try {
     const args = [
       "-NoProfile",
@@ -203,11 +205,21 @@ function lookupOfferDates(poNo) {
       timeout: 120000
     });
 
-    if (child.status === 0 && child.stdout.trim()) {
-      const output = child.stdout.trim().split(/\r?\n/).filter(Boolean).pop();
-      return JSON.parse(output);
+    if (child.stdout.trim()) {
+      const output = child.stdout.trim()
+        .split(/\r?\n/)
+        .filter(Boolean)
+        .reverse()
+        .find((line) => line.trim().startsWith("{") && line.trim().endsWith("}"));
+
+      if (output) {
+        return JSON.parse(output);
+      }
     }
+
+    powerShellLookupError = (child.stderr || child.stdout || "").trim();
   } catch {
+    powerShellLookupError = "PowerShell 오퍼 조회 실행 중 예외가 발생했습니다.";
   }
 
   const offerListPath = resolveOfferListPath();
@@ -225,9 +237,11 @@ function lookupOfferDates(poNo) {
 
   for (let index = 2; index < rows.length; index += 1) {
     const row = rows[index];
-    const candidate = String(row[0] || "").trim();
+    const candidate = [row[0], row[1], row[2]]
+      .map((value) => String(value || "").trim().toUpperCase())
+      .find((value) => value === poNo.trim().toUpperCase());
 
-    if (candidate === poNo) {
+    if (candidate) {
       return {
         boardingDate: formatOfferDate(row[23], "Boarding"),
         instockDate: formatOfferDate(row[24], "Instock"),
@@ -237,7 +251,7 @@ function lookupOfferDates(poNo) {
     }
   }
 
-  throw new Error(`오퍼발행내역에서 PO '${poNo}' 를 찾지 못했습니다.`);
+  throw new Error(`오퍼발행내역에서 PO '${poNo}' 를 찾지 못했습니다.${powerShellLookupError ? ` PowerShell 조회 오류: ${powerShellLookupError}` : ""}`);
 }
 
 function runNode(scriptPath, args, env = {}) {
