@@ -10,13 +10,38 @@ const COM_CODE = Deno.env.get("ECOUNT_COM_CODE") ?? "";
 const USER_ID = Deno.env.get("ECOUNT_USER_ID") ?? "";
 const PASSWORD = Deno.env.get("ECOUNT_PASSWORD") ?? "";
 const LOGIN_BASE = "https://loginbb.ecount.com";
+const PAGE_SIZE = 25;
 
 type EcountLogin = {
   sessionId: string;
   cookie: string;
 };
 
+type DateRange = {
+  from: string;
+  to: string;
+};
+
 type EcountSlipRow = Record<string, unknown>;
+
+type ScanMode = {
+  label: string;
+  dateRange: DateRange;
+  remarks: string;
+  maxPages: number;
+};
+
+type ScanDebug = {
+  mode: string;
+  dateRange: DateRange;
+  totalPages: number;
+  scannedPages: number;
+  rowsSeen: number;
+  poRowsSeen: number;
+  firstPageKeys: string[];
+  firstPageDataKeys: string[];
+  samplePoRowKeys: string[];
+};
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -33,7 +58,7 @@ function decodeMaybeBase64(text: string): unknown {
       const decoded = new TextDecoder().decode(Uint8Array.from(atob(trimmed), (char) => char.charCodeAt(0)));
       return JSON.parse(decoded);
     } catch {
-      // Some ECOUNT view responses are base64 encoded HTML snippets, not JSON.
+      // ECOUNT sometimes returns plain text/HTML instead of encoded JSON.
     }
   }
 
@@ -44,16 +69,56 @@ function decodeMaybeBase64(text: string): unknown {
   }
 }
 
+async function tryDecompress(bytes: Uint8Array, format: CompressionFormat | "deflate-raw") {
+  try {
+    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream(format as CompressionFormat));
+    const buffer = await new Response(stream).arrayBuffer();
+    return new TextDecoder().decode(buffer);
+  } catch {
+    return "";
+  }
+}
+
+function bytesToHex(bytes: Uint8Array, length = 32) {
+  return [...bytes.slice(0, length)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function decodeResponse(response: Response) {
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  const plainText = new TextDecoder().decode(bytes);
+  const candidates = [
+    plainText,
+    await tryDecompress(bytes, "gzip"),
+    await tryDecompress(bytes, "deflate"),
+    await tryDecompress(bytes, "deflate-raw")
+  ].filter(Boolean);
+
+  for (const candidate of candidates) {
+    const decoded = decodeMaybeBase64(candidate);
+
+    if (decoded && typeof decoded === "object") {
+      return {
+        text: candidate,
+        data: decoded,
+        rawHex: bytesToHex(bytes)
+      };
+    }
+  }
+
+  return {
+    text: candidates[0] ?? "",
+    data: decodeMaybeBase64(candidates[0] ?? ""),
+    rawHex: bytesToHex(bytes)
+  };
+}
+
 function toUtf8Bytes(value: string) {
   return [...new TextEncoder().encode(value)];
 }
 
 function encryptPassword(value: string, key: string) {
   return toUtf8Bytes(value)
-    .map((byte, index) => {
-      const hex = (byte ^ key.charCodeAt(index % key.length)).toString(16);
-      return `${hex.length < 2 ? "0" : ""}${hex}`;
-    })
+    .map((byte, index) => (byte ^ key.charCodeAt(index % key.length)).toString(16).padStart(2, "0"))
     .join("");
 }
 
@@ -70,8 +135,8 @@ class CookieJar {
   }
 
   addFromResponse(response: Response) {
-    const getSetCookie = (response.headers as Headers & { getSetCookie?: () => string[] }).getSetCookie;
-    const setCookies = getSetCookie ? getSetCookie.call(response.headers) : [];
+    const headers = response.headers as Headers & { getSetCookie?: () => string[] };
+    const setCookies = headers.getSetCookie ? headers.getSetCookie() : [];
 
     for (const cookie of setCookies) {
       const first = cookie.split(";")[0];
@@ -107,16 +172,18 @@ async function ecountFetch(jar: CookieJar, url: string, options: RequestInit = {
   });
   jar.addFromResponse(response);
 
-  const text = await response.text();
+  const decoded = await decodeResponse(response);
 
-  if (!response.ok && response.status >= 300) {
-    throw new Error(`ECOUNT 요청 실패: ${response.status}`);
+  if (response.status >= 400) {
+    throw new Error(`ECOUNT request failed: ${response.status}`);
   }
 
   return {
     response,
-    text,
-    data: decodeMaybeBase64(text)
+    headers: Object.fromEntries(response.headers.entries()),
+    text: decoded.text,
+    data: decoded.data,
+    rawHex: decoded.rawHex
   };
 }
 
@@ -154,6 +221,108 @@ function getSessionIdFromCookie(cookie: string) {
   return decodeURIComponent(cookie).split("=")[0] ?? "";
 }
 
+function getSessionIdFromLocation(location: string) {
+  if (!location) {
+    return "";
+  }
+
+  const decoded = location.replace(/&amp;/g, "&");
+  const match = decoded.match(/[?&]ec_req_sid=([^&#]+)/);
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
+function toHex(value: string) {
+  return [...new TextEncoder().encode(value)]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function buildSessionCookieValue(sessionId: string) {
+  const encodedUserId = encodeURIComponent(USER_ID).toLowerCase();
+  return `${sessionId}=${toHex(`${COM_CODE}|${encodedUserId}`)}`;
+}
+
+function formatYmd(date: Date) {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  return `${year}${month}${day}`;
+}
+
+function kstDate() {
+  return new Date(Date.now() + 9 * 60 * 60 * 1000);
+}
+
+function getRecentDateRange() {
+  const from = kstDate();
+  const to = kstDate();
+  from.setUTCDate(from.getUTCDate() - 30);
+  to.setUTCDate(to.getUTCDate() + 30);
+
+  return {
+    from: formatYmd(from),
+    to: formatYmd(to)
+  };
+}
+
+function getCurrentYearDateRange() {
+  const now = kstDate();
+  const year = now.getUTCFullYear();
+
+  return {
+    from: `${year}0101`,
+    to: `${year}1231`
+  };
+}
+
+async function continueNewDeviceLogin(jar: CookieJar, hidden: Record<string, string>) {
+  const zoneInfo = await ecountFetch(jar, `${LOGIN_BASE}/ec5/api/app.login/action/GetZoneInfoAction?&xce=none`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Referer": `${LOGIN_BASE}/ec5/view/app.login/erp_login`
+    },
+    body: "{}"
+  });
+  const zoneInfoData = getDataObject(zoneInfo.data);
+  const body = new URLSearchParams({
+    ...hidden,
+    process_ing: hidden.process_ing || "N",
+    ts: String(zoneInfoData.ts ?? hidden.ts ?? ""),
+    lan_type: hidden.lan_type || hidden.login_lantype || "ko-KR",
+    access_site: hidden.access_site || "ECOUNT",
+    adminChecked: hidden.adminChecked || "N",
+    deviceFlag: "N",
+    deviceKey: hidden.deviceKey || "",
+    closeSessionFlag: hidden.closeSessionFlag || "",
+    forceLogout: hidden.forceLogout || "",
+    qrNumber: hidden.qrNumber || "",
+    platformVersion: hidden.platformVersion || "19"
+  });
+
+  const response = await ecountFetch(jar, `${LOGIN_BASE}/ec5/view/app.login/erp_login_processor`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Origin": LOGIN_BASE,
+      "Referer": `${LOGIN_BASE}/ec5/view/app.login/erp_login`
+    },
+    body: body.toString()
+  });
+  const location = response.response.headers.get("location") ?? "";
+  let sessionId = getSessionIdFromLocation(location);
+
+  if (!sessionId) {
+    sessionId = getSessionIdFromCookie(jar.get("ECOUNT_SessionId"));
+  }
+
+  if (sessionId && !jar.get("ECOUNT_SessionId")) {
+    jar.set("ECOUNT_SessionId", buildSessionCookieValue(sessionId));
+  }
+
+  return sessionId;
+}
+
 async function ecountWebLogin(): Promise<EcountLogin> {
   const jar = new CookieJar();
 
@@ -183,11 +352,10 @@ async function ecountWebLogin(): Promise<EcountLogin> {
     body: "{}"
   });
   const zoneInfoData = getDataObject(zoneInfo.data);
-  const spasswd = buildEncryptedPassword(PASSWORD);
   const loginBody = new URLSearchParams({
     com_code: COM_CODE,
     id: USER_ID,
-    spasswd,
+    spasswd: buildEncryptedPassword(PASSWORD),
     loginck: "",
     logintimeinck: "",
     lan_type: "ko-KR",
@@ -241,13 +409,19 @@ async function ecountWebLogin(): Promise<EcountLogin> {
   const hidden = parseHiddenInputs(login.text);
 
   if (hidden.error_code === "505") {
-    throw new Error("ECOUNT 새 기기 로그인 알림 단계에서 멈췄습니다. Supabase 서버 IP/기기를 ERP에서 한 번 등록해야 완전 자동 조회가 가능합니다.");
+    const newDeviceSessionId = await continueNewDeviceLogin(jar, hidden);
+
+    if (newDeviceSessionId) {
+      return { sessionId: newDeviceSessionId, cookie: jar.header() };
+    }
+
+    throw new Error("ECOUNT new device step could not be completed automatically.");
   }
 
-  throw new Error(`ECOUNT 웹 로그인 세션을 만들지 못했습니다. error_code=${hidden.error_code || "unknown"}`);
+  throw new Error(`ECOUNT login did not return a session. error_code=${hidden.error_code || "unknown"}`);
 }
 
-function buildSlipSearchPayload(poNo: string, pageCurrent = 1) {
+function buildSlipSearchPayload(pageCurrent = 1, dateRange = getRecentDateRange(), remarks = "") {
   return {
     Request: {
       Data: {
@@ -255,12 +429,12 @@ function buildSlipSearchPayload(poNo: string, pageCurrent = 1) {
         FORM_TYPE: "AR990",
         FORM_SEQ: "1",
         PAGE_CURRENT: pageCurrent,
-        BASE_DATE_FROM: "20260101",
-        BASE_DATE_TO: "20261231",
+        BASE_DATE_FROM: dateRange.from,
+        BASE_DATE_TO: dateRange.to,
         PARAM: "",
         MENU_SEQ: "490",
         PRG_ID: "E060208",
-        PAGE_SIZE: 25,
+        PAGE_SIZE,
         GB_TYPE: "Y",
         SLIP_TYPE: "1",
         TRADE_GUBUN: "Y",
@@ -293,10 +467,10 @@ function buildSlipSearchPayload(poNo: string, pageCurrent = 1) {
         PJT_CODE1: "",
         PJT_CODE2: "",
         ACCCASE: "",
-        BILL_NO: poNo,
+        BILL_NO: "",
         AMT_F: "",
         AMT_T: "",
-        REMARKS: poNo,
+        REMARKS: remarks,
         DOC_NO: "",
         WRITER_ID: "",
         LAST_ID: "",
@@ -304,7 +478,7 @@ function buildSlipSearchPayload(poNo: string, pageCurrent = 1) {
       }
     },
     PAGE_CURRENT: pageCurrent,
-    PAGE_SIZE: 25
+    PAGE_SIZE
   };
 }
 
@@ -314,34 +488,115 @@ function getRows(payload: unknown): EcountSlipRow[] {
   return Array.isArray(rows) ? rows as EcountSlipRow[] : [];
 }
 
+function getTotalPages(payload: unknown, pageSize: number) {
+  const data = getDataObject(payload);
+  const totalCount = Number(data.TotalCount ?? data.TOTAL_COUNT ?? 0);
+
+  if (!Number.isFinite(totalCount) || totalCount <= 0) {
+    return 1;
+  }
+
+  return Math.max(1, Math.ceil(totalCount / pageSize));
+}
+
+function getTopLevelKeys(value: unknown) {
+  return value && typeof value === "object" ? Object.keys(value as Record<string, unknown>).slice(0, 30) : [];
+}
+
 function textFromRow(row: EcountSlipRow) {
   return Object.values(row).map((value) => String(value ?? "")).join(" ");
 }
 
+function normalizeRate(value: unknown) {
+  const rate = String(value ?? "").replace(/,/g, "").trim();
+  return rate && rate !== "0" && rate !== "0.0000" ? rate : "";
+}
+
+function getExchangeRate(row: EcountSlipRow) {
+  const directRate = normalizeRate(row["ACC101.EXCHANGE_RATE"]);
+
+  if (directRate) {
+    return directRate;
+  }
+
+  const explicit = textFromRow(row).match(/@\s*([\d,]+(?:\.\d+)?)/);
+  return explicit ? explicit[1].replace(/,/g, "") : "";
+}
+
 function findExchangeRate(rows: EcountSlipRow[], poNo: string) {
-  const row = rows.find((item) => {
-    const text = textFromRow(item);
-    return text.includes(poNo) && text.includes("물품대") && text.includes("미지급");
-  }) ?? rows.find((item) => {
-    const text = textFromRow(item);
-    return text.includes(poNo) && text.includes("물품대");
-  });
+  const row = rows.find((item) => textFromRow(item).includes(poNo) && Boolean(getExchangeRate(item)));
 
   if (!row) {
     return { row: null, exchangeRate: "" };
   }
 
-  const rate = String(row["ACC101.EXCHANGE_RATE"] ?? "").replace(/,/g, "");
-
-  if (rate && rate !== "0.0000") {
-    return { row, exchangeRate: rate };
-  }
-
-  const explicit = textFromRow(row).match(/@\s*([\d,]+(?:\.\d+)?)/);
   return {
     row,
-    exchangeRate: explicit ? explicit[1].replace(/,/g, "") : ""
+    exchangeRate: getExchangeRate(row)
   };
+}
+
+async function scanSlipPages(jar: CookieJar, login: EcountLogin, poNo: string, mode: ScanMode) {
+  const debug: ScanDebug = {
+    mode: mode.label,
+    dateRange: mode.dateRange,
+    totalPages: 1,
+    scannedPages: 0,
+    rowsSeen: 0,
+    poRowsSeen: 0,
+    firstPageKeys: [],
+    firstPageDataKeys: [],
+    samplePoRowKeys: []
+  };
+
+  let totalPages = 1;
+
+  for (let pageCurrent = 1; pageCurrent <= totalPages; pageCurrent += 1) {
+    const response = await ecountFetch(
+      jar,
+      `${LOGIN_BASE}/ECAPI/SVC/Common/SlipTransfer/GetListXFormSlipAccountCommon?ec_req_sid=${encodeURIComponent(login.sessionId)}&xce=none`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Referer": `${LOGIN_BASE}/ec5/view/erp?w_flag=1&ec_req_sid=${encodeURIComponent(login.sessionId)}`
+        },
+        body: JSON.stringify(buildSlipSearchPayload(pageCurrent, mode.dateRange, mode.remarks))
+      }
+    );
+    const rows = getRows(response.data);
+    const poRows = rows.filter((item) => textFromRow(item).includes(poNo));
+    const found = findExchangeRate(rows, poNo);
+
+    debug.scannedPages = pageCurrent;
+    debug.rowsSeen += rows.length;
+    debug.poRowsSeen += poRows.length;
+
+    if (pageCurrent === 1) {
+      totalPages = Math.min(getTotalPages(response.data, PAGE_SIZE), mode.maxPages);
+      debug.totalPages = totalPages;
+      debug.firstPageKeys = rows[0] ? Object.keys(rows[0]).slice(0, 20) : [];
+      debug.firstPageDataKeys = getTopLevelKeys(getDataObject(response.data));
+    }
+
+    if (poRows.length && debug.samplePoRowKeys.length === 0) {
+      debug.samplePoRowKeys = Object.keys(poRows[0]).slice(0, 20);
+    }
+
+    if (found.exchangeRate) {
+      return {
+        found: {
+          poNo,
+          exchangeRate: found.exchangeRate,
+          pageCurrent,
+          mode: mode.label
+        },
+        debug
+      };
+    }
+  }
+
+  return { found: null, debug };
 }
 
 async function lookupExchangeRate(poNo: string) {
@@ -355,30 +610,25 @@ async function lookupExchangeRate(poNo: string) {
     }
   }
 
-  const response = await ecountFetch(
-    jar,
-    `${LOGIN_BASE}/ECAPI/SVC/Common/SlipTransfer/GetListXFormSlipAccountCommon?ec_req_sid=${encodeURIComponent(login.sessionId)}&xce=none`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Referer": `${LOGIN_BASE}/ec5/view/erp?w_flag=1&ec_req_sid=${encodeURIComponent(login.sessionId)}`
-      },
-      body: JSON.stringify(buildSlipSearchPayload(poNo))
-    }
-  );
-  const rows = getRows(response.data);
-  const found = findExchangeRate(rows, poNo);
+  const recentDateRange = getRecentDateRange();
+  const currentYearDateRange = getCurrentYearDateRange();
+  const modes: ScanMode[] = [
+    { label: "remarks-current-year", dateRange: currentYearDateRange, remarks: poNo, maxPages: 40 },
+    { label: "recent-scan", dateRange: recentDateRange, remarks: "", maxPages: 80 },
+    { label: "current-year-scan", dateRange: currentYearDateRange, remarks: "", maxPages: 160 }
+  ];
+  const debug: ScanDebug[] = [];
 
-  if (!found.exchangeRate) {
-    throw new Error(`${poNo} 물품대 행에서 환율을 찾지 못했습니다.`);
+  for (const mode of modes) {
+    const result = await scanSlipPages(jar, login, poNo, mode);
+    debug.push(result.debug);
+
+    if (result.found) {
+      return result.found;
+    }
   }
 
-  return {
-    poNo,
-    exchangeRate: found.exchangeRate,
-    row: found.row
-  };
+  throw new Error(`${poNo} exchange rate not found. debug=${JSON.stringify(debug)}`);
 }
 
 Deno.serve(async (req) => {
@@ -387,18 +637,18 @@ Deno.serve(async (req) => {
   }
 
   if (req.method !== "POST") {
-    return json({ ok: false, error: "POST 요청만 지원합니다." }, 405);
+    return json({ ok: false, error: "POST requests only." }, 405);
   }
 
   const { poNo } = await req.json().catch(() => ({ poNo: "" }));
   const normalizedPoNo = typeof poNo === "string" ? poNo.trim() : "";
 
   if (!normalizedPoNo) {
-    return json({ ok: false, error: "PO 번호가 필요합니다." }, 400);
+    return json({ ok: false, error: "PO number is required." }, 400);
   }
 
   if (!COM_CODE || !USER_ID || !PASSWORD) {
-    return json({ ok: false, error: "ECOUNT_COM_CODE, ECOUNT_USER_ID, ECOUNT_PASSWORD secret이 필요합니다." }, 500);
+    return json({ ok: false, error: "ECOUNT_COM_CODE, ECOUNT_USER_ID, and ECOUNT_PASSWORD secrets are required." }, 500);
   }
 
   try {
