@@ -1,11 +1,13 @@
 ﻿param(
   [Parameter(Mandatory = $true)][string]$SettlementPath,
   [Parameter(Mandatory = $true)][string]$ManagerName,
-  [Parameter(Mandatory = $true)][string]$PoNo,
+  [string]$PoNo = "",
   [string]$BoardingDate = "",
   [string]$InstockDate = "",
   [Parameter(Mandatory = $true)][string]$ExchangeRate,
-  [string]$Quantity = ""
+  [string]$Quantity = "",
+  [string]$BatchItemsJson = "",
+  [string]$BatchItemsPath = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -165,6 +167,104 @@ function Convert-ToDateValue([string]$value, [string]$label) {
   return [datetime]::Parse($text, [System.Globalization.CultureInfo]::InvariantCulture)
 }
 
+function Get-SettlementItems {
+  param(
+    [string]$BatchJson,
+    [string]$SinglePoNo,
+    [string]$SingleQuantity,
+    [string]$SingleBoardingDate,
+    [string]$SingleInstockDate,
+    [double]$DefaultDuty,
+    [double]$DefaultVat
+  )
+
+  $items = @()
+
+  if ($BatchJson) {
+    $rawItems = ConvertFrom-Json -InputObject $BatchJson
+
+    foreach ($raw in @($rawItems)) {
+      $po = ([string]$raw.poNo).Trim()
+
+      if (-not $po) {
+        throw "일괄 PO 번호가 비어 있습니다."
+      }
+
+      $vat = Convert-ToNumber $raw.vat
+      $dutyValue = Convert-ToNumber $raw.duty
+
+      if ($vat -le 0) {
+        throw "일괄 PO '$po' 의 부가세를 입력해주세요."
+      }
+
+      $items += [pscustomobject]@{
+        PoNo = $po
+        Quantity = Convert-ToNumber $raw.quantity
+        BoardingDate = [string]$raw.boardingDate
+        InstockDate = [string]$raw.instockDate
+        Duty = $dutyValue
+        Vat = $vat
+        Ratio = 0
+        RatioBasis = ""
+      }
+    }
+  } else {
+    if (-not ([string]$SinglePoNo).Trim()) {
+      throw "PO 번호가 비어 있습니다."
+    }
+
+    $items += [pscustomobject]@{
+      PoNo = $SinglePoNo
+      Quantity = Convert-ToNumber $SingleQuantity
+      BoardingDate = $SingleBoardingDate
+      InstockDate = $SingleInstockDate
+      Duty = $DefaultDuty
+      Vat = $DefaultVat
+      Ratio = 1
+      RatioBasis = "single"
+    }
+  }
+
+  if ($items.Count -eq 0) {
+    throw "정산 항목이 없습니다."
+  }
+
+  if ($items.Count -eq 1) {
+    $items[0].Ratio = 1
+    $items[0].RatioBasis = "single"
+    return @($items)
+  }
+
+  $allHaveDuty = @($items | Where-Object { $_.Duty -gt 0 }).Count -eq $items.Count
+  $basisName = if ($allHaveDuty) { "duty" } else { "vat" }
+  $basisTotal = if ($allHaveDuty) {
+    ($items | Measure-Object -Property Duty -Sum).Sum
+  } else {
+    ($items | Measure-Object -Property Vat -Sum).Sum
+  }
+
+  if ($basisTotal -le 0) {
+    throw "일괄 비율 계산 기준 금액이 0입니다."
+  }
+
+  $ratioSum = 0
+
+  for ($index = 0; $index -lt $items.Count; $index += 1) {
+    $basisValue = if ($basisName -eq "duty") { $items[$index].Duty } else { $items[$index].Vat }
+    $ratio = if ($index -eq $items.Count - 1) {
+      1 - $ratioSum
+    } else {
+      [math]::Round($basisValue / $basisTotal, 10)
+    }
+
+    $items[$index].Ratio = $ratio
+    $items[$index].RatioBasis = $basisName
+    $ratioSum += $ratio
+  }
+
+  return @($items)
+}
+
 if (-not (Test-Path -LiteralPath $SettlementPath)) {
   throw "정산서 파일을 찾을 수 없습니다: $SettlementPath"
 }
@@ -192,6 +292,14 @@ if ($exchange -le 0) {
   throw "ERP 환율이 올바르지 않습니다."
 }
 
+if ($BatchItemsPath) {
+  if (-not (Test-Path -LiteralPath $BatchItemsPath)) {
+    throw "일괄 항목 파일을 찾지 못했습니다: $BatchItemsPath"
+  }
+
+  $BatchItemsJson = Get-Content -LiteralPath $BatchItemsPath -Raw -Encoding UTF8
+}
+
 $excel = $null
 $sourceWorkbook = $null
 $targetWorkbook = $null
@@ -201,14 +309,6 @@ try {
   $excel.Visible = $false
   $excel.DisplayAlerts = $false
   $excel.AutomationSecurity = 1
-
-  if (-not $BoardingDate -or -not $InstockDate) {
-    throw "Boarding/Instock 날짜가 비어 있습니다. 오퍼발행내역 자동 조회 후 다시 실행해주세요."
-  }
-
-  $boarding = Convert-ToDateValue $BoardingDate "Boarding"
-  $instock = Convert-ToDateValue $InstockDate "Instock"
-  $sheetName = "$($instock.Month)월"
 
   $sourceWorkbook = $excel.Workbooks.Open($SettlementPath, $false, $true)
   $sourceSheet = $sourceWorkbook.Worksheets.Item(1)
@@ -224,6 +324,7 @@ try {
   $insurance = Sum-LeftLabels $sourceSheet @("화 재 보 험 료")
   $quarantine = Sum-RightLabels $sourceSheet @("검역수수료", "검역교통비")
   $clearance = Sum-RightLabels $sourceSheet @("통관수수료", "부대수수료", "임개수수료", "타장수수료", "인지대", "복사대", "팩시밀리 대", "시외 전화료")
+  $items = @(Get-SettlementItems $BatchItemsJson $PoNo $Quantity $BoardingDate $InstockDate $duty $importVat)
 
   $targetWorkbook = $excel.Workbooks.Open($targetFile.FullName)
 
@@ -231,86 +332,122 @@ try {
     throw "수입정산서 파일이 읽기 전용으로 열렸습니다. 다른 사용자가 열고 있는지 확인해주세요."
   }
 
-  $targetSheet = $targetWorkbook.Worksheets.Item($sheetName)
-  $targetSheet.Activate() | Out-Null
-  $excel.Run("'$($targetWorkbook.Name)'!양식") | Out-Null
-  $startRow = Find-LastBlockStart $targetSheet
+  $results = @()
 
-  $targetSheet.Cells.Item($startRow, 2).Value2 = $PoNo
-  $targetSheet.Cells.Item($startRow, 2).Select() | Out-Null
-  $excel.Run("'$($targetWorkbook.Name)'!오퍼내용") | Out-Null
+  foreach ($item in $items) {
+    if (-not $item.BoardingDate -or -not $item.InstockDate) {
+      throw "PO '$($item.PoNo)' 의 Boarding/Instock 날짜가 비어 있습니다."
+    }
 
-  $totalForeign = Convert-ToNumber ($targetSheet.Cells.Item($startRow + 4, 2).Value2)
-  $quantityValue = Convert-ToNumber $Quantity
+    $boarding = Convert-ToDateValue $item.BoardingDate "Boarding"
+    $instock = Convert-ToDateValue $item.InstockDate "Instock"
+    $sheetName = "$($instock.Month)월"
+    $targetSheet = $targetWorkbook.Worksheets.Item($sheetName)
+    $targetSheet.Activate() | Out-Null
+    $excel.Run("'$($targetWorkbook.Name)'!양식") | Out-Null
+    $startRow = Find-LastBlockStart $targetSheet
 
-  if ($quantityValue -le 0) {
-    $quantityValue = Convert-ToNumber ($targetSheet.Cells.Item($startRow + 2, 2).Text)
+    $targetSheet.Cells.Item($startRow, 2).Value2 = $item.PoNo
+    $targetSheet.Cells.Item($startRow, 2).Select() | Out-Null
+    $excel.Run("'$($targetWorkbook.Name)'!오퍼내용") | Out-Null
+
+    $totalForeign = Convert-ToNumber ($targetSheet.Cells.Item($startRow + 4, 2).Value2)
+    $quantityValue = Convert-ToNumber $item.Quantity
+
+    if ($quantityValue -le 0) {
+      $quantityValue = Convert-ToNumber ($targetSheet.Cells.Item($startRow + 2, 2).Text)
+    }
+
+    $ratio = Convert-ToNumber $item.Ratio
+
+    if ($ratio -le 0) {
+      throw "PO '$($item.PoNo)' 의 비율이 0입니다."
+    }
+
+    $dutyBase = if ($item.Duty -gt 0) { $item.Duty / $ratio } else { 0 }
+    $vatBase = if ($item.Vat -gt 0) { $item.Vat / $ratio } else { 0 }
+
+    Set-DateCell $targetSheet "F$($startRow + 2)" $boarding
+    Set-DateCell $targetSheet "O$($startRow + 5)" $instock
+    Set-NumberCell $targetSheet $startRow 13 $ratio
+    $targetSheet.Cells.Item($startRow, 13).NumberFormat = "0.0000"
+    Set-NumberCell $targetSheet ($startRow + 5) 6 $exchange
+    $targetSheet.Cells.Item($startRow + 1, 8).Formula = "=F$($startRow + 5)*B$($startRow + 4)"
+    $targetSheet.Cells.Item($startRow + 1, 11).Formula = "=H$($startRow + 1)"
+
+    Set-NumberCellIfPositive $targetSheet ($startRow + 2) 12 $dutyBase
+    Set-NumberCellIfPositive $targetSheet ($startRow + 2) 13 $vatBase
+    Set-NumberCell $targetSheet ($startRow + 3) 12 $port.Amount
+    Set-NumberCell $targetSheet ($startRow + 3) 13 $port.Vat
+    Set-NumberCell $targetSheet ($startRow + 4) 12 $transport.Amount
+    Set-NumberCell $targetSheet ($startRow + 4) 13 $transport.Vat
+    Set-NumberCell $targetSheet ($startRow + 6) 12 $insurance.Amount
+    Set-NumberCell $targetSheet ($startRow + 6) 13 $insurance.Vat
+    Set-NumberCell $targetSheet ($startRow + 7) 12 $warehouse.Amount
+    Set-NumberCell $targetSheet ($startRow + 7) 13 $warehouse.Vat
+    Set-NumberCell $targetSheet ($startRow + 9) 12 $quarantine.Amount
+    Set-NumberCell $targetSheet ($startRow + 9) 13 $quarantine.Vat
+    Set-NumberCell $targetSheet ($startRow + 10) 12 $clearance.Amount
+    Set-NumberCell $targetSheet ($startRow + 10) 13 $clearance.Vat
+
+    if ($declarationNo) {
+      $targetSheet.Cells.Item($startRow + 1, 14).Value2 = $declarationNo
+    }
+
+    $targetSheet.Cells.Item($startRow + 11, 14).Value2 = $ManagerName
+    $targetSheet.Cells.Item($startRow + 13, 14).Value2 = "정산완료"
+
+    $excel.CalculateFull() | Out-Null
+
+    $unitPriceFormula = '=ROUND(H{0}/VALUE(SUBSTITUTE(SUBSTITUTE(LOWER(TRIM(B{1})),"kg",""),",","")),0)' -f ($startRow + 13), ($startRow + 2)
+    $targetSheet.Cells.Item($startRow + 4, 6).Formula = $unitPriceFormula
+    $targetSheet.Cells.Item($startRow + 4, 6).NumberFormat = "#,##0"
+    $excel.CalculateFull() | Out-Null
+
+    $unitPrice = [math]::Round((Convert-ToNumber ($targetSheet.Cells.Item($startRow + 4, 6).Value2)), 0)
+    $purchaseUnitPrice = if ($quantityValue -gt 0) {
+      [math]::Round(($totalForeign / $quantityValue), 4)
+    } else {
+      0
+    }
+    $krwAmount = [math]::Round((Convert-ToNumber ($targetSheet.Cells.Item($startRow + 13, 8).Value2)), 0)
+
+    $results += [ordered]@{
+      targetFile = $targetFile.Name
+      targetPath = $targetFile.FullName
+      sheetName = $sheetName
+      startRow = $startRow
+      poNo = $item.PoNo
+      boardingDate = $boarding.ToString("yyyy-MM-dd")
+      instockDate = $instock.ToString("yyyy-MM-dd")
+      ratio = $ratio
+      ratioBasis = $item.RatioBasis
+      inputDuty = $item.Duty
+      inputVat = $item.Vat
+      productCode = [string]$targetSheet.Cells.Item($startRow + 1, 6).Text
+      quantity = $quantityValue
+      exchangeRate = $exchange
+      unitPrice = $unitPrice
+      purchaseUnitPrice = $purchaseUnitPrice
+      foreignAmount = $totalForeign
+      krwAmount = $krwAmount
+      remittanceAmount = [math]::Round($exchange * $totalForeign, 2)
+    }
   }
-
-  Set-DateCell $targetSheet "F$($startRow + 2)" $boarding
-  Set-DateCell $targetSheet "O$($startRow + 5)" $instock
-  Set-NumberCell $targetSheet ($startRow + 5) 6 $exchange
-  $targetSheet.Cells.Item($startRow + 1, 8).Formula = "=F$($startRow + 5)*B$($startRow + 4)"
-  $targetSheet.Cells.Item($startRow + 1, 11).Formula = "=H$($startRow + 1)"
-
-  Set-NumberCellIfPositive $targetSheet ($startRow + 2) 12 $duty
-  Set-NumberCell $targetSheet ($startRow + 2) 13 $importVat
-  Set-NumberCell $targetSheet ($startRow + 3) 12 $port.Amount
-  Set-NumberCell $targetSheet ($startRow + 3) 13 $port.Vat
-  Set-NumberCell $targetSheet ($startRow + 4) 12 $transport.Amount
-  Set-NumberCell $targetSheet ($startRow + 4) 13 $transport.Vat
-  Set-NumberCell $targetSheet ($startRow + 6) 12 $insurance.Amount
-  Set-NumberCell $targetSheet ($startRow + 6) 13 $insurance.Vat
-  Set-NumberCell $targetSheet ($startRow + 7) 12 $warehouse.Amount
-  Set-NumberCell $targetSheet ($startRow + 7) 13 $warehouse.Vat
-  Set-NumberCell $targetSheet ($startRow + 9) 12 $quarantine.Amount
-  Set-NumberCell $targetSheet ($startRow + 9) 13 $quarantine.Vat
-  Set-NumberCell $targetSheet ($startRow + 10) 12 $clearance.Amount
-  Set-NumberCell $targetSheet ($startRow + 10) 13 $clearance.Vat
-
-  if ($declarationNo) {
-    $targetSheet.Cells.Item($startRow + 1, 14).Value2 = $declarationNo
-  }
-
-  $targetSheet.Cells.Item($startRow + 11, 14).Value2 = $ManagerName
-  $targetSheet.Cells.Item($startRow + 13, 14).Value2 = "정산완료"
-
-  $excel.CalculateFull() | Out-Null
-
-  $unitPriceFormula = '=ROUND(H{0}/VALUE(SUBSTITUTE(SUBSTITUTE(LOWER(TRIM(B{1})),"kg",""),",","")),0)' -f ($startRow + 13), ($startRow + 2)
-  $targetSheet.Cells.Item($startRow + 4, 6).Formula = $unitPriceFormula
-  $targetSheet.Cells.Item($startRow + 4, 6).NumberFormat = "#,##0"
-  $excel.CalculateFull() | Out-Null
 
   $targetWorkbook.Save()
 
-  $unitPrice = [math]::Round((Convert-ToNumber ($targetSheet.Cells.Item($startRow + 4, 6).Value2)), 0)
-  $purchaseUnitPrice = if ($quantityValue -gt 0) {
-    [math]::Round(($totalForeign / $quantityValue), 4)
+  if ($results.Count -eq 1 -and -not $BatchItemsJson) {
+    $results[0] | ConvertTo-Json -Compress
   } else {
-    0
+    [ordered]@{
+      targetFile = $targetFile.Name
+      targetPath = $targetFile.FullName
+      exchangeRate = $exchange
+      mode = "batch"
+      items = $results
+    } | ConvertTo-Json -Depth 6 -Compress
   }
-  $krwAmount = [math]::Round((Convert-ToNumber ($targetSheet.Cells.Item($startRow + 13, 8).Value2)), 0)
-
-  $result = [ordered]@{
-    targetFile = $targetFile.Name
-    targetPath = $targetFile.FullName
-    sheetName = $sheetName
-    startRow = $startRow
-    poNo = $PoNo
-    boardingDate = $boarding.ToString("yyyy-MM-dd")
-    instockDate = $instock.ToString("yyyy-MM-dd")
-    productCode = [string]$targetSheet.Cells.Item($startRow + 1, 6).Text
-    quantity = $quantityValue
-    exchangeRate = $exchange
-    unitPrice = $unitPrice
-    purchaseUnitPrice = $purchaseUnitPrice
-    foreignAmount = $totalForeign
-    krwAmount = $krwAmount
-    remittanceAmount = [math]::Round($exchange * $totalForeign, 2)
-  }
-
-  $result | ConvertTo-Json -Compress
 } finally {
   if ($sourceWorkbook) {
     $sourceWorkbook.Close($false)

@@ -39,6 +39,21 @@ function Convert-ToDateText {
     return "{0}-{1:D2}-{2:D2}" -f [int]$Matches[1], [int]$Matches[2], [int]$Matches[3]
   }
 
+  $monthText = $text -match "(\d{4})[./-]?(\d{1,2})\s*월\s*(초|중순|말)?"
+
+  if ($monthText) {
+    $year = [int]$Matches[1]
+    $month = [int]$Matches[2]
+    $day = switch ($Matches[3]) {
+      "초" { 5 }
+      "중순" { 15 }
+      "말" { [datetime]::DaysInMonth($year, $month) }
+      default { 1 }
+    }
+
+    return "{0}-{1:D2}-{2:D2}" -f $year, $month, $day
+  }
+
   return $text
 }
 

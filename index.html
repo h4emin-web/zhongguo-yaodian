@@ -403,6 +403,13 @@
         <p class="wc-search-meta">정산서 파일명에서 PO 번호를 읽고, 오퍼발행내역의 Boarding/Instock 날짜와 ERP 환율을 바탕으로 수입정산서와 ERP 구매입력을 처리합니다.</p>
         <div class="auto-settlement-grid">
           <div class="margin-calc-field">
+            <label for="auto-settlement-mode">처리 방식</label>
+            <select id="auto-settlement-mode">
+              <option value="single">단일</option>
+              <option value="batch">일괄</option>
+            </select>
+          </div>
+          <div class="margin-calc-field">
             <label for="auto-settlement-manager">담당자 이름</label>
             <input id="auto-settlement-manager" type="text" placeholder="예: 강해민" autocomplete="off">
           </div>
@@ -413,18 +420,31 @@
               <button class="excel-export auto-exchange-fetch" type="button">ERP 조회</button>
             </div>
           </div>
-          <div class="margin-calc-field">
+          <div class="margin-calc-field auto-single-field">
             <label for="auto-settlement-quantity">수량</label>
             <input id="auto-settlement-quantity" type="number" inputmode="decimal" placeholder="예: 1000">
           </div>
-          <div class="margin-calc-field">
+          <div class="margin-calc-field auto-single-field">
             <label for="auto-settlement-boarding">선적일자</label>
             <input id="auto-settlement-boarding" type="text" inputmode="numeric" placeholder="오퍼발행내역 자동 조회" autocomplete="off">
           </div>
-          <div class="margin-calc-field">
+          <div class="margin-calc-field auto-single-field">
             <label for="auto-settlement-instock">입고일자</label>
             <input id="auto-settlement-instock" type="text" inputmode="numeric" placeholder="오퍼발행내역 자동 조회" autocomplete="off">
           </div>
+          <div class="margin-calc-field auto-batch-count" hidden>
+            <label for="auto-settlement-batch-count">일괄 건수</label>
+            <input id="auto-settlement-batch-count" type="number" min="2" max="12" step="1" value="2">
+          </div>
+        </div>
+        <div class="auto-settlement-batch" hidden>
+          <div class="auto-settlement-batch-head">
+            <span>PO 번호</span>
+            <span>수량</span>
+            <span>부가세</span>
+            <span>관세</span>
+          </div>
+          <div class="auto-settlement-batch-rows"></div>
         </div>
         <input type="file" class="auto-settlement-file" accept=".xlsx,.xlsm" hidden>
         <div class="auto-settlement-dropzone" tabindex="0" role="button" aria-label="정산서 엑셀 올리기">

@@ -350,6 +350,25 @@ async function runInoutOrderSave(payload, options = {}) {
   return JSON.parse(output);
 }
 
+function parseBatchItems(value) {
+  if (!value) {
+    return [];
+  }
+
+  const parsed = JSON.parse(value);
+
+  if (!Array.isArray(parsed)) {
+    throw new Error("batchItems must be an array.");
+  }
+
+  return parsed.map((item) => ({
+    poNo: String(item.poNo || "").trim(),
+    quantity: String(item.quantity || "").trim(),
+    vat: String(item.vat || "").trim(),
+    duty: String(item.duty || "").trim()
+  })).filter((item) => item.poNo);
+}
+
 async function saveAutoSettlement(req, res) {
   let tempDir = "";
 
@@ -369,31 +388,60 @@ async function saveAutoSettlement(req, res) {
       : ".xlsx";
     const settlementPath = join(tempDir, `settlement-upload${extension}`);
     await writeFile(settlementPath, file.buffer);
-    const offerDates = (!fields.boardingDate || !fields.instockDate)
+    const settlementMode = fields.settlementMode === "batch" ? "batch" : "single";
+    const batchItems = settlementMode === "batch" ? parseBatchItems(fields.batchItems) : [];
+    const batchItemsWithDates = settlementMode === "batch"
+      ? batchItems.map((item) => {
+        const dates = lookupOfferDates(item.poNo);
+        return {
+          ...item,
+          boardingDate: dates.boardingDate,
+          instockDate: dates.instockDate
+        };
+      })
+      : [];
+    const offerDates = settlementMode === "single" && (!fields.boardingDate || !fields.instockDate)
       ? lookupOfferDates(fields.poNo || "")
       : null;
     const boardingDate = fields.boardingDate || offerDates?.boardingDate || "";
     const instockDate = fields.instockDate || offerDates?.instockDate || "";
 
-    const output = await runPowerShell(join(ROOT, "scripts", "auto-settlement-save.ps1"), [
+    const powerShellArgs = [
       "-SettlementPath", settlementPath,
       "-ManagerName", fields.managerName || "",
-      "-PoNo", fields.poNo || "",
+      "-PoNo", fields.poNo || (settlementMode === "batch" ? "__BATCH__" : ""),
       "-BoardingDate", boardingDate,
       "-InstockDate", instockDate,
       "-ExchangeRate", fields.exchangeRate || "",
       "-Quantity", fields.quantity || ""
-    ]);
+    ];
+
+    if (settlementMode === "batch") {
+      const batchItemsPath = join(tempDir, "batch-items.json");
+      await writeFile(batchItemsPath, JSON.stringify(batchItemsWithDates), "utf8");
+      powerShellArgs.push("-BatchItemsPath", batchItemsPath);
+    }
+
+    const output = await runPowerShell(join(ROOT, "scripts", "auto-settlement-save.ps1"), powerShellArgs);
     const result = JSON.parse(output);
     result.offerListPath = offerDates?.offerListPath || "";
     result.offerListRow = offerDates?.offerListRow || null;
     let ecount = null;
+    const resultItems = Array.isArray(result.items) ? result.items : [result];
 
     if (process.env.AUTO_SETTLEMENT_ECOUNT_SAVE === "1") {
       try {
-        ecount = await runEcountPurchaseFill(buildEcountPurchasePayload(result, true), {
-          keepOpenMs: process.env.ECOUNT_PURCHASE_KEEP_OPEN_MS || "0"
-        });
+        ecount = [];
+
+        for (const item of resultItems) {
+          ecount.push(await runEcountPurchaseFill(buildEcountPurchasePayload(item, true), {
+            keepOpenMs: process.env.ECOUNT_PURCHASE_KEEP_OPEN_MS || "0"
+          }));
+        }
+
+        if (ecount.length === 1 && !Array.isArray(result.items)) {
+          ecount = ecount[0];
+        }
       } catch (error) {
         json(res, {
           ok: false,
@@ -409,9 +457,17 @@ async function saveAutoSettlement(req, res) {
 
     if (process.env.AUTO_SETTLEMENT_INOUT_SAVE === "1") {
       try {
-        inout = await runInoutOrderSave(buildInoutOrderPayload(result), {
-          commit: true
-        });
+        inout = [];
+
+        for (const item of resultItems) {
+          inout.push(await runInoutOrderSave(buildInoutOrderPayload(item), {
+            commit: true
+          }));
+        }
+
+        if (inout.length === 1 && !Array.isArray(result.items)) {
+          inout = inout[0];
+        }
       } catch (error) {
         json(res, {
           ok: false,

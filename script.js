@@ -57,11 +57,17 @@ const importCertFileInput = document.querySelector(".importcert-file-input");
 const importCertResult = document.querySelector(".importcert-result");
 const autoSettlementItem = document.querySelector('.tools-item[data-tool="auto-settlement"]');
 const autoSettlementPanel = document.querySelector(".auto-settlement-panel");
+const autoSettlementMode = document.querySelector("#auto-settlement-mode");
 const autoSettlementManager = document.querySelector("#auto-settlement-manager");
 const autoSettlementExchange = document.querySelector("#auto-settlement-exchange");
 const autoSettlementQuantity = document.querySelector("#auto-settlement-quantity");
 const autoSettlementBoarding = document.querySelector("#auto-settlement-boarding");
 const autoSettlementInstock = document.querySelector("#auto-settlement-instock");
+const autoSettlementSingleFields = document.querySelectorAll(".auto-single-field");
+const autoSettlementBatchCountField = document.querySelector(".auto-batch-count");
+const autoSettlementBatchCount = document.querySelector("#auto-settlement-batch-count");
+const autoSettlementBatchPanel = document.querySelector(".auto-settlement-batch");
+const autoSettlementBatchRows = document.querySelector(".auto-settlement-batch-rows");
 const autoSettlementFileInput = document.querySelector(".auto-settlement-file");
 const autoSettlementUpload = document.querySelector(".auto-settlement-upload");
 const autoSettlementSave = document.querySelector(".auto-settlement-save");
@@ -112,6 +118,7 @@ let currentGlobalMatches = { wc: [], mfds: [], cnph: [], usdmf: [], indiawc: [] 
 let worklogPeople = [];
 let worklogDateLabel = "";
 let autoSettlementState = {
+  mode: "single",
   settlementFile: "",
   poNo: "",
   targetFile: "",
@@ -124,7 +131,8 @@ let autoSettlementState = {
   unitPrice: "",
   purchaseUnitPrice: "",
   foreignAmount: "",
-  krwAmount: ""
+  krwAmount: "",
+  batchItems: []
 };
 let autoSettlementSelectedFile = null;
 
@@ -1315,15 +1323,89 @@ function findAutoSettlementTargetFile(managerName) {
   return AUTO_SETTLEMENT_TARGET_FILES.find((fileName) => fileName.includes(keyword)) || "";
 }
 
+function collectAutoSettlementBatchItems() {
+  if (!autoSettlementBatchRows) {
+    return [];
+  }
+
+  return Array.from(autoSettlementBatchRows.querySelectorAll(".auto-settlement-batch-row")).map((row) => ({
+    poNo: row.querySelector('[data-field="poNo"]').value.trim(),
+    quantity: row.querySelector('[data-field="quantity"]').value.trim(),
+    vat: row.querySelector('[data-field="vat"]').value.trim(),
+    duty: row.querySelector('[data-field="duty"]').value.trim()
+  }));
+}
+
+function renderAutoSettlementBatchRows() {
+  if (!autoSettlementBatchRows || !autoSettlementBatchCount) {
+    return;
+  }
+
+  const previous = collectAutoSettlementBatchItems();
+  const count = Math.max(2, Math.min(12, Number(autoSettlementBatchCount.value) || 2));
+  autoSettlementBatchCount.value = String(count);
+  autoSettlementBatchRows.innerHTML = "";
+
+  for (let index = 0; index < count; index += 1) {
+    const item = previous[index] || autoSettlementState.batchItems[index] || {};
+    const row = document.createElement("div");
+    row.className = "auto-settlement-batch-row";
+    row.innerHTML = `
+      <input data-field="poNo" type="text" placeholder="Z26-00000" autocomplete="off" value="${escapeHtml(item.poNo || "")}">
+      <input data-field="quantity" type="number" inputmode="decimal" placeholder="수량" value="${escapeHtml(item.quantity || "")}">
+      <input data-field="vat" type="number" inputmode="decimal" placeholder="부가세" value="${escapeHtml(item.vat || "")}">
+      <input data-field="duty" type="number" inputmode="decimal" placeholder="관세 없으면 빈칸" value="${escapeHtml(item.duty || "")}">
+    `;
+    autoSettlementBatchRows.appendChild(row);
+  }
+}
+
+function syncAutoSettlementMode() {
+  const mode = autoSettlementMode?.value || "single";
+  autoSettlementState.mode = mode;
+  const isBatch = mode === "batch";
+
+  autoSettlementSingleFields.forEach((field) => {
+    field.hidden = isBatch;
+  });
+
+  if (autoSettlementBatchCountField) {
+    autoSettlementBatchCountField.hidden = !isBatch;
+  }
+
+  if (autoSettlementBatchPanel) {
+    autoSettlementBatchPanel.hidden = !isBatch;
+  }
+
+  if (isBatch) {
+    const desiredCount = Math.max(2, Math.min(12, Number(autoSettlementBatchCount?.value) || 2));
+    const currentCount = autoSettlementBatchRows?.querySelectorAll(".auto-settlement-batch-row").length || 0;
+
+    if (currentCount !== desiredCount) {
+      renderAutoSettlementBatchRows();
+    }
+  }
+}
+
 function updateAutoSettlementCalculations() {
+  syncAutoSettlementMode();
   const managerName = autoSettlementManager.value.trim();
 
   autoSettlementState.targetFile = findAutoSettlementTargetFile(managerName);
   autoSettlementState.exchangeRate = autoSettlementExchange.value.trim();
-  autoSettlementState.quantity = autoSettlementQuantity.value.trim() || autoSettlementState.quantity;
-  autoSettlementState.boardingDate = autoSettlementBoarding.value;
-  autoSettlementState.instockDate = autoSettlementInstock.value;
-  autoSettlementState.targetMonth = getMonthLabelFromDate(autoSettlementInstock.value);
+  autoSettlementState.batchItems = collectAutoSettlementBatchItems();
+
+  if (autoSettlementState.mode === "batch") {
+    autoSettlementState.quantity = "";
+    autoSettlementState.boardingDate = "";
+    autoSettlementState.instockDate = "";
+    autoSettlementState.targetMonth = `${autoSettlementState.batchItems.length || 0}건`;
+  } else {
+    autoSettlementState.quantity = autoSettlementQuantity.value.trim() || autoSettlementState.quantity;
+    autoSettlementState.boardingDate = autoSettlementBoarding.value;
+    autoSettlementState.instockDate = autoSettlementInstock.value;
+    autoSettlementState.targetMonth = getMonthLabelFromDate(autoSettlementInstock.value);
+  }
 
   renderAutoSettlementResult();
 }
@@ -1368,19 +1450,42 @@ async function saveAutoSettlementToWorkbook() {
     return;
   }
 
+  const isBatch = autoSettlementState.mode === "batch";
+  const batchItems = isBatch ? collectAutoSettlementBatchItems() : [];
   const payload = {
+    settlementMode: autoSettlementState.mode,
     managerName: autoSettlementManager.value.trim(),
     poNo: autoSettlementState.poNo,
     boardingDate: autoSettlementState.boardingDate,
     instockDate: autoSettlementState.instockDate,
     exchangeRate: autoSettlementState.exchangeRate,
-    quantity: autoSettlementState.quantity
+    quantity: autoSettlementState.quantity,
+    batchItems
   };
   const missing = [
     ["담당자 이름", payload.managerName],
-    ["PO 번호", payload.poNo],
     ["ERP 환율", payload.exchangeRate]
   ].filter(([, value]) => !value);
+
+  if (isBatch) {
+    if (!batchItems.length) {
+      missing.push(["일괄 항목", ""]);
+    }
+
+    batchItems.forEach((item, index) => {
+      if (!item.poNo) {
+        missing.push([`${index + 1}번 PO 번호`, ""]);
+      }
+      if (!item.quantity) {
+        missing.push([`${index + 1}번 수량`, ""]);
+      }
+      if (!item.vat) {
+        missing.push([`${index + 1}번 부가세`, ""]);
+      }
+    });
+  } else if (!payload.poNo) {
+    missing.push(["PO 번호", ""]);
+  }
 
   if (missing.length) {
     renderAutoSettlementResult(`${missing.map(([label]) => label).join(", ")} 입력이 필요합니다.`);
@@ -1389,7 +1494,9 @@ async function saveAutoSettlementToWorkbook() {
 
   const formData = new FormData();
   formData.append("settlementFile", autoSettlementSelectedFile, autoSettlementSelectedFile.name);
-  Object.entries(payload).forEach(([key, value]) => formData.append(key, value));
+  Object.entries(payload).forEach(([key, value]) => {
+    formData.append(key, Array.isArray(value) ? JSON.stringify(value) : value);
+  });
 
   autoSettlementSave.disabled = true;
   autoSettlementResult.innerHTML = '<p class="empty-result">수입정산서 파일을 열어 저장 중입니다.</p>';
@@ -1405,28 +1512,34 @@ async function saveAutoSettlementToWorkbook() {
       throw new Error(data.error || "수입정산서 저장에 실패했습니다.");
     }
 
-    autoSettlementState.targetFile = data.targetFile || autoSettlementState.targetFile;
-    autoSettlementState.targetMonth = data.sheetName || autoSettlementState.targetMonth;
-    autoSettlementState.boardingDate = data.boardingDate || autoSettlementState.boardingDate;
-    autoSettlementState.instockDate = data.instockDate || autoSettlementState.instockDate;
+    const firstItem = Array.isArray(data.items) ? data.items[0] : data;
+    autoSettlementState.targetFile = data.targetFile || firstItem.targetFile || autoSettlementState.targetFile;
+    autoSettlementState.targetMonth = data.sheetName || firstItem.sheetName || autoSettlementState.targetMonth;
+    autoSettlementState.boardingDate = firstItem.boardingDate || autoSettlementState.boardingDate;
+    autoSettlementState.instockDate = firstItem.instockDate || autoSettlementState.instockDate;
     autoSettlementBoarding.value = autoSettlementState.boardingDate;
     autoSettlementInstock.value = autoSettlementState.instockDate;
-    autoSettlementState.productCode = data.productCode || autoSettlementState.productCode;
-    autoSettlementState.quantity = data.quantity || autoSettlementState.quantity;
+    autoSettlementState.productCode = firstItem.productCode || autoSettlementState.productCode;
+    autoSettlementState.quantity = firstItem.quantity || autoSettlementState.quantity;
     autoSettlementState.exchangeRate = data.exchangeRate || autoSettlementState.exchangeRate;
-    autoSettlementState.unitPrice = data.unitPrice || autoSettlementState.unitPrice;
-    autoSettlementState.purchaseUnitPrice = data.purchaseUnitPrice || autoSettlementState.purchaseUnitPrice;
-    autoSettlementState.foreignAmount = data.foreignAmount || autoSettlementState.foreignAmount;
-    autoSettlementState.krwAmount = data.krwAmount || autoSettlementState.krwAmount;
+    autoSettlementState.unitPrice = firstItem.unitPrice || autoSettlementState.unitPrice;
+    autoSettlementState.purchaseUnitPrice = firstItem.purchaseUnitPrice || autoSettlementState.purchaseUnitPrice;
+    autoSettlementState.foreignAmount = firstItem.foreignAmount || autoSettlementState.foreignAmount;
+    autoSettlementState.krwAmount = firstItem.krwAmount || autoSettlementState.krwAmount;
     renderAutoSettlementResult();
-    const ecountMessage = data.ecount
-      ? ` / ERP 구매 ${data.ecount.saved ? "저장 완료" : "입력 완료"}: ${escapeHtml(data.ecount.visiblePurchaseNo || data.ecount.purchaseNo || "")}`
+    const ecountList = Array.isArray(data.ecount) ? data.ecount : (data.ecount ? [data.ecount] : []);
+    const inoutList = Array.isArray(data.inout) ? data.inout : (data.inout ? [data.inout] : []);
+    const ecountMessage = ecountList.length
+      ? ` / ERP 구매 ${ecountList.length}건 처리 완료`
       : "";
-    const inoutMessage = data.inout
-      ? ` / 입출고 지시서 반영 완료: ${escapeHtml(data.inout.orderNo || "")}`
+    const inoutMessage = inoutList.length
+      ? ` / 입출고 지시서 ${inoutList.length}건 반영 완료`
       : "";
+    const savedLabel = Array.isArray(data.items)
+      ? `${escapeHtml(data.targetFile)} / ${escapeHtml(String(data.items.length))}건`
+      : `${escapeHtml(data.targetFile)} / ${escapeHtml(data.sheetName)} ${escapeHtml(String(data.startRow))}행`;
     autoSettlementResult.insertAdjacentHTML("afterbegin", `
-      <p class="status-ok">원본 저장 완료: ${escapeHtml(data.targetFile)} / ${escapeHtml(data.sheetName)} ${escapeHtml(String(data.startRow))}행${ecountMessage}${inoutMessage}</p>
+      <p class="status-ok">원본 저장 완료: ${savedLabel}${ecountMessage}${inoutMessage}</p>
     `);
   } catch (error) {
     console.error(error);
@@ -1446,7 +1559,15 @@ function renderAutoSettlementResult(message = "") {
     return;
   }
 
-  const rows = [
+  const isBatch = autoSettlementState.mode === "batch";
+  const batchItems = isBatch ? collectAutoSettlementBatchItems() : [];
+  const rows = isBatch ? [
+    ["담당자 파일", autoSettlementState.targetFile || "담당자 이름 입력 후 확인"],
+    ["처리 방식", "일괄"],
+    ["일괄 건수", String(batchItems.length || 0)],
+    ["ERP 환율", autoSettlementState.exchangeRate || "수동 입력 필요"],
+    ["비율 기준", "관세가 모두 있으면 관세, 아니면 부가세"]
+  ] : [
     ["담당자 파일", autoSettlementState.targetFile || "담당자 이름 입력 후 확인"],
     ["PO 번호", autoSettlementState.poNo || "정산서 파일명에서 추출 예정"],
     ["선적일자", autoSettlementState.boardingDate || "오퍼발행내역 자동 조회"],
@@ -1468,7 +1589,7 @@ function renderAutoSettlementResult(message = "") {
         <p><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value)}</span></p>
       `).join("")}
     </div>
-    <p class="wc-search-meta">선적일자와 입고일자는 오퍼발행내역에서 PO 번호로 자동 조회합니다. 직접 입력하면 입력값을 우선 사용합니다.</p>
+    <p class="wc-search-meta">선적일자와 입고일자는 오퍼발행내역에서 PO 번호로 자동 조회합니다. 일괄은 PO별 부가세와 관세 입력값으로 비율을 계산합니다.</p>
   `;
 }
 
@@ -2593,10 +2714,16 @@ poReceiveInput.addEventListener("keydown", (event) => {
   }
 });
 autoSettlementManager.addEventListener("input", updateAutoSettlementCalculations);
+autoSettlementMode.addEventListener("change", updateAutoSettlementCalculations);
 autoSettlementExchange.addEventListener("input", updateAutoSettlementCalculations);
 autoSettlementQuantity.addEventListener("input", updateAutoSettlementCalculations);
 autoSettlementBoarding.addEventListener("input", updateAutoSettlementCalculations);
 autoSettlementInstock.addEventListener("input", updateAutoSettlementCalculations);
+autoSettlementBatchCount.addEventListener("input", () => {
+  renderAutoSettlementBatchRows();
+  updateAutoSettlementCalculations();
+});
+autoSettlementBatchRows.addEventListener("input", updateAutoSettlementCalculations);
 autoSettlementUpload.addEventListener("click", () => autoSettlementFileInput.click());
 autoExchangeFetch.addEventListener("click", fetchAutoSettlementExchangeRate);
 autoSettlementSave.addEventListener("click", saveAutoSettlementToWorkbook);
@@ -2626,6 +2753,7 @@ autoSettlementFileInput.addEventListener("change", () => {
 
   handleAutoSettlementFile(file);
 });
+syncAutoSettlementMode();
 worklogClose.addEventListener("click", closeWorklog);
 worklogClearButton.addEventListener("click", clearWorklog);
 worklogLoadButton.addEventListener("click", () => worklogFileInput.click());
