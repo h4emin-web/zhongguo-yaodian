@@ -71,7 +71,6 @@ const autoSettlementBatchRows = document.querySelector(".auto-settlement-batch-r
 const autoSettlementFileInput = document.querySelector(".auto-settlement-file");
 const autoSettlementUpload = document.querySelector(".auto-settlement-upload");
 const autoSettlementSave = document.querySelector(".auto-settlement-save");
-const autoErpPurchaseFill = document.querySelector(".auto-erp-purchase-fill");
 const autoSettlementDropzone = document.querySelector(".auto-settlement-dropzone");
 const autoExchangeFetch = document.querySelector(".auto-exchange-fetch");
 const autoExchangeResult = document.querySelector(".auto-exchange-result");
@@ -1593,65 +1592,6 @@ function renderAutoSettlementResult(message = "") {
   `;
 }
 
-async function fillEcountPurchaseFromSettlement() {
-  const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
-  const automationUrl = isLocal
-    ? "/api/ecount-purchase/fill"
-    : "http://127.0.0.1:4173/api/ecount-purchase/fill";
-  const payload = {
-    productCode: autoSettlementState.productCode,
-    quantity: autoSettlementState.quantity,
-    exchangeRate: autoSettlementState.exchangeRate,
-    unitPrice: autoSettlementState.unitPrice,
-    foreignAmount: autoSettlementState.foreignAmount,
-    krwAmount: autoSettlementState.krwAmount
-  };
-  const missing = [
-    ["품목코드", payload.productCode],
-    ["수량", payload.quantity],
-    ["환율", payload.exchangeRate],
-    ["ERP 단가", payload.unitPrice],
-    ["외화금액", payload.foreignAmount],
-    ["원화금액", payload.krwAmount]
-  ].filter(([, value]) => !value);
-
-  if (missing.length) {
-    renderAutoSettlementResult(`${missing.map(([label]) => label).join(", ")} 값이 필요합니다. 먼저 업로드를 완료해주세요.`);
-    return;
-  }
-
-  autoErpPurchaseFill.disabled = true;
-  autoSettlementResult.insertAdjacentHTML("afterbegin", '<p class="empty-result">ERP 구매수정 화면을 열고 값을 입력하는 중입니다.</p>');
-
-  try {
-    const response = await fetch(automationUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    const data = await response.json();
-
-    if (!response.ok || !data.ok) {
-      throw new Error(data.error || "ERP 구매입력 실행에 실패했습니다.");
-    }
-
-    renderAutoSettlementResult();
-    autoSettlementResult.insertAdjacentHTML("afterbegin", `
-      <p class="status-ok">ERP 구매 ${data.saved ? "저장" : "입력"} 완료: ${escapeHtml(data.visiblePurchaseNo || data.purchaseNo || "")}</p>
-    `);
-  } catch (error) {
-    console.error(error);
-    const message = error instanceof TypeError && !isLocal
-      ? "로컬 자동정산 실행기가 켜져 있어야 haemin.space에서 ERP 입력을 시작할 수 있습니다."
-      : error instanceof Error
-        ? error.message
-        : String(error);
-    renderAutoSettlementResult(message);
-  } finally {
-    autoErpPurchaseFill.disabled = false;
-  }
-}
-
 async function exportAutoSettlementSummary() {
   if (!window.ExcelJS) {
     alert("엑셀 처리 도구를 불러오지 못했습니다.");
@@ -2727,7 +2667,6 @@ autoSettlementBatchRows.addEventListener("input", updateAutoSettlementCalculatio
 autoSettlementUpload.addEventListener("click", () => autoSettlementFileInput.click());
 autoExchangeFetch.addEventListener("click", fetchAutoSettlementExchangeRate);
 autoSettlementSave.addEventListener("click", saveAutoSettlementToWorkbook);
-autoErpPurchaseFill.addEventListener("click", fillEcountPurchaseFromSettlement);
 autoSettlementDropzone.addEventListener("click", () => autoSettlementFileInput.click());
 autoSettlementDropzone.addEventListener("keydown", (event) => {
   if (event.key === "Enter" || event.key === " ") {
