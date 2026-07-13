@@ -258,9 +258,9 @@ try {
   if ($Commit) {
     $sheet.Cells.Item($rowIndex, 12).Value2 = $dueDateValue.ToString("yyyy-MM-dd")
     $sheet.Cells.Item($rowIndex, 12).NumberFormat = "yyyy-mm-dd"
-    $sheet.Cells.Item($rowIndex, 10).Value2 = [math]::Round($UnitPrice, 0)
+    $sheet.Cells.Item($rowIndex, 10).Formula = ([math]::Round($UnitPrice, 0)).ToString([Globalization.CultureInfo]::InvariantCulture)
     $sheet.Cells.Item($rowIndex, 10).NumberFormat = "#,##0"
-    $sheet.Cells.Item($rowIndex, 11).Value2 = [math]::Round($Amount, 0)
+    $sheet.Cells.Item($rowIndex, 11).Formula = ([math]::Round($Amount, 0)).ToString([Globalization.CultureInfo]::InvariantCulture)
     $sheet.Cells.Item($rowIndex, 11).NumberFormat = "#,##0"
 
     $sheet.Range("A$rowIndex").Select() | Out-Null
