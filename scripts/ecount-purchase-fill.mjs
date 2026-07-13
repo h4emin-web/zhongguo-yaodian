@@ -161,6 +161,26 @@ async function getVisibleProductInput(page, productCode) {
   }
 
   if (!productInput) {
+    const firstGridRow = inputs
+      .filter((input) => {
+        return input.type === "checkbox" &&
+          input.x >= 180 &&
+          input.x <= 240 &&
+          input.y > 650;
+      })
+      .sort((a, b) => a.y - b.y)[0] || null;
+
+    if (firstGridRow) {
+      return {
+        ...firstGridRow,
+        value: normalizedCode,
+        x: 259,
+        y: firstGridRow.y,
+        width: 68,
+        height: firstGridRow.height
+      };
+    }
+
     await writeFile("tmp/ecount-purchase-fill-inputs.json", JSON.stringify(inputs, null, 2), "utf8").catch(() => {});
     throw new Error(`Could not locate product row input for ${productCode}.`);
   }
