@@ -137,6 +137,78 @@ function runPowerShell(scriptPath, args) {
   });
 }
 
+function runNode(scriptPath, args, env = {}) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, [
+      scriptPath,
+      ...args
+    ], {
+      cwd: ROOT,
+      windowsHide: false,
+      env: {
+        ...process.env,
+        ...env
+      }
+    });
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk.toString("utf8");
+    });
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk.toString("utf8");
+    });
+    child.on("error", reject);
+    child.on("close", (code) => {
+      if (code !== 0) {
+        reject(new Error(stderr.trim() || stdout.trim() || `Node exited with ${code}`));
+        return;
+      }
+
+      resolve(stdout.trim());
+    });
+  });
+}
+
+function buildEcountPurchasePayload(result, autoSave = false) {
+  return {
+    productCode: result.productCode,
+    quantity: result.quantity,
+    exchangeRate: result.exchangeRate,
+    unitPrice: result.purchaseUnitPrice || result.unitPrice,
+    foreignAmount: result.foreignAmount,
+    krwAmount: result.krwAmount,
+    autoSave
+  };
+}
+
+async function runEcountPurchaseFill(payload, options = {}) {
+  requireEcountEnv();
+  const required = ["productCode", "quantity", "exchangeRate", "unitPrice", "foreignAmount", "krwAmount"];
+  const missing = required.filter((key) => payload[key] === undefined || payload[key] === null || payload[key] === "");
+
+  if (missing.length) {
+    throw new Error(`${missing.join(", ")} values are required.`);
+  }
+
+  const tempDir = await mkdtemp(join(tmpdir(), "haemin-ecount-purchase-"));
+
+  try {
+    const payloadPath = join(tempDir, "payload.json");
+    await writeFile(payloadPath, JSON.stringify(payload), "utf8");
+    const output = await runNode(join(ROOT, "scripts", "ecount-purchase-fill.mjs"), [payloadPath], {
+      HEADLESS: "false",
+      KEEP_OPEN_MS: options.keepOpenMs ?? "0",
+      ECOUNT_PURCHASE_AUTO_SAVE: payload.autoSave ? "1" : "0"
+    });
+
+    return JSON.parse(output.split(/\r?\n/).filter(Boolean).pop() || "{}");
+  } finally {
+    await rm(tempDir, { recursive: true, force: true }).catch(() => {});
+  }
+}
+
 async function saveAutoSettlement(req, res) {
   let tempDir = "";
 
@@ -167,7 +239,25 @@ async function saveAutoSettlement(req, res) {
       "-Quantity", fields.quantity || ""
     ]);
     const result = JSON.parse(output);
-    json(res, { ok: true, ...result });
+    let ecount = null;
+
+    if (process.env.AUTO_SETTLEMENT_ECOUNT_SAVE === "1") {
+      try {
+        ecount = await runEcountPurchaseFill(buildEcountPurchasePayload(result, true), {
+          keepOpenMs: process.env.ECOUNT_PURCHASE_KEEP_OPEN_MS || "0"
+        });
+      } catch (error) {
+        json(res, {
+          ok: false,
+          excelSaved: true,
+          ...result,
+          error: `수입정산서 원본은 저장됐지만 ERP 구매 저장에 실패했습니다: ${error instanceof Error ? error.message : String(error)}`
+        }, 500);
+        return;
+      }
+    }
+
+    json(res, { ok: true, ...result, ecount });
   } catch (error) {
     json(res, {
       ok: false,
@@ -190,39 +280,17 @@ function requireEcountEnv() {
 
 async function startEcountPurchaseFill(req, res) {
   try {
-    requireEcountEnv();
     const payload = await readBody(req);
-    const required = ["productCode", "quantity", "exchangeRate", "unitPrice", "foreignAmount", "krwAmount"];
-    const missing = required.filter((key) => payload[key] === undefined || payload[key] === null || payload[key] === "");
-
-    if (missing.length) {
-      throw new Error(`${missing.join(", ")} values are required.`);
-    }
-
-    const tempDir = await mkdtemp(join(tmpdir(), "haemin-ecount-purchase-"));
-    const payloadPath = join(tempDir, "payload.json");
-    await writeFile(payloadPath, JSON.stringify(payload), "utf8");
-
-    const child = spawn(process.execPath, [
-      join(ROOT, "scripts", "ecount-purchase-fill.mjs"),
-      payloadPath
-    ], {
-      cwd: ROOT,
-      detached: true,
-      stdio: "ignore",
-      windowsHide: false,
-      env: {
-        ...process.env,
-        HEADLESS: "false",
-        KEEP_OPEN_MS: process.env.ECOUNT_PURCHASE_KEEP_OPEN_MS || "1800000"
-      }
+    const result = await runEcountPurchaseFill({
+      ...payload,
+      autoSave: payload.autoSave === true || process.env.ECOUNT_PURCHASE_AUTO_SAVE === "1"
+    }, {
+      keepOpenMs: process.env.ECOUNT_PURCHASE_KEEP_OPEN_MS || "0"
     });
 
-    child.unref();
     json(res, {
       ok: true,
-      pid: child.pid,
-      message: "ECOUNT purchase automation started. Save is not clicked automatically."
+      ...result
     });
   } catch (error) {
     json(res, {

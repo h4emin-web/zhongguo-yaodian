@@ -1417,8 +1417,11 @@ async function saveAutoSettlementToWorkbook() {
     autoSettlementState.foreignAmount = data.foreignAmount || autoSettlementState.foreignAmount;
     autoSettlementState.krwAmount = data.krwAmount || autoSettlementState.krwAmount;
     renderAutoSettlementResult();
+    const ecountMessage = data.ecount
+      ? ` / ERP 구매 ${data.ecount.saved ? "저장 완료" : "입력 완료"}: ${escapeHtml(data.ecount.visiblePurchaseNo || data.ecount.purchaseNo || "")}`
+      : "";
     autoSettlementResult.insertAdjacentHTML("afterbegin", `
-      <p class="status-ok">복사본 업로드 완료: ${escapeHtml(data.targetFile)} / ${escapeHtml(data.sheetName)} ${escapeHtml(String(data.startRow))}행</p>
+      <p class="status-ok">원본 저장 완료: ${escapeHtml(data.targetFile)} / ${escapeHtml(data.sheetName)} ${escapeHtml(String(data.startRow))}행${ecountMessage}</p>
     `);
   } catch (error) {
     console.error(error);
@@ -1508,7 +1511,7 @@ async function fillEcountPurchaseFromSettlement() {
 
     renderAutoSettlementResult();
     autoSettlementResult.insertAdjacentHTML("afterbegin", `
-      <p class="status-ok">ERP 구매입력을 시작했습니다. 열린 ERP 화면에서 값 확인 후 저장(F8)을 눌러주세요.</p>
+      <p class="status-ok">ERP 구매 ${data.saved ? "저장" : "입력"} 완료: ${escapeHtml(data.visiblePurchaseNo || data.purchaseNo || "")}</p>
     `);
   } catch (error) {
     console.error(error);

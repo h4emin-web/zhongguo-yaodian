@@ -6,6 +6,7 @@ const {
   ECOUNT_USER_ID,
   ECOUNT_PASSWORD,
   HEADLESS = "false",
+  ECOUNT_PURCHASE_AUTO_SAVE = "0",
   KEEP_OPEN_MS = "1800000"
 } = process.env;
 
@@ -142,6 +143,21 @@ async function fillPurchaseForm(page, payload) {
   await fillTextAt(page, productInput.x + 755, rowY, normalizeAmount(payload.krwAmount));
 }
 
+async function savePurchaseForm(page) {
+  const saveText = "\uc800\uc7a5(F8)";
+  let dialogMessage = "";
+
+  page.on("dialog", async (dialog) => {
+    dialogMessage = dialog.message();
+    await dialog.accept();
+  });
+
+  await page.getByText(saveText, { exact: true }).first().click();
+  await page.waitForTimeout(8000);
+
+  return { dialogMessage };
+}
+
 async function main() {
   required("ECOUNT_COM_CODE", ECOUNT_COM_CODE);
   required("ECOUNT_USER_ID", ECOUNT_USER_ID);
@@ -150,6 +166,7 @@ async function main() {
 
   const payload = JSON.parse(await readFile(payloadPath, "utf8"));
   const requiredPayload = ["productCode", "quantity", "exchangeRate", "unitPrice", "foreignAmount", "krwAmount"];
+  const autoSave = payload.autoSave === true || ECOUNT_PURCHASE_AUTO_SAVE === "1";
 
   for (const key of requiredPayload) {
     required(`payload.${key}`, payload[key]);
@@ -211,8 +228,17 @@ async function main() {
     await fillPurchaseForm(page, payload);
     await page.screenshot({ path: "tmp/ecount-purchase-filled.png", fullPage: true });
 
+    let saveResult = null;
+
+    if (autoSave) {
+      setStep("save form");
+      saveResult = await savePurchaseForm(page);
+      await page.screenshot({ path: "tmp/ecount-purchase-saved.png", fullPage: true }).catch(() => {});
+    }
+
     const result = {
       ok: true,
+      saved: autoSave,
       purchaseNo,
       visiblePurchaseNo,
       productCode: payload.productCode,
@@ -221,7 +247,10 @@ async function main() {
       unitPrice: normalizeAmount(payload.unitPrice),
       foreignAmount: normalizeAmount(payload.foreignAmount),
       krwAmount: normalizeAmount(payload.krwAmount),
-      note: "Values were entered on the purchase edit screen. Save was not clicked."
+      dialogMessage: saveResult?.dialogMessage || "",
+      note: autoSave
+        ? "Values were entered and the purchase save button was clicked."
+        : "Values were entered on the purchase edit screen. Save was not clicked."
     };
     await writeFile("tmp/ecount-purchase-fill-result.json", JSON.stringify(result, null, 2), "utf8");
     console.log(JSON.stringify(result));
