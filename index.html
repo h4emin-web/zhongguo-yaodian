@@ -416,15 +416,18 @@
           </div>
           <div class="margin-calc-field">
             <label for="auto-settlement-boarding">선적일자</label>
-            <input id="auto-settlement-boarding" type="date">
+            <input id="auto-settlement-boarding" type="text" inputmode="numeric" placeholder="예: 2025-11-18" autocomplete="off">
           </div>
           <div class="margin-calc-field">
             <label for="auto-settlement-instock">입고일자</label>
-            <input id="auto-settlement-instock" type="date">
+            <input id="auto-settlement-instock" type="text" inputmode="numeric" placeholder="예: 2025-11-18" autocomplete="off">
           </div>
         </div>
+        <input type="file" class="auto-settlement-file" accept=".xlsx,.xlsm" hidden>
+        <div class="auto-settlement-dropzone" tabindex="0" role="button" aria-label="정산서 엑셀 올리기">
+          <p>정산서 엑셀을 여기에 끌어다 놓거나 클릭해서 올리세요</p>
+        </div>
         <div class="auto-settlement-actions">
-          <input type="file" class="auto-settlement-file" accept=".xlsx,.xlsm" hidden>
           <button class="excel-export auto-settlement-upload" type="button">정산서 업로드</button>
           <button class="excel-export auto-settlement-export" type="button">입력값 엑셀 추출</button>
         </div>

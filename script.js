@@ -64,6 +64,7 @@ const autoSettlementBoarding = document.querySelector("#auto-settlement-boarding
 const autoSettlementInstock = document.querySelector("#auto-settlement-instock");
 const autoSettlementFileInput = document.querySelector(".auto-settlement-file");
 const autoSettlementUpload = document.querySelector(".auto-settlement-upload");
+const autoSettlementDropzone = document.querySelector(".auto-settlement-dropzone");
 const autoSettlementExport = document.querySelector(".auto-settlement-export");
 const autoSettlementResult = document.querySelector(".auto-settlement-result");
 const importCostPanel = document.querySelector(".import-cost-panel");
@@ -1331,6 +1332,19 @@ async function readAutoSettlementFile(file) {
   updateAutoSettlementCalculations();
 }
 
+function handleAutoSettlementFile(file) {
+  if (!file) {
+    return;
+  }
+
+  if (!/\.(xlsx|xlsm)$/i.test(file.name)) {
+    renderAutoSettlementResult("정산서 엑셀 파일(.xlsx, .xlsm)을 올려주세요.");
+    return;
+  }
+
+  readAutoSettlementFile(file);
+}
+
 function renderAutoSettlementResult(message = "") {
   if (!autoSettlementResult) {
     return;
@@ -1338,7 +1352,6 @@ function renderAutoSettlementResult(message = "") {
 
   const rows = [
     ["담당자 파일", autoSettlementState.targetFile || "담당자 이름 입력 후 확인"],
-    ["정산서 파일", autoSettlementState.settlementFile || "업로드 필요"],
     ["PO 번호", autoSettlementState.poNo || "정산서 파일명에서 추출 예정"],
     ["선적일자", autoSettlementState.boardingDate || "직접 입력 필요"],
     ["입고일자", autoSettlementState.instockDate || "직접 입력 필요"],
@@ -2361,14 +2374,31 @@ autoSettlementQuantity.addEventListener("input", updateAutoSettlementCalculation
 autoSettlementBoarding.addEventListener("input", updateAutoSettlementCalculations);
 autoSettlementInstock.addEventListener("input", updateAutoSettlementCalculations);
 autoSettlementUpload.addEventListener("click", () => autoSettlementFileInput.click());
+autoSettlementDropzone.addEventListener("click", () => autoSettlementFileInput.click());
+autoSettlementDropzone.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    autoSettlementFileInput.click();
+  }
+});
+autoSettlementDropzone.addEventListener("dragover", (event) => {
+  event.preventDefault();
+  autoSettlementDropzone.classList.add("is-dragover");
+});
+autoSettlementDropzone.addEventListener("dragleave", () => {
+  autoSettlementDropzone.classList.remove("is-dragover");
+});
+autoSettlementDropzone.addEventListener("drop", (event) => {
+  event.preventDefault();
+  autoSettlementDropzone.classList.remove("is-dragover");
+  handleAutoSettlementFile(event.dataTransfer.files && event.dataTransfer.files[0]);
+});
 autoSettlementExport.addEventListener("click", exportAutoSettlementSummary);
 autoSettlementFileInput.addEventListener("change", () => {
   const file = autoSettlementFileInput.files[0];
   autoSettlementFileInput.value = "";
 
-  if (file) {
-    readAutoSettlementFile(file);
-  }
+  handleAutoSettlementFile(file);
 });
 worklogClose.addEventListener("click", closeWorklog);
 worklogClearButton.addEventListener("click", clearWorklog);

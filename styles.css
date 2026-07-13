@@ -844,6 +844,36 @@ body.detail-open {
   gap: 10px;
 }
 
+.auto-settlement-dropzone {
+  margin-top: 18px;
+  padding: 24px;
+  display: grid;
+  place-items: center;
+  min-height: 120px;
+  border: 2px dashed #b9c7da;
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 800;
+  text-align: center;
+  background: #fbfcff;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.auto-settlement-dropzone p {
+  margin: 0;
+}
+
+.auto-settlement-dropzone:hover,
+.auto-settlement-dropzone:focus-visible,
+.auto-settlement-dropzone.is-dragover {
+  outline: none;
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
 .auto-settlement-summary {
   display: grid;
   gap: 8px;
