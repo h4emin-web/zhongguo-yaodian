@@ -66,6 +66,8 @@ const autoSettlementFileInput = document.querySelector(".auto-settlement-file");
 const autoSettlementUpload = document.querySelector(".auto-settlement-upload");
 const autoSettlementDropzone = document.querySelector(".auto-settlement-dropzone");
 const autoSettlementExport = document.querySelector(".auto-settlement-export");
+const autoExchangeFetch = document.querySelector(".auto-exchange-fetch");
+const autoExchangeResult = document.querySelector(".auto-exchange-result");
 const autoSettlementResult = document.querySelector(".auto-settlement-result");
 const importCostPanel = document.querySelector(".import-cost-panel");
 const importPriceInput = document.querySelector("#import-price-input");
@@ -1433,6 +1435,47 @@ async function exportAutoSettlementSummary() {
   URL.revokeObjectURL(url);
 }
 
+async function fetchAutoSettlementExchangeRate() {
+  const poNo = autoSettlementState.poNo || extractPoNo(autoSettlementState.settlementFile);
+
+  if (!poNo) {
+    autoExchangeResult.innerHTML = '<p class="status-error">먼저 정산서 파일을 올려 PO 번호를 확인해주세요.</p>';
+    return;
+  }
+
+  if (!supabaseClient) {
+    autoExchangeResult.innerHTML = '<p class="status-error">Supabase 연결 설정이 없어 ERP 조회를 할 수 없습니다.</p>';
+    return;
+  }
+
+  autoExchangeFetch.disabled = true;
+  autoExchangeResult.innerHTML = '<p class="empty-result">ERP에서 환율을 조회하는 중입니다.</p>';
+
+  try {
+    const { data, error } = await supabaseClient.functions.invoke("ecount-exchange-rate", {
+      body: { poNo }
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data || !data.ok) {
+      autoExchangeResult.innerHTML = `<p class="status-error">${escapeHtml((data && data.error) || "ERP 환율 조회에 실패했습니다.")}</p>`;
+      return;
+    }
+
+    autoSettlementExchange.value = data.exchangeRate;
+    updateAutoSettlementCalculations();
+    autoExchangeResult.innerHTML = `<p class="status-ok">ERP 환율 ${escapeHtml(data.exchangeRate)} 적용 완료</p>`;
+  } catch (error) {
+    console.error(error);
+    autoExchangeResult.innerHTML = '<p class="status-error">ERP 환율 조회 중 오류가 발생했습니다.</p>';
+  } finally {
+    autoExchangeFetch.disabled = false;
+  }
+}
+
 function closeToolsDropdown() {
   toolsTrigger.setAttribute("aria-expanded", "false");
 
@@ -2374,6 +2417,7 @@ autoSettlementQuantity.addEventListener("input", updateAutoSettlementCalculation
 autoSettlementBoarding.addEventListener("input", updateAutoSettlementCalculations);
 autoSettlementInstock.addEventListener("input", updateAutoSettlementCalculations);
 autoSettlementUpload.addEventListener("click", () => autoSettlementFileInput.click());
+autoExchangeFetch.addEventListener("click", fetchAutoSettlementExchangeRate);
 autoSettlementDropzone.addEventListener("click", () => autoSettlementFileInput.click());
 autoSettlementDropzone.addEventListener("keydown", (event) => {
   if (event.key === "Enter" || event.key === " ") {
