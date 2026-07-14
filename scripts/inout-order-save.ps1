@@ -146,15 +146,25 @@ function Find-OrderRow {
 }
 
 function Start-EnterKeyHelper {
+  param([string]$WorkbookName = "")
+
   $command = @"
 Start-Sleep -Milliseconds 1200
 `$shell = New-Object -ComObject WScript.Shell
-for (`$i = 0; `$i -lt 12; `$i++) {
-  if (`$shell.AppActivate("Excel")) {
-    Start-Sleep -Milliseconds 250
-    `$shell.SendKeys("{ENTER}")
+`$titles = @("Microsoft Excel", "Excel", "$WorkbookName") | Where-Object { `$_ }
+for (`$i = 0; `$i -lt 75; `$i++) {
+  foreach (`$title in `$titles) {
+    if (`$shell.AppActivate(`$title)) {
+      Start-Sleep -Milliseconds 150
+      `$shell.SendKeys("{ENTER}")
+      break
+    }
   }
-  Start-Sleep -Milliseconds 500
+  if (`$i -lt 10) {
+    Start-Sleep -Milliseconds 250
+  } else {
+    Start-Sleep -Milliseconds 900
+  }
 }
 "@
   $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))
@@ -276,7 +286,7 @@ try {
 
     $sheet.Range("A$rowIndex").Select() | Out-Null
     Run-WorkbookMacro $excel $workbook "출고수정선택"
-    Start-EnterKeyHelper
+    Start-EnterKeyHelper $workbook.Name
     Run-WorkbookMacro $excel $workbook "출고수정"
 
     Start-Sleep -Milliseconds 700
