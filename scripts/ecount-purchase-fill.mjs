@@ -219,8 +219,16 @@ async function savePurchaseForm(page) {
     await dialog.accept();
   });
 
-  await page.getByText(saveText, { exact: true }).first().click();
-  await page.waitForTimeout(8000);
+  const saveButton = page.getByText(saveText, { exact: true }).first();
+  const clicked = await saveButton.click({ timeout: 5000 }).then(() => true).catch(() => false);
+
+  if (!clicked) {
+    await page.keyboard.press("F8").catch(() => {});
+    await page.waitForTimeout(800);
+    await page.mouse.click(271, 807).catch(() => {});
+  }
+
+  await page.waitForTimeout(6000);
 
   return { dialogMessage };
 }

@@ -264,7 +264,7 @@ function lookupOfferDates(poNo) {
   throw new Error(`오퍼발행내역에서 PO '${poNo}' 를 찾지 못했습니다.${powerShellLookupError ? ` PowerShell 조회 오류: ${powerShellLookupError}` : ""}`);
 }
 
-function runNode(scriptPath, args, env = {}) {
+function runNode(scriptPath, args, env = {}, options = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [
       scriptPath,
@@ -279,6 +279,19 @@ function runNode(scriptPath, args, env = {}) {
     });
     let stdout = "";
     let stderr = "";
+    let settled = false;
+    const timeoutMs = Number(options.timeoutMs || 0);
+    const timer = timeoutMs > 0
+      ? setTimeout(() => {
+        if (settled) {
+          return;
+        }
+
+        settled = true;
+        spawn("taskkill", ["/PID", String(child.pid), "/T", "/F"], { windowsHide: true }).on("error", () => {});
+        reject(new Error(`Node automation timed out after ${timeoutMs} ms. ${stderr.trim() || stdout.trim()}`.trim()));
+      }, timeoutMs)
+      : null;
 
     child.stdout.on("data", (chunk) => {
       stdout += chunk.toString("utf8");
@@ -286,8 +299,27 @@ function runNode(scriptPath, args, env = {}) {
     child.stderr.on("data", (chunk) => {
       stderr += chunk.toString("utf8");
     });
-    child.on("error", reject);
+    child.on("error", (error) => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      if (timer) {
+        clearTimeout(timer);
+      }
+      reject(error);
+    });
     child.on("close", (code) => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      if (timer) {
+        clearTimeout(timer);
+      }
+
       if (code !== 0) {
         reject(new Error(stderr.trim() || stdout.trim() || `Node exited with ${code}`));
         return;
@@ -338,6 +370,8 @@ async function runEcountPurchaseFill(payload, options = {}) {
       HEADLESS: "false",
       KEEP_OPEN_MS: options.keepOpenMs ?? "0",
       ECOUNT_PURCHASE_AUTO_SAVE: payload.autoSave ? "1" : "0"
+    }, {
+      timeoutMs: Number(process.env.ECOUNT_PURCHASE_TIMEOUT_MS || "180000")
     });
 
     return JSON.parse(output.split(/\r?\n/).filter(Boolean).pop() || "{}");

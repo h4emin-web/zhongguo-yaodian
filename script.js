@@ -1498,7 +1498,7 @@ async function saveAutoSettlementToWorkbook() {
   });
 
   autoSettlementSave.disabled = true;
-  autoSettlementResult.innerHTML = '<p class="empty-result">수입정산서 파일을 열어 저장 중입니다.</p>';
+  autoSettlementResult.innerHTML = '<p class="empty-result">수입정산서 저장 후 입출고 지시서와 ERP 구매 저장을 진행 중입니다. ERP 저장은 잠시 걸릴 수 있습니다.</p>';
 
   try {
     const response = await fetch(automationUrl, {
