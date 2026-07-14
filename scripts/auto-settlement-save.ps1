@@ -345,9 +345,9 @@ try {
   $duty = Get-LastRegexNumber $taxText "관세"
   $importVat = Get-LastRegexNumber $taxText "부가세"
 
-  $port = Sum-LeftLabels $sourceSheet @("입항료", "콘테이너세", "터미날 취급료", "화물적임료", "선박/항공 운임", "셔틀료", "하역료")
+  $port = Sum-LeftLabels $sourceSheet @("입항료", "콘테이너세", "터미날 취급료", "화물적임료", "선박/항공 운임", "셔틀료")
   $transport = Sum-LeftLabels $sourceSheet @("시외 운송료", "시내 운송료", "철 도 운 송 료", "취급수수료 H/C")
-  $warehouse = Sum-LeftLabels $sourceSheet @("보관료", "출고상차료")
+  $warehouse = Sum-LeftLabels $sourceSheet @("보관료", "출고상차료", "하역료")
   $insurance = Sum-LeftLabels $sourceSheet @("화 재 보 험 료")
   $quarantine = Sum-RightLabels $sourceSheet @("검역수수료", "검역교통비")
   $clearance = Sum-RightLabels $sourceSheet @("통관수수료", "부대수수료", "임개수수료", "타장수수료", "인지대", "복사대", "팩시밀리 대", "시외 전화료")
