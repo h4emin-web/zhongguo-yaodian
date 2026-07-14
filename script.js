@@ -134,7 +134,7 @@ let autoSettlementState = {
   foreignAmount: "",
   krwAmount: "",
   batchItems: [],
-  batchRatioBasis: "tax"
+  batchRatioBasis: "quantity"
 };
 let autoSettlementSelectedFile = null;
 
@@ -1338,6 +1338,19 @@ function collectAutoSettlementBatchItems() {
   }));
 }
 
+function resolveAutoSettlementBatchRatioBasis(batchItems = collectAutoSettlementBatchItems()) {
+  const selected = autoSettlementBatchRatio?.value || "quantity";
+
+  if (selected === "quantity") {
+    return "quantity";
+  }
+
+  const hasMissingVat = batchItems.some((item) => !item.vat);
+  const allHaveQuantity = batchItems.length > 0 && batchItems.every((item) => item.quantity);
+
+  return hasMissingVat && allHaveQuantity ? "quantity" : "tax";
+}
+
 function renderAutoSettlementBatchRows() {
   if (!autoSettlementBatchRows || !autoSettlementBatchCount) {
     return;
@@ -1399,8 +1412,8 @@ function updateAutoSettlementCalculations() {
 
   autoSettlementState.targetFile = findAutoSettlementTargetFile(managerName);
   autoSettlementState.exchangeRate = autoSettlementExchange.value.trim();
-  autoSettlementState.batchRatioBasis = autoSettlementBatchRatio?.value || "tax";
   autoSettlementState.batchItems = collectAutoSettlementBatchItems();
+  autoSettlementState.batchRatioBasis = resolveAutoSettlementBatchRatioBasis(autoSettlementState.batchItems);
 
   if (autoSettlementState.mode === "batch") {
     autoSettlementState.quantity = "";
@@ -1459,7 +1472,7 @@ async function saveAutoSettlementToWorkbook() {
 
   const isBatch = autoSettlementState.mode === "batch";
   const batchItems = isBatch ? collectAutoSettlementBatchItems() : [];
-  autoSettlementState.batchRatioBasis = autoSettlementBatchRatio?.value || "tax";
+  autoSettlementState.batchRatioBasis = resolveAutoSettlementBatchRatioBasis(batchItems);
   const payload = {
     settlementMode: autoSettlementState.mode,
     managerName: autoSettlementManager.value.trim(),
@@ -1574,7 +1587,7 @@ function renderAutoSettlementResult(message = "") {
   const rows = isBatch ? [
     ["담당자 파일", autoSettlementState.targetFile || "담당자 이름 입력 후 확인"],
     ["처리 방식", "일괄"],
-    ["비율 기준", (autoSettlementBatchRatio?.value || "tax") === "quantity" ? "수량" : "부가세/관세"],
+    ["비율 기준", resolveAutoSettlementBatchRatioBasis(batchItems) === "quantity" ? "수량" : "부가세/관세"],
     ["일괄 건수", String(batchItems.length || 0)],
     ["ERP 환율", autoSettlementState.exchangeRate || "수동 입력 필요"]
   ] : [

@@ -432,6 +432,17 @@ function parseBatchItems(value) {
   })).filter((item) => item.poNo);
 }
 
+function resolveBatchRatioBasis(fields, batchItems) {
+  if (fields.batchRatioBasis === "quantity") {
+    return "quantity";
+  }
+
+  const hasMissingVat = batchItems.some((item) => !item.vat);
+  const allHaveQuantity = batchItems.length > 0 && batchItems.every((item) => item.quantity);
+
+  return hasMissingVat && allHaveQuantity ? "quantity" : "tax";
+}
+
 async function saveAutoSettlement(req, res) {
   let tempDir = "";
 
@@ -452,8 +463,8 @@ async function saveAutoSettlement(req, res) {
     const settlementPath = join(tempDir, `settlement-upload${extension}`);
     await writeFile(settlementPath, file.buffer);
     const settlementMode = fields.settlementMode === "batch" ? "batch" : "single";
-    const batchRatioBasis = fields.batchRatioBasis === "quantity" ? "quantity" : "tax";
     const batchItems = settlementMode === "batch" ? parseBatchItems(fields.batchItems) : [];
+    const batchRatioBasis = settlementMode === "batch" ? resolveBatchRatioBasis(fields, batchItems) : "tax";
     const batchItemsWithDates = settlementMode === "batch"
       ? batchItems.map((item) => {
         const dates = lookupOfferDates(item.poNo);
