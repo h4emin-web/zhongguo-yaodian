@@ -17,6 +17,8 @@ trap {
   exit 1
 }
 
+$xlRight = -4152
+
 $DefaultTestTargetPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "3.수입정산서C3-1(26년)-박성윤,송하형,강해민 - 복사본.xlsm"
 $TargetPath = if ($env:AUTO_SETTLEMENT_TARGET_PATH) {
   $env:AUTO_SETTLEMENT_TARGET_PATH
@@ -415,6 +417,7 @@ try {
     $unitPriceFormula = '=ROUND(H{0}/VALUE(SUBSTITUTE(SUBSTITUTE(LOWER(TRIM(B{1})),"kg",""),",","")),0)' -f ($startRow + 13), ($startRow + 2)
     $targetSheet.Cells.Item($startRow + 4, 6).Formula = $unitPriceFormula
     $targetSheet.Cells.Item($startRow + 4, 6).NumberFormat = "#,##0"
+    $targetSheet.Cells.Item($startRow + 4, 6).HorizontalAlignment = $xlRight
     $targetSheet.Range("F$($startRow + 4):K$($startRow + 14)").Calculate() | Out-Null
 
     $unitPrice = [math]::Round((Convert-ToNumber ($targetSheet.Cells.Item($startRow + 4, 6).Value2)), 0)
