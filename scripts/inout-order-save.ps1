@@ -19,6 +19,46 @@ trap {
 $xlUp = -4162
 $xlCalculationAutomatic = -4105
 
+function Invoke-WithComRetry {
+  param(
+    [Parameter(Mandatory=$true)][scriptblock]$Operation,
+    [string]$Label = "Excel 작업",
+    [int]$Attempts = 90,
+    [int]$DelayMs = 500
+  )
+
+  $lastError = $null
+
+  for ($attempt = 1; $attempt -le $Attempts; $attempt += 1) {
+    try {
+      return & $Operation
+    } catch {
+      $lastError = $_
+      $message = $_.Exception.Message
+      $hresult = try { [uint32]$_.Exception.HResult } catch { 0 }
+      $isBusy =
+        $message -like "*Call was rejected by callee*" -or
+        $message -like "*RPC_E_CALL_REJECTED*" -or
+        $message -like "*0x80010001*" -or
+        $message -like "*0x800AC472*" -or
+        $message -like "*0x800A9C68*" -or
+        $hresult -eq 0x80010001 -or
+        $hresult -eq 0x800AC472 -or
+        $hresult -eq 0x800A9C68
+
+      if (-not $isBusy -or $attempt -eq $Attempts) {
+        throw
+      }
+
+      Start-Sleep -Milliseconds $DelayMs
+    }
+  }
+
+  if ($lastError) {
+    throw "$Label 실패: $($lastError.Exception.Message)"
+  }
+}
+
 function Convert-ToNumber {
   param($Value)
 
@@ -128,7 +168,7 @@ function Find-Workbook {
 function Run-WorkbookMacro {
   param($Excel, $Workbook, [string]$MacroName)
   $macro = "'{0}'!{1}" -f $Workbook.Name, $MacroName
-  $Excel.Run($macro) | Out-Null
+  Invoke-WithComRetry { $Excel.Run($macro) | Out-Null } "매크로 실행: $MacroName"
 }
 
 function Find-OrderRow {
@@ -202,27 +242,27 @@ $oldEnableEvents = $null
 $oldCalculation = $null
 
 try {
-  $excel.Visible = $true
-  $oldDisplayAlerts = $excel.DisplayAlerts
-  $oldScreenUpdating = $excel.ScreenUpdating
-  $oldEnableEvents = $excel.EnableEvents
-  $oldCalculation = $excel.Calculation
-  $excel.DisplayAlerts = $false
+  Invoke-WithComRetry { $excel.Visible = $true } "Excel 표시"
+  $oldDisplayAlerts = Invoke-WithComRetry { $excel.DisplayAlerts } "DisplayAlerts 읽기"
+  $oldScreenUpdating = Invoke-WithComRetry { $excel.ScreenUpdating } "ScreenUpdating 읽기"
+  $oldEnableEvents = Invoke-WithComRetry { $excel.EnableEvents } "EnableEvents 읽기"
+  $oldCalculation = Invoke-WithComRetry { $excel.Calculation } "Calculation 읽기"
+  Invoke-WithComRetry { $excel.DisplayAlerts = $false } "DisplayAlerts 설정"
   # This workbook's save macros depend on the active selection/event flow.
-  $excel.ScreenUpdating = $true
-  $excel.EnableEvents = $true
-  $excel.Calculation = $xlCalculationAutomatic
+  Invoke-WithComRetry { $excel.ScreenUpdating = $true } "ScreenUpdating 설정"
+  Invoke-WithComRetry { $excel.EnableEvents = $true } "EnableEvents 설정"
+  Invoke-WithComRetry { $excel.Calculation = $xlCalculationAutomatic } "Calculation 설정"
 
-  $workbook = Find-Workbook $excel $resolvedPath
+  $workbook = Invoke-WithComRetry { Find-Workbook $excel $resolvedPath } "입출고 통합문서 확인"
 
   if (-not $workbook) {
-    $workbook = $excel.Workbooks.Open($resolvedPath)
+    $workbook = Invoke-WithComRetry { $excel.Workbooks.Open($resolvedPath) } "입출고 통합문서 열기"
     $openedWorkbook = $true
   }
 
-  $sheet = $workbook.Worksheets.Item("출고지시")
-  $sheet.Activate() | Out-Null
-  $sheet.Range("B1").Value2 = $ProductCode
+  $sheet = Invoke-WithComRetry { $workbook.Worksheets.Item("출고지시") } "출고지시 시트 열기"
+  Invoke-WithComRetry { $sheet.Activate() | Out-Null } "출고지시 시트 활성화"
+  Invoke-WithComRetry { $sheet.Range("B1").Value2 = $ProductCode } "품목코드 검색어 입력"
 
   Run-WorkbookMacro $excel $workbook "조회_메이커"
 

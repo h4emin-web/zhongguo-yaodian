@@ -37,6 +37,10 @@ function json(res, body, status = 200) {
   res.end(JSON.stringify(body));
 }
 
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function readBody(req) {
   const chunks = [];
 
@@ -492,6 +496,7 @@ async function saveAutoSettlement(req, res) {
 
     if (process.env.AUTO_SETTLEMENT_INOUT_SAVE === "1") {
       try {
+        await delay(Number(process.env.AUTO_SETTLEMENT_EXCEL_SETTLE_MS || "3000"));
         inout = [];
 
         for (const item of resultItems) {
