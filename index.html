@@ -436,6 +436,13 @@
             <label for="auto-settlement-batch-count">일괄 건수</label>
             <input id="auto-settlement-batch-count" type="number" min="2" max="12" step="1" value="2">
           </div>
+          <div class="margin-calc-field auto-batch-ratio" hidden>
+            <label for="auto-settlement-batch-ratio">일괄 비율 기준</label>
+            <select id="auto-settlement-batch-ratio">
+              <option value="tax">부가세/관세</option>
+              <option value="quantity">수량</option>
+            </select>
+          </div>
         </div>
         <div class="auto-settlement-batch" hidden>
           <div class="auto-settlement-batch-head">

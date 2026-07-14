@@ -66,6 +66,8 @@ const autoSettlementInstock = document.querySelector("#auto-settlement-instock")
 const autoSettlementSingleFields = document.querySelectorAll(".auto-single-field");
 const autoSettlementBatchCountField = document.querySelector(".auto-batch-count");
 const autoSettlementBatchCount = document.querySelector("#auto-settlement-batch-count");
+const autoSettlementBatchRatioField = document.querySelector(".auto-batch-ratio");
+const autoSettlementBatchRatio = document.querySelector("#auto-settlement-batch-ratio");
 const autoSettlementBatchPanel = document.querySelector(".auto-settlement-batch");
 const autoSettlementBatchRows = document.querySelector(".auto-settlement-batch-rows");
 const autoSettlementFileInput = document.querySelector(".auto-settlement-file");
@@ -131,7 +133,8 @@ let autoSettlementState = {
   purchaseUnitPrice: "",
   foreignAmount: "",
   krwAmount: "",
-  batchItems: []
+  batchItems: [],
+  batchRatioBasis: "tax"
 };
 let autoSettlementSelectedFile = null;
 
@@ -1372,6 +1375,10 @@ function syncAutoSettlementMode() {
     autoSettlementBatchCountField.hidden = !isBatch;
   }
 
+  if (autoSettlementBatchRatioField) {
+    autoSettlementBatchRatioField.hidden = !isBatch;
+  }
+
   if (autoSettlementBatchPanel) {
     autoSettlementBatchPanel.hidden = !isBatch;
   }
@@ -1392,6 +1399,7 @@ function updateAutoSettlementCalculations() {
 
   autoSettlementState.targetFile = findAutoSettlementTargetFile(managerName);
   autoSettlementState.exchangeRate = autoSettlementExchange.value.trim();
+  autoSettlementState.batchRatioBasis = autoSettlementBatchRatio?.value || "tax";
   autoSettlementState.batchItems = collectAutoSettlementBatchItems();
 
   if (autoSettlementState.mode === "batch") {
@@ -1451,6 +1459,7 @@ async function saveAutoSettlementToWorkbook() {
 
   const isBatch = autoSettlementState.mode === "batch";
   const batchItems = isBatch ? collectAutoSettlementBatchItems() : [];
+  autoSettlementState.batchRatioBasis = autoSettlementBatchRatio?.value || "tax";
   const payload = {
     settlementMode: autoSettlementState.mode,
     managerName: autoSettlementManager.value.trim(),
@@ -1459,6 +1468,7 @@ async function saveAutoSettlementToWorkbook() {
     instockDate: autoSettlementState.instockDate,
     exchangeRate: autoSettlementState.exchangeRate,
     quantity: autoSettlementState.quantity,
+    batchRatioBasis: autoSettlementState.batchRatioBasis,
     batchItems
   };
   const missing = [
@@ -1478,7 +1488,7 @@ async function saveAutoSettlementToWorkbook() {
       if (!item.quantity) {
         missing.push([`${index + 1}번 수량`, ""]);
       }
-      if (!item.vat) {
+      if (payload.batchRatioBasis !== "quantity" && !item.vat) {
         missing.push([`${index + 1}번 부가세`, ""]);
       }
     });
@@ -1564,9 +1574,9 @@ function renderAutoSettlementResult(message = "") {
   const rows = isBatch ? [
     ["담당자 파일", autoSettlementState.targetFile || "담당자 이름 입력 후 확인"],
     ["처리 방식", "일괄"],
+    ["비율 기준", (autoSettlementBatchRatio?.value || "tax") === "quantity" ? "수량" : "부가세/관세"],
     ["일괄 건수", String(batchItems.length || 0)],
-    ["ERP 환율", autoSettlementState.exchangeRate || "수동 입력 필요"],
-    ["비율 기준", "관세가 모두 있으면 관세, 아니면 부가세"]
+    ["ERP 환율", autoSettlementState.exchangeRate || "수동 입력 필요"]
   ] : [
     ["담당자 파일", autoSettlementState.targetFile || "담당자 이름 입력 후 확인"],
     ["PO 번호", autoSettlementState.poNo || "정산서 파일명에서 추출 예정"],
@@ -2660,6 +2670,7 @@ autoSettlementExchange.addEventListener("input", updateAutoSettlementCalculation
 autoSettlementQuantity.addEventListener("input", updateAutoSettlementCalculations);
 autoSettlementBoarding.addEventListener("input", updateAutoSettlementCalculations);
 autoSettlementInstock.addEventListener("input", updateAutoSettlementCalculations);
+autoSettlementBatchRatio.addEventListener("change", updateAutoSettlementCalculations);
 autoSettlementBatchCount.addEventListener("input", () => {
   renderAutoSettlementBatchRows();
   updateAutoSettlementCalculations();

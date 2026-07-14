@@ -7,7 +7,8 @@
   [Parameter(Mandatory = $true)][string]$ExchangeRate,
   [string]$Quantity = "",
   [string]$BatchItemsJson = "",
-  [string]$BatchItemsPath = ""
+  [string]$BatchItemsPath = "",
+  [string]$BatchRatioBasis = "tax"
 )
 
 $ErrorActionPreference = "Stop"
@@ -177,7 +178,8 @@ function Get-SettlementItems {
     [string]$SingleBoardingDate,
     [string]$SingleInstockDate,
     [double]$DefaultDuty,
-    [double]$DefaultVat
+    [double]$DefaultVat,
+    [string]$RatioBasisMode = "tax"
   )
 
   $items = @()
@@ -194,14 +196,19 @@ function Get-SettlementItems {
 
       $vat = Convert-ToNumber $raw.vat
       $dutyValue = Convert-ToNumber $raw.duty
+      $quantityValue = Convert-ToNumber $raw.quantity
 
-      if ($vat -le 0) {
+      if ($RatioBasisMode -ne "quantity" -and $vat -le 0) {
         throw "일괄 PO '$po' 의 부가세를 입력해주세요."
+      }
+
+      if ($quantityValue -le 0) {
+        throw "일괄 PO '$po' 의 수량을 입력해주세요."
       }
 
       $items += [pscustomobject]@{
         PoNo = $po
-        Quantity = Convert-ToNumber $raw.quantity
+        Quantity = $quantityValue
         BoardingDate = [string]$raw.boardingDate
         InstockDate = [string]$raw.instockDate
         Duty = $dutyValue
@@ -243,12 +250,17 @@ function Get-SettlementItems {
     return @($items)
   }
 
-  $allHaveDuty = @($items | Where-Object { $_.Duty -gt 0 }).Count -eq $items.Count
-  $basisName = if ($allHaveDuty) { "duty" } else { "vat" }
-  $basisTotal = if ($allHaveDuty) {
-    ($items | Measure-Object -Property Duty -Sum).Sum
+  if ($RatioBasisMode -eq "quantity") {
+    $basisName = "quantity"
+    $basisTotal = ($items | Measure-Object -Property Quantity -Sum).Sum
   } else {
-    ($items | Measure-Object -Property Vat -Sum).Sum
+    $allHaveDuty = @($items | Where-Object { $_.Duty -gt 0 }).Count -eq $items.Count
+    $basisName = if ($allHaveDuty) { "duty" } else { "vat" }
+    $basisTotal = if ($allHaveDuty) {
+      ($items | Measure-Object -Property Duty -Sum).Sum
+    } else {
+      ($items | Measure-Object -Property Vat -Sum).Sum
+    }
   }
 
   if ($basisTotal -le 0) {
@@ -256,7 +268,11 @@ function Get-SettlementItems {
   }
 
   for ($index = 0; $index -lt $items.Count; $index += 1) {
-    $basisValue = if ($basisName -eq "duty") { $items[$index].Duty } else { $items[$index].Vat }
+    $basisValue = switch ($basisName) {
+      "duty" { $items[$index].Duty }
+      "quantity" { $items[$index].Quantity }
+      default { $items[$index].Vat }
+    }
     $ratio = $basisValue / $basisTotal
 
     $items[$index].Ratio = $ratio
@@ -335,7 +351,8 @@ try {
   $insurance = Sum-LeftLabels $sourceSheet @("화 재 보 험 료")
   $quarantine = Sum-RightLabels $sourceSheet @("검역수수료", "검역교통비")
   $clearance = Sum-RightLabels $sourceSheet @("통관수수료", "부대수수료", "임개수수료", "타장수수료", "인지대", "복사대", "팩시밀리 대", "시외 전화료")
-  $items = @(Get-SettlementItems $BatchItemsJson $PoNo $Quantity $BoardingDate $InstockDate $duty $importVat)
+  $ratioBasisMode = if ($BatchRatioBasis -eq "quantity") { "quantity" } else { "tax" }
+  $items = @(Get-SettlementItems $BatchItemsJson $PoNo $Quantity $BoardingDate $InstockDate $duty $importVat $ratioBasisMode)
 
   $targetWorkbook = $excel.Workbooks.Open($targetFile.FullName)
 
@@ -375,8 +392,20 @@ try {
       throw "PO '$($item.PoNo)' 의 비율이 0입니다."
     }
 
-    $dutyBase = if ($item.Duty -gt 0) { $item.Duty } else { 0 }
-    $vatBase = if ($item.Vat -gt 0) { $item.Vat / $ratio } else { 0 }
+    $dutyBase = if ($item.Duty -gt 0) {
+      $item.Duty
+    } elseif ($item.RatioBasis -eq "quantity" -and $duty -gt 0) {
+      $duty
+    } else {
+      0
+    }
+    $vatBase = if ($item.Vat -gt 0) {
+      $item.Vat / $ratio
+    } elseif ($item.RatioBasis -eq "quantity" -and $importVat -gt 0) {
+      $importVat
+    } else {
+      0
+    }
 
     Set-DateCell $targetSheet "F$($startRow + 2)" $boarding
     Set-DateCell $targetSheet "O$($startRow + 5)" $instock

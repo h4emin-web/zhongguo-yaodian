@@ -427,7 +427,8 @@ function parseBatchItems(value) {
     poNo: String(item.poNo || "").trim(),
     quantity: String(item.quantity || "").trim(),
     vat: String(item.vat || "").trim(),
-    duty: String(item.duty || "").trim()
+    duty: String(item.duty || "").trim(),
+    ratioBasis: String(item.ratioBasis || "").trim()
   })).filter((item) => item.poNo);
 }
 
@@ -451,12 +452,14 @@ async function saveAutoSettlement(req, res) {
     const settlementPath = join(tempDir, `settlement-upload${extension}`);
     await writeFile(settlementPath, file.buffer);
     const settlementMode = fields.settlementMode === "batch" ? "batch" : "single";
+    const batchRatioBasis = fields.batchRatioBasis === "quantity" ? "quantity" : "tax";
     const batchItems = settlementMode === "batch" ? parseBatchItems(fields.batchItems) : [];
     const batchItemsWithDates = settlementMode === "batch"
       ? batchItems.map((item) => {
         const dates = lookupOfferDates(item.poNo);
         return {
           ...item,
+          ratioBasis: batchRatioBasis,
           boardingDate: dates.boardingDate,
           instockDate: dates.instockDate
         };
@@ -481,7 +484,7 @@ async function saveAutoSettlement(req, res) {
     if (settlementMode === "batch") {
       const batchItemsPath = join(tempDir, "batch-items.json");
       await writeFile(batchItemsPath, JSON.stringify(batchItemsWithDates), "utf8");
-      powerShellArgs.push("-BatchItemsPath", batchItemsPath);
+      powerShellArgs.push("-BatchItemsPath", batchItemsPath, "-BatchRatioBasis", batchRatioBasis);
     }
 
     const output = await runPowerShell(join(ROOT, "scripts", "auto-settlement-save.ps1"), powerShellArgs);
