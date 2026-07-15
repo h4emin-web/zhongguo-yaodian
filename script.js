@@ -1249,7 +1249,7 @@ function openImportCertTool() {
 
 function openAutoSettlementTool() {
   lastFocusedCard = toolsTrigger;
-  modalLocked = false;
+  modalLocked = true;
   detailKicker.textContent = "Tools";
   detailTitle.textContent = "자동정산";
   detailDescription.textContent = "정산서 파일명과 오퍼발행내역의 Boarding/Instock 날짜, 환율을 기준으로 수입정산서와 ERP 구매입력을 처리합니다.";
@@ -2684,10 +2684,13 @@ autoSettlementQuantity.addEventListener("input", updateAutoSettlementCalculation
 autoSettlementBoarding.addEventListener("input", updateAutoSettlementCalculations);
 autoSettlementInstock.addEventListener("input", updateAutoSettlementCalculations);
 autoSettlementBatchRatio.addEventListener("change", updateAutoSettlementCalculations);
-autoSettlementBatchCount.addEventListener("input", () => {
+function handleAutoSettlementBatchCountChange() {
   renderAutoSettlementBatchRows();
   updateAutoSettlementCalculations();
-});
+}
+
+autoSettlementBatchCount.addEventListener("input", handleAutoSettlementBatchCountChange);
+autoSettlementBatchCount.addEventListener("change", handleAutoSettlementBatchCountChange);
 autoSettlementBatchRows.addEventListener("input", updateAutoSettlementCalculations);
 autoSettlementUpload.addEventListener("click", () => autoSettlementFileInput.click());
 autoExchangeFetch.addEventListener("click", fetchAutoSettlementExchangeRate);
