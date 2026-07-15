@@ -360,10 +360,12 @@ body.detail-open {
   inset: 0;
   z-index: 20;
   display: grid;
-  place-items: center;
+  align-items: start;
+  justify-items: center;
   padding: clamp(18px, 4vw, 48px);
   background: rgba(12, 20, 34, 0.46);
   opacity: 0;
+  overflow-y: auto;
   pointer-events: none;
   transition: opacity 180ms ease;
 }
@@ -375,9 +377,10 @@ body.detail-open {
 
 .detail-panel {
   width: min(100%, 1040px);
-  min-height: min(720px, calc(100vh - 64px));
+  min-height: 0;
+  max-height: calc(100vh - clamp(36px, 8vw, 96px));
+  overflow-y: auto;
   padding: clamp(28px, 5vw, 56px);
-  position: relative;
   border: 1px solid rgba(216, 224, 234, 0.9);
   border-radius: 8px;
   background: #ffffff;
@@ -391,9 +394,12 @@ body.detail-open {
 }
 
 .detail-close {
-  position: absolute;
-  top: 22px;
-  right: 22px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: block;
+  width: fit-content;
+  margin: 0 0 18px auto;
   padding: 10px 14px;
   border: 0;
   border-radius: 8px;
@@ -425,7 +431,7 @@ body.detail-open {
 
 .detail-panel h2 {
   margin: 0 0 14px;
-  padding-right: 92px;
+  padding-right: 0;
   font-size: clamp(32px, 6vw, 56px);
   line-height: 1.1;
 }
@@ -1361,8 +1367,8 @@ body.detail-open {
   }
 
   .detail-panel {
-    min-height: calc(100vh - 36px);
-    padding: 72px 22px 24px;
+    max-height: calc(100vh - 36px);
+    padding: 22px;
   }
 
   .detail-panel h2 {
