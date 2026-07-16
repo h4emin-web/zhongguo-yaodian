@@ -19,6 +19,19 @@ $xlUp = -4162
 $xlShiftDown = -4121
 $xlCalculationAutomatic = -4105
 
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+public static class MouseClicker {
+  [DllImport("user32.dll")]
+  public static extern bool SetCursorPos(int X, int Y);
+  [DllImport("user32.dll")]
+  public static extern void mouse_event(int dwFlags, int dx, int dy, int cButtons, int dwExtraInfo);
+  public const int MOUSEEVENTF_LEFTDOWN = 0x0002;
+  public const int MOUSEEVENTF_LEFTUP = 0x0004;
+}
+"@
+
 function U {
   param([int[]]$Codes)
   return -join ($Codes | ForEach-Object { [char]$_ })
@@ -170,6 +183,39 @@ function Invoke-FirstMacro {
   throw "$Label macro failed. $($errors -join ' / ')"
 }
 
+function Click-WorksheetCellCenter {
+  param($Excel, $Sheet, [string]$Address, [string]$Label)
+
+  Invoke-WithComRetry { $Sheet.Activate() | Out-Null } "activate sheet for $Label"
+  $range = Invoke-WithComRetry { $Sheet.Range($Address) } "range for $Label"
+  $window = Invoke-WithComRetry { $Excel.ActiveWindow } "active window for $Label"
+  $x = Invoke-WithComRetry { $window.PointsToScreenPixelsX($range.Left + ($range.Width / 2)) } "screen x for $Label"
+  $y = Invoke-WithComRetry { $window.PointsToScreenPixelsY($range.Top + ($range.Height / 2)) } "screen y for $Label"
+
+  [MouseClicker]::SetCursorPos([int]$x, [int]$y) | Out-Null
+  Start-Sleep -Milliseconds 150
+  [MouseClicker]::mouse_event([MouseClicker]::MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
+  Start-Sleep -Milliseconds 80
+  [MouseClicker]::mouse_event([MouseClicker]::MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
+  Start-Sleep -Milliseconds 700
+  return "clicked:$Address"
+}
+
+function Invoke-MacroOrColumnButton {
+  param($Excel, $Workbook, $Sheet, [string[]]$MacroNames, [string]$ColumnLetter, [string]$Label)
+
+  try {
+    return Invoke-FirstMacro $Excel $Workbook $Sheet $MacroNames $Label
+  } catch {
+    $macroError = $_.Exception.Message
+    try {
+      return Click-WorksheetCellCenter $Excel $Sheet ("{0}1" -f $ColumnLetter) $Label
+    } catch {
+      throw "$Label failed. Macro error: $macroError / Click error: $($_.Exception.Message)"
+    }
+  }
+}
+
 function Find-HeaderColumn {
   param($Sheet, [string[]]$Needles, [int]$MaxRows = 8, [int]$MaxColumns = 80)
 
@@ -309,11 +355,11 @@ try {
 
     try {
       Invoke-WithComRetry { $sheet.Range("A$newRow").Select() | Out-Null } "select new row"
-      $ranOrderSelectMacro = Invoke-FirstMacro $excel $workbook $sheet @($orderSelectMacroName, "OrderSelect", "SelectOrder") "in/out order select"
+      $ranOrderSelectMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($orderSelectMacroName, "OrderSelect", "SelectOrder") "A" "in/out order select"
       Invoke-WithComRetry { $sheet.Range("A$newRow").Select() | Out-Null } "select new row after order select"
-      $ranOrderNoMacro = Invoke-FirstMacro $excel $workbook $sheet @($orderNoMacroName, "OrderNo", "OrderNoInsert", "InsertOrderNo") "in/out order no"
+      $ranOrderNoMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($orderNoMacroName, "OrderNo", "OrderNoInsert", "InsertOrderNo") "B" "in/out order no"
       Invoke-WithComRetry { $sheet.Range("G$newRow").Select() | Out-Null } "select add cell"
-      $ranAddMacro = Invoke-FirstMacro $excel $workbook $sheet @($addMacroName, "Add", "Insert", "Append") "in/out add"
+      $ranAddMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($addMacroName, "Add", "Insert", "Append") "G" "in/out add"
     } catch {
       $macroWarning = "In/out order select/order no/add macro failed: $($_.Exception.Message)"
       throw $macroWarning
