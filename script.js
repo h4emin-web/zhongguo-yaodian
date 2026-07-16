@@ -54,6 +54,7 @@ const importCertDropzone = document.querySelector(".importcert-dropzone");
 const importCertFileInput = document.querySelector(".importcert-file-input");
 const importCertResult = document.querySelector(".importcert-result");
 const autoSettlementItem = document.querySelector('.tools-item[data-tool="auto-settlement"]');
+const pendingReceiptItem = document.querySelector('.tools-item[data-tool="pending-receipt"]');
 const autoSettlementPanel = document.querySelector(".auto-settlement-panel");
 const autoSettlementMode = document.querySelector("#auto-settlement-mode");
 const autoSettlementManager = document.querySelector("#auto-settlement-manager");
@@ -75,6 +76,17 @@ const autoSettlementDropzone = document.querySelector(".auto-settlement-dropzone
 const autoExchangeFetch = document.querySelector(".auto-exchange-fetch");
 const autoExchangeResult = document.querySelector(".auto-exchange-result");
 const autoSettlementResult = document.querySelector(".auto-settlement-result");
+const pendingReceiptPanel = document.querySelector(".pending-receipt-panel");
+const pendingReceiptMode = document.querySelector("#pending-receipt-mode");
+const pendingReceiptInstock = document.querySelector("#pending-receipt-instock");
+const pendingReceiptPo = document.querySelector("#pending-receipt-po");
+const pendingReceiptSingleField = document.querySelector(".pending-receipt-single-field");
+const pendingReceiptBatchCountField = document.querySelector(".pending-receipt-batch-count");
+const pendingReceiptBatchCount = document.querySelector("#pending-receipt-batch-count");
+const pendingReceiptBatchPanel = document.querySelector(".pending-receipt-batch");
+const pendingReceiptBatchRows = document.querySelector(".pending-receipt-batch-rows");
+const pendingReceiptRun = document.querySelector(".pending-receipt-run");
+const pendingReceiptResult = document.querySelector(".pending-receipt-result");
 const importCostPanel = document.querySelector(".import-cost-panel");
 const importPriceInput = document.querySelector("#import-price-input");
 const importPriceCurrency = document.querySelector("#import-price-currency");
@@ -135,6 +147,12 @@ let autoSettlementState = {
   batchRatioBasis: "quantity"
 };
 let autoSettlementSelectedFile = null;
+let pendingReceiptState = {
+  mode: "single",
+  poNo: "",
+  instockDate: "",
+  items: []
+};
 
 const AUTO_SETTLEMENT_TARGET_FILES = [
   "1.수입정산서C3-1(26년)-전서진,나지훈,보비.xlsm",
@@ -231,6 +249,7 @@ function openDetail(card) {
   showImportCostCalc(false);
   showImportCertPanel(false);
   showAutoSettlementPanel(false);
+  showPendingReceiptPanel(false);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
   document.body.classList.add("detail-open");
@@ -377,6 +396,20 @@ importCertItem.addEventListener("click", () => {
 autoSettlementItem.addEventListener("click", () => {
   openAutoSettlementTool();
 });
+
+pendingReceiptItem.addEventListener("click", () => {
+  openPendingReceiptTool();
+});
+
+pendingReceiptMode.addEventListener("change", updatePendingReceiptState);
+pendingReceiptInstock.addEventListener("input", updatePendingReceiptState);
+pendingReceiptPo.addEventListener("input", updatePendingReceiptState);
+pendingReceiptBatchCount.addEventListener("change", () => {
+  renderPendingReceiptRows();
+  updatePendingReceiptState();
+});
+pendingReceiptBatchRows.addEventListener("input", updatePendingReceiptState);
+pendingReceiptRun.addEventListener("click", runPendingReceiptProcess);
 
 importCertDropzone.addEventListener("click", () => importCertFileInput.click());
 importCertDropzone.addEventListener("keydown", (event) => {
@@ -1190,6 +1223,7 @@ function openImportCostCalculator() {
   showIndiawcSearch(false);
   showImportCertPanel(false);
   showAutoSettlementPanel(false);
+  showPendingReceiptPanel(false);
   showImportCostCalc(true);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
@@ -1210,6 +1244,15 @@ function showAutoSettlementPanel(isAutoSettlement) {
 
   if (isAutoSettlement) {
     renderAutoSettlementResult();
+  }
+}
+
+function showPendingReceiptPanel(isPendingReceipt) {
+  pendingReceiptPanel.hidden = !isPendingReceipt;
+
+  if (isPendingReceipt) {
+    renderPendingReceiptRows();
+    renderPendingReceiptResult();
   }
 }
 
@@ -1285,6 +1328,7 @@ function openImportCertTool() {
   showIndiawcSearch(false);
   showImportCostCalc(false);
   showAutoSettlementPanel(false);
+  showPendingReceiptPanel(false);
   showImportCertPanel(true);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
@@ -1306,11 +1350,34 @@ function openAutoSettlementTool() {
   showIndiawcSearch(false);
   showImportCostCalc(false);
   showImportCertPanel(false);
+  showPendingReceiptPanel(false);
   showAutoSettlementPanel(true);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
   document.body.classList.add("detail-open");
   autoSettlementManager.focus();
+}
+
+function openPendingReceiptTool() {
+  lastFocusedCard = pendingReceiptItem;
+  modalLocked = true;
+  detailKicker.textContent = "Tools";
+  detailTitle.textContent = "입고예정 처리";
+  detailDescription.textContent = "PO 번호와 향남입고일자를 기준으로 오퍼발행내역, 입출고지시서, ERP 구매관리, COA 복사를 처리합니다.";
+  showWcSearch(false);
+  showPoReceive(false);
+  showMfdsSearch(false);
+  showCnphSearch(false);
+  showUsdmfSearch(false);
+  showIndiawcSearch(false);
+  showImportCostCalc(false);
+  showImportCertPanel(false);
+  showAutoSettlementPanel(false);
+  showPendingReceiptPanel(true);
+  detailView.classList.add("is-open");
+  detailView.setAttribute("aria-hidden", "false");
+  document.body.classList.add("detail-open");
+  pendingReceiptPo.focus();
 }
 
 function extractPoNo(text) {
@@ -1448,6 +1515,170 @@ function syncAutoSettlementMode() {
     if (currentCount !== desiredCount) {
       renderAutoSettlementBatchRows();
     }
+  }
+}
+
+function collectPendingReceiptItems() {
+  if (!pendingReceiptBatchRows) {
+    return [];
+  }
+
+  return Array.from(pendingReceiptBatchRows.querySelectorAll(".pending-receipt-batch-row")).map((row) => ({
+    poNo: row.querySelector('[data-field="poNo"]').value.trim()
+  })).filter((item) => item.poNo);
+}
+
+function renderPendingReceiptRows() {
+  if (!pendingReceiptBatchRows || !pendingReceiptBatchCount) {
+    return;
+  }
+
+  const previous = collectPendingReceiptItems();
+  const count = Math.max(2, Math.min(12, Number(pendingReceiptBatchCount.value) || 2));
+  pendingReceiptBatchCount.value = String(count);
+  pendingReceiptBatchRows.innerHTML = "";
+
+  for (let index = 0; index < count; index += 1) {
+    const item = previous[index] || pendingReceiptState.items[index] || {};
+    const row = document.createElement("div");
+    row.className = "pending-receipt-batch-row";
+    row.innerHTML = `<input data-field="poNo" type="text" placeholder="Z26-00000" autocomplete="off" value="${escapeHtml(item.poNo || "")}">`;
+    pendingReceiptBatchRows.appendChild(row);
+  }
+}
+
+function syncPendingReceiptMode() {
+  const mode = pendingReceiptMode?.value || "single";
+  pendingReceiptState.mode = mode;
+  const isBatch = mode === "batch";
+
+  if (pendingReceiptSingleField) {
+    pendingReceiptSingleField.hidden = isBatch;
+  }
+
+  if (pendingReceiptBatchCountField) {
+    pendingReceiptBatchCountField.hidden = !isBatch;
+  }
+
+  if (pendingReceiptBatchPanel) {
+    pendingReceiptBatchPanel.hidden = !isBatch;
+  }
+
+  if (isBatch) {
+    const desiredCount = Math.max(2, Math.min(12, Number(pendingReceiptBatchCount?.value) || 2));
+    const currentCount = pendingReceiptBatchRows?.querySelectorAll(".pending-receipt-batch-row").length || 0;
+
+    if (currentCount !== desiredCount) {
+      renderPendingReceiptRows();
+    }
+  }
+}
+
+function updatePendingReceiptState() {
+  syncPendingReceiptMode();
+  pendingReceiptState.instockDate = pendingReceiptInstock.value.trim();
+
+  if (pendingReceiptState.mode === "batch") {
+    pendingReceiptState.poNo = "";
+    pendingReceiptState.items = collectPendingReceiptItems();
+  } else {
+    pendingReceiptState.poNo = pendingReceiptPo.value.trim();
+    pendingReceiptState.items = pendingReceiptState.poNo ? [{ poNo: pendingReceiptState.poNo }] : [];
+  }
+
+  renderPendingReceiptResult();
+}
+
+function renderPendingReceiptResult(message = "", status = "error") {
+  if (!pendingReceiptResult) {
+    return;
+  }
+
+  syncPendingReceiptMode();
+  const items = pendingReceiptState.mode === "batch" ? collectPendingReceiptItems() : pendingReceiptState.items;
+  const rows = [
+    ["처리 방식", pendingReceiptState.mode === "batch" ? "일괄" : "단일선적"],
+    ["향남입고일자", pendingReceiptState.instockDate || "입력 필요"],
+    ["PO 건수", String(items.length || 0)],
+    ["처리 범위", "오퍼발행내역 / 입출고지시서 / ERP 구매관리 / COA 복사"]
+  ];
+
+  pendingReceiptResult.innerHTML = `
+    ${message ? `<p class="status-${status === "ok" ? "ok" : "error"}">${escapeHtml(message)}</p>` : ""}
+    <div class="auto-settlement-summary">
+      ${rows.map(([label, value]) => `
+        <p><strong>${escapeHtml(label)}</strong><span>${escapeHtml(value)}</span></p>
+      `).join("")}
+    </div>
+  `;
+}
+
+async function runPendingReceiptProcess() {
+  updatePendingReceiptState();
+
+  const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+  const automationUrl = isLocal
+    ? "/api/pending-receipt/process"
+    : "http://127.0.0.1:4173/api/pending-receipt/process";
+  const items = pendingReceiptState.mode === "batch" ? collectPendingReceiptItems() : pendingReceiptState.items;
+  const missing = [
+    ["향남입고일자", pendingReceiptState.instockDate]
+  ];
+
+  if (!items.length) {
+    missing.push(["PO 번호", ""]);
+  }
+
+  items.forEach((item, index) => {
+    if (!item.poNo) {
+      missing.push([`${index + 1}번 PO 번호`, ""]);
+    }
+  });
+
+  if (missing.filter(([, value]) => !value).length) {
+    renderPendingReceiptResult(`${missing.filter(([, value]) => !value).map(([label]) => label).join(", ")} 입력이 필요합니다.`);
+    return;
+  }
+
+  pendingReceiptRun.disabled = true;
+  pendingReceiptResult.innerHTML = '<p class="empty-result">입고예정 처리를 진행 중입니다. Excel과 ERP 자동화가 잠시 걸릴 수 있습니다.</p>';
+
+  try {
+    const response = await fetch(automationUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mode: pendingReceiptState.mode,
+        instockDate: pendingReceiptState.instockDate,
+        items
+      })
+    });
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.error || "입고예정 처리에 실패했습니다.");
+    }
+
+    const count = Array.isArray(data.items) ? data.items.length : 0;
+    renderPendingReceiptResult(`입고예정 처리 완료: ${count}건`, "ok");
+    pendingReceiptResult.insertAdjacentHTML("beforeend", `
+      <div class="auto-settlement-summary">
+        ${(data.items || []).map((item) => `
+          <p><strong>${escapeHtml(item.poNo || "")}</strong><span>${escapeHtml(item.productCode || "")} / ${escapeHtml(item.productName || "")} / ${escapeHtml(item.quantity || "")}${escapeHtml(item.unit || "")}</span></p>
+        `).join("")}
+      </div>
+      ${data.warning ? `<p class="status-error">${escapeHtml(data.warning)}</p>` : ""}
+    `);
+  } catch (error) {
+    console.error(error);
+    const message = error instanceof TypeError && !isLocal
+      ? "로컬 자동화 실행기가 켜져 있어야 합니다. 실행 후 haemin.space에서 다시 시도하세요."
+      : error instanceof Error
+        ? error.message
+        : String(error);
+    renderPendingReceiptResult(message);
+  } finally {
+    pendingReceiptRun.disabled = false;
   }
 }
 

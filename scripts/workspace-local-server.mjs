@@ -412,6 +412,208 @@ async function runInoutOrderSave(payload, options = {}) {
   return JSON.parse(output);
 }
 
+function parseJsonOutput(output) {
+  const line = String(output || "")
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .reverse()
+    .find((entry) => entry.trim().startsWith("{") && entry.trim().endsWith("}"));
+
+  if (!line) {
+    throw new Error(`Automation did not return JSON. ${String(output || "").slice(-1000)}`.trim());
+  }
+
+  return JSON.parse(line);
+}
+
+function pendingReceiptShouldCommit() {
+  return process.env.PENDING_RECEIPT_COMMIT !== "0";
+}
+
+async function runPendingOfferUpdate(item, instockDate) {
+  const args = [
+    "-PoNo", String(item.poNo || ""),
+    "-InstockDate", String(instockDate || "")
+  ];
+
+  if (process.env.OFFER_LIST_PATH) {
+    args.push("-WorkbookPath", process.env.OFFER_LIST_PATH);
+  }
+
+  if (pendingReceiptShouldCommit()) {
+    args.push("-Commit");
+  }
+
+  const output = await runPowerShell(join(ROOT, "scripts", "pending-receipt-offer-update.ps1"), args);
+  return parseJsonOutput(output);
+}
+
+async function runPendingInoutCopy(offer) {
+  const args = [
+    "-ProductCode", String(offer.productCode || ""),
+    "-Quantity", String(offer.quantity || ""),
+    "-PoDate", String(offer.poDate || ""),
+    "-InstockDate", String(offer.instockDate || "")
+  ];
+
+  if (process.env.INOUT_ORDER_PATH) {
+    args.push("-WorkbookPath", process.env.INOUT_ORDER_PATH);
+  }
+
+  if (pendingReceiptShouldCommit()) {
+    args.push("-Commit");
+  }
+
+  const output = await runPowerShell(join(ROOT, "scripts", "pending-receipt-inout-copy.ps1"), args);
+  return parseJsonOutput(output);
+}
+
+async function runPendingCoaCopy(offer) {
+  const quantityLabel = `${offer.quantity || ""}${offer.unit || ""}`.trim();
+  const args = [
+    "-PoNo", String(offer.poNo || ""),
+    "-ProductName", String(offer.productName || ""),
+    "-InstockDate", String(offer.instockDate || ""),
+    "-Quantity", quantityLabel,
+    "-Messrs", String(offer.messrs || "")
+  ];
+
+  if (process.env.PENDING_RECEIPT_COA_SOURCE_ROOT) {
+    args.push("-SourceRoot", process.env.PENDING_RECEIPT_COA_SOURCE_ROOT);
+  }
+
+  if (process.env.PENDING_RECEIPT_COA_TARGET_ROOT) {
+    args.push("-TargetRoot", process.env.PENDING_RECEIPT_COA_TARGET_ROOT);
+  }
+
+  if (pendingReceiptShouldCommit()) {
+    args.push("-Commit");
+  }
+
+  const output = await runPowerShell(join(ROOT, "scripts", "pending-receipt-coa-copy.ps1"), args);
+  return parseJsonOutput(output);
+}
+
+async function runPendingEcountCopy(offer) {
+  requireEcountEnv();
+  const tempDir = await mkdtemp(join(tmpdir(), "haemin-pending-ecount-"));
+
+  try {
+    const payloadPath = join(tempDir, "payload.json");
+    const payload = {
+      productCode: offer.productCode,
+      quantity: offer.quantity,
+      instockDate: offer.instockDate,
+      autoSave: process.env.ECOUNT_PENDING_AUTO_SAVE === "1" || process.env.ECOUNT_PURCHASE_AUTO_SAVE === "1"
+    };
+    await writeFile(payloadPath, JSON.stringify(payload), "utf8");
+    const output = await runNode(join(ROOT, "scripts", "ecount-pending-receipt-copy.mjs"), [payloadPath], {
+      HEADLESS: "false",
+      KEEP_OPEN_MS: process.env.ECOUNT_PENDING_KEEP_OPEN_MS || "0",
+      ECOUNT_PENDING_AUTO_SAVE: payload.autoSave ? "1" : "0"
+    }, {
+      timeoutMs: Number(process.env.ECOUNT_PENDING_TIMEOUT_MS || "180000")
+    });
+
+    return parseJsonOutput(output);
+  } finally {
+    await rm(tempDir, { recursive: true, force: true }).catch(() => {});
+  }
+}
+
+async function processPendingReceipt(req, res) {
+  try {
+    const payload = await readBody(req);
+    const instockDate = String(payload.instockDate || "").trim();
+    const items = Array.isArray(payload.items) ? payload.items : [];
+
+    if (!instockDate) {
+      throw new Error("Instock date is required.");
+    }
+
+    if (!items.length) {
+      throw new Error("At least one PO number is required.");
+    }
+
+    const shouldRunInout = process.env.PENDING_RECEIPT_INOUT_SAVE !== "0";
+    const shouldRunEcount = process.env.PENDING_RECEIPT_ECOUNT_SAVE === "1" || (
+      process.env.PENDING_RECEIPT_ECOUNT_SAVE !== "0" && process.env.AUTO_SETTLEMENT_ECOUNT_SAVE === "1"
+    );
+    const shouldRunCoa = process.env.PENDING_RECEIPT_COA_COPY !== "0";
+    const results = [];
+
+    for (const item of items) {
+      const poNo = String(item.poNo || "").trim();
+      if (!poNo) {
+        throw new Error("PO number is empty.");
+      }
+
+      const itemResult = {
+        poNo,
+        ok: false,
+        offer: null,
+        inout: null,
+        ecount: null,
+        coa: null,
+        warnings: []
+      };
+
+      try {
+        const offer = await runPendingOfferUpdate({ poNo }, instockDate);
+        itemResult.offer = offer;
+        Object.assign(itemResult, {
+          poNo: offer.poNo || poNo,
+          productCode: offer.productCode,
+          productName: offer.productName,
+          quantity: offer.quantity,
+          unit: offer.unit,
+          poDate: offer.poDate,
+          instockDate: offer.instockDate,
+          messrs: offer.messrs
+        });
+
+        if (shouldRunInout) {
+          itemResult.inout = await runPendingInoutCopy(offer);
+          if (itemResult.inout?.warning) {
+            itemResult.warnings.push(itemResult.inout.warning);
+          }
+        }
+
+        if (shouldRunEcount) {
+          itemResult.ecount = await runPendingEcountCopy(offer);
+        }
+
+        if (shouldRunCoa) {
+          itemResult.coa = await runPendingCoaCopy(offer);
+        }
+
+        itemResult.ok = true;
+      } catch (error) {
+        itemResult.error = error instanceof Error ? error.message : String(error);
+      }
+
+      results.push(itemResult);
+    }
+
+    const failed = results.filter((item) => !item.ok);
+
+    json(res, {
+      ok: failed.length === 0,
+      committed: pendingReceiptShouldCommit(),
+      mode: payload.mode === "batch" ? "batch" : "single",
+      instockDate,
+      count: results.length,
+      items: results,
+      error: failed.length ? failed.map((item) => `${item.poNo}: ${item.error}`).join(" / ") : ""
+    }, failed.length ? 500 : 200);
+  } catch (error) {
+    json(res, {
+      ok: false,
+      error: error instanceof Error ? error.message : String(error)
+    }, 500);
+  }
+}
+
 function parseBatchItems(value) {
   if (!value) {
     return [];
@@ -657,6 +859,11 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "POST" && req.url === "/api/ecount-purchase/fill") {
     await startEcountPurchaseFill(req, res);
+    return;
+  }
+
+  if (req.method === "POST" && req.url === "/api/pending-receipt/process") {
+    await processPendingReceipt(req, res);
     return;
   }
 

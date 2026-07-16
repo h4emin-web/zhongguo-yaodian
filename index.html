@@ -29,6 +29,7 @@
       <button class="tools-item" type="button" data-tool="import-cost-calculator">예상수입원가 마진율</button>
       <button class="tools-item" type="button" data-tool="import-cert-extractor">수입신고필증</button>
       <button class="tools-item" type="button" data-tool="auto-settlement">자동정산</button>
+      <button class="tools-item" type="button" data-tool="pending-receipt">입고예정 처리</button>
     </aside>
 
     <main class="workspace">
@@ -474,6 +475,53 @@
         </div>
         <div class="auto-exchange-result" aria-live="polite"></div>
         <div class="auto-settlement-result" aria-live="polite"></div>
+      </div>
+      <div class="wc-search-panel pending-receipt-panel" hidden>
+        <label>입고예정 처리</label>
+        <p class="wc-search-meta">오퍼발행내역, 입출고지시서, ERP 구매관리, COA 파일 복사를 한 번에 처리합니다.</p>
+        <div class="auto-settlement-grid">
+          <div class="margin-calc-field">
+            <label for="pending-receipt-mode">처리 방식</label>
+            <select id="pending-receipt-mode">
+              <option value="single">단일선적</option>
+              <option value="batch">일괄</option>
+            </select>
+          </div>
+          <div class="margin-calc-field">
+            <label for="pending-receipt-instock">향남입고일자</label>
+            <input id="pending-receipt-instock" type="text" inputmode="numeric" placeholder="예: 2026-07-01" autocomplete="off">
+          </div>
+          <div class="margin-calc-field pending-receipt-single-field">
+            <label for="pending-receipt-po">PO 번호</label>
+            <input id="pending-receipt-po" type="text" placeholder="예: Z26-00618" autocomplete="off">
+          </div>
+          <div class="margin-calc-field pending-receipt-batch-count" hidden>
+            <label for="pending-receipt-batch-count">일괄 건수</label>
+            <select id="pending-receipt-batch-count">
+              <option value="2">2개</option>
+              <option value="3">3개</option>
+              <option value="4">4개</option>
+              <option value="5">5개</option>
+              <option value="6">6개</option>
+              <option value="7">7개</option>
+              <option value="8">8개</option>
+              <option value="9">9개</option>
+              <option value="10">10개</option>
+              <option value="11">11개</option>
+              <option value="12">12개</option>
+            </select>
+          </div>
+        </div>
+        <div class="pending-receipt-batch" hidden>
+          <div class="pending-receipt-batch-head">
+            <span>PO 번호</span>
+          </div>
+          <div class="pending-receipt-batch-rows"></div>
+        </div>
+        <div class="auto-settlement-actions">
+          <button class="excel-export pending-receipt-run" type="button">입고예정 처리 실행</button>
+        </div>
+        <div class="pending-receipt-result" aria-live="polite"></div>
       </div>
       <div class="po-receive-panel" hidden>
         <label for="po-receive-input">PO 번호</label>
