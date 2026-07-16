@@ -135,6 +135,49 @@ function Run-WorkbookMacro {
   Invoke-WithComRetry { $Excel.Run($macro) | Out-Null } "macro: $MacroName"
 }
 
+function Invoke-FirstMacro {
+  param($Excel, $Workbook, $Sheet, [string[]]$MacroNames, [string]$Label)
+  $errors = @()
+
+  foreach ($macroName in $MacroNames) {
+    if (-not $macroName) { continue }
+    try {
+      Run-WorkbookMacro $Excel $Workbook $macroName
+      return $macroName
+    } catch {
+      $errors += ("{0}: {1}" -f $macroName, $_.Exception.Message)
+    }
+  }
+
+  if ($Sheet) {
+    foreach ($shape in @($Sheet.Shapes)) {
+      $shapeText = ""
+      $shapeAction = ""
+
+      try { $shapeText = [string]$shape.TextFrame2.TextRange.Text } catch {}
+      if (-not $shapeText) {
+        try { $shapeText = [string]$shape.TextFrame.Characters().Text } catch {}
+      }
+      try { $shapeAction = [string]$shape.OnAction } catch {}
+
+      $normalizedShapeText = $shapeText.Trim()
+      $matchesText = @($MacroNames | Where-Object { $_ -and ($normalizedShapeText -eq $_ -or $normalizedShapeText -like "*$_*") }).Count -gt 0
+      $matchesAction = @($MacroNames | Where-Object { $_ -and $shapeAction -like "*$_*" }).Count -gt 0
+
+      if (($matchesText -or $matchesAction) -and $shapeAction) {
+        try {
+          Invoke-WithComRetry { $Excel.Run($shapeAction) | Out-Null } "shape action: $shapeAction"
+          return $shapeAction
+        } catch {
+          $errors += ("shape {0}: {1}" -f $normalizedShapeText, $_.Exception.Message)
+        }
+      }
+    }
+  }
+
+  throw "$Label macro failed. $($errors -join ' / ')"
+}
+
 $resolvedPath = Resolve-WorkbookPath $WorkbookPath
 $instockDateValue = Convert-ToDateValue $InstockDate
 if (-not $instockDateValue) { throw "Invalid instock date: $InstockDate" }
@@ -143,6 +186,11 @@ $normalizedPoNo = Normalize-PoNo $PoNo
 $poMainSheetName = "PO{0}" -f (U 0xBA54,0xC778)
 $statusInStock = U 0xC785,0xACE0
 $copyMacroName = "PO{0}" -f (U 0xBCF5,0xC0AC)
+$orderSelectMacroName = if ($env:PENDING_RECEIPT_OFFER_SELECT_MACRO) { $env:PENDING_RECEIPT_OFFER_SELECT_MACRO } else { "{0}{1}" -f (U 0xC624,0xB354), (U 0xC120,0xD0DD) }
+$updateMacroName = if ($env:PENDING_RECEIPT_OFFER_UPDATE_MACRO) { $env:PENDING_RECEIPT_OFFER_UPDATE_MACRO } else { U 0xC218,0xC815 }
+$offerMacroWarning = ""
+$ranOrderSelectMacro = ""
+$ranUpdateMacro = ""
 
 $excel = Get-RunningExcel
 $createdExcel = $false
@@ -195,6 +243,16 @@ try {
     Invoke-WithComRetry { $sheet.Cells.Item($targetRow, 3).Value2 = $statusInStock } "set status"
     Invoke-WithComRetry { $sheet.Cells.Item($targetRow, 25).Value2 = $instockDateValue.ToString("yyyy-MM-dd") } "set instock"
     Invoke-WithComRetry { $sheet.Cells.Item($targetRow, 25).NumberFormat = "yyyy-mm-dd" } "instock format"
+
+    try {
+      Invoke-WithComRetry { $sheet.Range("A$targetRow").Select() | Out-Null } "select offer row"
+      $ranOrderSelectMacro = Invoke-FirstMacro $excel $workbook $sheet @($orderSelectMacroName, "OrderSelect", "SelectOrder") "offer order select"
+      $ranUpdateMacro = Invoke-FirstMacro $excel $workbook $sheet @($updateMacroName, "Update", "Modify") "offer update"
+    } catch {
+      $offerMacroWarning = "Offer list server update macro failed: $($_.Exception.Message)"
+      throw $offerMacroWarning
+    }
+
     Invoke-WithComRetry { $workbook.Save() } "save offer workbook"
   }
 
@@ -216,6 +274,9 @@ try {
     unit = [string]$sheet.Cells.Item($targetRow, 12).Text
     instockDate = $instockDateValue.ToString("yyyy-MM-dd")
     scNo = [string]$sheet.Cells.Item($targetRow, 14).Text
+    orderSelectMacro = $ranOrderSelectMacro
+    updateMacro = $ranUpdateMacro
+    warning = $offerMacroWarning
     before = @{
       status = $beforeStatus
       instockDate = $beforeInstock
