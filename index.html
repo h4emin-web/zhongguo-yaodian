@@ -22,21 +22,16 @@
       <span class="brand-mark">H</span>
       <h1>WorkSpace</h1>
     </a>
-    <nav class="top-nav" aria-label="main navigation">
-      <a href="#">Home</a>
-      <div class="tools-menu">
-        <button class="tools-trigger" type="button" aria-haspopup="true" aria-expanded="false">Tools</button>
-        <div class="tools-dropdown">
-          <button class="tools-item" type="button" data-tool="import-cost-calculator">예상수입원가 마진율</button>
-          <button class="tools-item" type="button" data-tool="import-cert-extractor">수입신고필증</button>
-          <button class="tools-item" type="button" data-tool="auto-settlement">자동정산</button>
-        </div>
-      </div>
-      <a href="#">Archive</a>
-    </nav>
   </header>
 
-  <main class="workspace">
+  <div class="app-shell">
+    <aside class="side-tools" aria-label="tools">
+      <button class="tools-item" type="button" data-tool="import-cost-calculator">예상수입원가 마진율</button>
+      <button class="tools-item" type="button" data-tool="import-cert-extractor">수입신고필증</button>
+      <button class="tools-item" type="button" data-tool="auto-settlement">자동정산</button>
+    </aside>
+
+    <main class="workspace">
     <div class="search-area">
       <label for="workspace-search">종합검색</label>
       <input id="workspace-search" type="search" placeholder="원료명, 성분명 등으로 K-DMF / 중국 약전 / WC &amp; COPP 통합검색" autocomplete="off">
@@ -185,7 +180,8 @@
         <p class="worklog-box-date">불러온 업무일지 없음</p>
       </section>
     </div>
-  </main>
+    </main>
+  </div>
 
   <div class="detail-view" aria-hidden="true">
     <div class="detail-panel" role="dialog" aria-modal="true" aria-labelledby="detail-title">

@@ -43,9 +43,6 @@ const worklogLoadButton = document.querySelector(".worklog-load-button");
 const worklogFileInput = document.querySelector(".worklog-file-input");
 const worklogFilterInput = document.querySelector("#worklog-filter-input");
 const worklogClearButton = document.querySelector(".worklog-clear-button");
-const toolsMenu = document.querySelector(".tools-menu");
-const toolsTrigger = document.querySelector(".tools-trigger");
-const toolsDropdown = document.querySelector(".tools-dropdown");
 const marginCostInput = document.querySelector("#margin-cost-input");
 const marginPriceInput = document.querySelector("#margin-price-input");
 const marginResult = document.querySelector(".margin-calc-result");
@@ -296,24 +293,12 @@ document.addEventListener("keydown", (event) => {
     closeWorklog();
   }
 
-  if (event.key === "Escape" && document.activeElement && document.activeElement.closest(".tools-menu")) {
-    closeToolsDropdown();
-  }
-});
-
-toolsMenu.addEventListener("mouseenter", () => {
-  toolsTrigger.setAttribute("aria-expanded", "true");
-});
-
-toolsMenu.addEventListener("mouseleave", () => {
-  toolsTrigger.setAttribute("aria-expanded", "false");
 });
 
 marginCostInput.addEventListener("input", renderMarginResult);
 marginPriceInput.addEventListener("input", renderMarginResult);
 
 importCostItem.addEventListener("click", () => {
-  closeToolsDropdown();
   openImportCostCalculator();
 });
 
@@ -324,12 +309,10 @@ importCostItem.addEventListener("click", () => {
   });
 
 importCertItem.addEventListener("click", () => {
-  closeToolsDropdown();
   openImportCertTool();
 });
 
 autoSettlementItem.addEventListener("click", () => {
-  closeToolsDropdown();
   openAutoSettlementTool();
 });
 
@@ -1132,7 +1115,7 @@ function renderImportCostResult() {
 }
 
 function openImportCostCalculator() {
-  lastFocusedCard = toolsTrigger;
+  lastFocusedCard = importCostItem;
   modalLocked = true;
   detailKicker.textContent = "Tools";
   detailTitle.textContent = "예상수입원가 마진율";
@@ -1227,7 +1210,7 @@ async function extractLastPdfPage(file) {
 }
 
 function openImportCertTool() {
-  lastFocusedCard = toolsTrigger;
+  lastFocusedCard = importCertItem;
   modalLocked = false;
   detailKicker.textContent = "Tools";
   detailTitle.textContent = "수입신고필증";
@@ -1248,7 +1231,7 @@ function openImportCertTool() {
 }
 
 function openAutoSettlementTool() {
-  lastFocusedCard = toolsTrigger;
+  lastFocusedCard = autoSettlementItem;
   modalLocked = true;
   detailKicker.textContent = "Tools";
   detailTitle.textContent = "자동정산";
@@ -1739,14 +1722,6 @@ async function fetchAutoSettlementExchangeRate() {
     autoExchangeResult.innerHTML = `<p class="status-error">ERP 환율 조회 실패: ${escapeHtml(message)}</p>`;
   } finally {
     autoExchangeFetch.disabled = false;
-  }
-}
-
-function closeToolsDropdown() {
-  toolsTrigger.setAttribute("aria-expanded", "false");
-
-  if (document.activeElement && document.activeElement.closest(".tools-menu")) {
-    document.activeElement.blur();
   }
 }
 
