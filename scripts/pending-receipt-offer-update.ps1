@@ -209,17 +209,76 @@ function Click-WorksheetCellCenter {
   return "clicked:$Address"
 }
 
+function Click-TopButtonInColumn {
+  param($Excel, $Sheet, [string]$ColumnLetter, [string[]]$Needles, [string]$Label)
+
+  Invoke-WithComRetry { $Sheet.Activate() | Out-Null } "activate sheet for $Label"
+  $window = Invoke-WithComRetry { $Excel.ActiveWindow } "active window for $Label"
+  Invoke-WithComRetry { $window.ScrollRow = 1 } "scroll row for $Label"
+  Invoke-WithComRetry { $window.ScrollColumn = 1 } "scroll column for $Label"
+
+  $targetColumn = Invoke-WithComRetry { $Sheet.Range(("{0}1" -f $ColumnLetter)).Column } "button column for $Label"
+  $candidates = @()
+
+  foreach ($shape in @($Sheet.Shapes)) {
+    $text = ""
+    try { $text = [string]$shape.TextFrame2.TextRange.Text } catch {}
+    if (-not $text) {
+      try { $text = [string]$shape.TextFrame.Characters().Text } catch {}
+    }
+
+    $normalizedText = $text.Trim() -replace "\s+", ""
+    $matchesNeedle = $false
+    foreach ($needle in $Needles) {
+      if (-not $needle) { continue }
+      $normalizedNeedle = $needle -replace "\s+", ""
+      if ($normalizedText -eq $normalizedNeedle -or $normalizedText -like ("*{0}*" -f $normalizedNeedle)) {
+        $matchesNeedle = $true
+        break
+      }
+    }
+
+    $topRow = 0
+    $leftColumn = 0
+    $rightColumn = 0
+    try { $topRow = [int]$shape.TopLeftCell.Row } catch {}
+    try { $leftColumn = [int]$shape.TopLeftCell.Column } catch {}
+    try { $rightColumn = [int]$shape.BottomRightCell.Column } catch { $rightColumn = $leftColumn }
+
+    if (($matchesNeedle -or ($leftColumn -le $targetColumn -and $rightColumn -ge $targetColumn)) -and $topRow -le 3) {
+      $candidates += $shape
+    }
+  }
+
+  $targetShape = $candidates | Sort-Object @{ Expression = { try { [double]$_.Top } catch { 999999 } } }, @{ Expression = { try { [double]$_.Left } catch { 999999 } } } | Select-Object -First 1
+  if ($targetShape) {
+    $x = Invoke-WithComRetry { $window.PointsToScreenPixelsX($targetShape.Left + ($targetShape.Width / 2)) } "shape screen x for $Label"
+    $y = Invoke-WithComRetry { $window.PointsToScreenPixelsY($targetShape.Top + ($targetShape.Height / 2)) } "shape screen y for $Label"
+
+    [MouseClicker]::SetCursorPos([int]$x, [int]$y) | Out-Null
+    Start-Sleep -Milliseconds 150
+    [MouseClicker]::mouse_event([MouseClicker]::MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
+    Start-Sleep -Milliseconds 80
+    [MouseClicker]::mouse_event([MouseClicker]::MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
+    Start-Sleep -Milliseconds 1200
+    $shapeName = try { [string]$targetShape.Name } catch { "" }
+    return "clicked-shape:$shapeName"
+  }
+
+  return Click-WorksheetCellCenter $Excel $Sheet ("{0}1" -f $ColumnLetter) $Label
+}
+
 function Invoke-MacroOrColumnButton {
   param($Excel, $Workbook, $Sheet, [string[]]$MacroNames, [string]$ColumnLetter, [string]$Label)
 
   try {
-    return Invoke-FirstMacro $Excel $Workbook $Sheet $MacroNames $Label
+    return Click-TopButtonInColumn $Excel $Sheet $ColumnLetter $MacroNames $Label
   } catch {
-    $macroError = $_.Exception.Message
+    $clickError = $_.Exception.Message
     try {
-      return Click-WorksheetCellCenter $Excel $Sheet ("{0}1" -f $ColumnLetter) $Label
+      return Invoke-FirstMacro $Excel $Workbook $Sheet $MacroNames $Label
     } catch {
-      throw "$Label failed. Macro error: $macroError / Click error: $($_.Exception.Message)"
+      throw "$Label failed. Click error: $clickError / Macro error: $($_.Exception.Message)"
     }
   }
 }

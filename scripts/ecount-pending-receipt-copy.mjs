@@ -219,19 +219,83 @@ async function clickCopyButton(page) {
           !text.includes("검색");
       })
       .sort((a, b) => a.x - b.x);
-    const copyControl = sameToolbarControls.find((control) => controlText(control).includes("복사")) ||
-      sameToolbarControls[1] ||
-      sameToolbarControls[0];
+    const copyControl = sameToolbarControls.find((control) => controlText(control).includes("복사"));
 
     if (copyControl) {
       await copyControl.handle.click();
-      await page.waitForTimeout(2500);
+      await page.waitForTimeout(1000);
       return `toolbar:${copyControl.text || copyControl.title || copyControl.ariaLabel || "copy"}`;
     }
   }
 
   await writeFile("tmp/ecount-pending-copy-controls.json", JSON.stringify(controls.map(({ frame, handle, ...control }) => control), null, 2), "utf8").catch(() => {});
   throw new Error("Could not locate the toolbar copy button next to Save.");
+}
+
+async function acceptCopyConfirmation(page, previousDialogCount) {
+  const startedAt = Date.now();
+  let clickedDomConfirm = false;
+
+  while (Date.now() - startedAt < 12_000) {
+    if (dialogMessages.length > previousDialogCount) {
+      await page.waitForTimeout(1500);
+      return {
+        accepted: true,
+        method: "native-dialog",
+        message: dialogMessages[dialogMessages.length - 1] || ""
+      };
+    }
+
+    for (const frame of page.frames()) {
+      const frameText = await frame.locator("body").innerText({ timeout: 500 }).catch(() => "");
+      const hasCopyPrompt =
+        frameText.includes("복사하겠습니까") ||
+        frameText.includes("시리얼") ||
+        frameText.includes("로트No") ||
+        frameText.includes("로트No.");
+
+      if (!hasCopyPrompt) {
+        continue;
+      }
+
+      const handles = await frame.locator("button, a, input, [role='button'], .btn, .btn-primary, .btn-default").elementHandles().catch(() => []);
+
+      for (const handle of handles) {
+        const box = await handle.boundingBox().catch(() => null);
+        if (!box || box.width <= 0 || box.height <= 0) {
+          continue;
+        }
+
+        const text = await handle.evaluate((element) => (
+          element.innerText ||
+          element.textContent ||
+          element.value ||
+          element.getAttribute("title") ||
+          element.getAttribute("aria-label") ||
+          ""
+        ).trim()).catch(() => "");
+
+        if (["확인", "예", "OK", "Ok", "ok"].includes(text) || text.includes("확인")) {
+          await handle.click();
+          clickedDomConfirm = true;
+          await page.waitForTimeout(2500);
+          return {
+            accepted: true,
+            method: "dom-confirm",
+            message: frameText.replace(/\s+/g, " ").trim().slice(0, 160)
+          };
+        }
+      }
+    }
+
+    await page.waitForTimeout(500);
+  }
+
+  return {
+    accepted: clickedDomConfirm || dialogMessages.length > previousDialogCount,
+    method: clickedDomConfirm ? "dom-confirm" : "",
+    message: dialogMessages.slice(previousDialogCount).join(" / ")
+  };
 }
 
 async function getVisibleProductInput(page, productCode) {
@@ -406,7 +470,9 @@ async function main() {
     await page.waitForTimeout(7000);
 
     setStep("copy and clear form");
+    const dialogCountBeforeCopy = dialogMessages.length;
     const copyButton = await clickCopyButton(page);
+    const copyConfirm = await acceptCopyConfirmation(page, dialogCountBeforeCopy);
     const clearResult = await clearPendingFields(page, payload);
     await page.screenshot({ path: "tmp/ecount-pending-receipt-filled.png", fullPage: true }).catch(() => {});
 
@@ -427,6 +493,7 @@ async function main() {
       quantity: payload.quantity || "",
       instockDate: payload.instockDate,
       copyButton,
+      copyConfirm,
       ...clearResult,
       dialogMessage: dialogMessages.join(" / "),
       dialogMessages,
@@ -448,10 +515,13 @@ async function main() {
 }
 
 main().catch(async (error) => {
+  await writeFile("tmp/ecount-pending-receipt-error-dialogs.json", JSON.stringify(dialogMessages, null, 2), "utf8").catch(() => {});
   const result = {
     ok: false,
     step: currentStep,
-    error: error instanceof Error ? error.message : String(error)
+    error: error instanceof Error ? error.message : String(error),
+    dialogMessage: dialogMessages.join(" / "),
+    dialogMessages
   };
   await writeFile("tmp/ecount-pending-receipt-result.json", JSON.stringify(result, null, 2), "utf8").catch(() => {});
   console.error(JSON.stringify(result));
