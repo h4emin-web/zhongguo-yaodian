@@ -448,13 +448,13 @@ async function runPendingOfferUpdate(item, instockDate) {
   return parseJsonOutput(output);
 }
 
-async function runPendingInoutCopy(offer) {
+async function runPendingInoutCopy(offer, requestedPoNo = "") {
   const args = [
     "-ProductCode", String(offer.productCode || ""),
     "-Quantity", String(offer.quantity || ""),
     "-PoDate", String(offer.poDate || ""),
     "-InstockDate", String(offer.instockDate || ""),
-    "-PoNo", String(offer.poNo || "")
+    "-PoNo", String(offer.poNo || requestedPoNo || "")
   ];
 
   if (process.env.INOUT_ORDER_PATH) {
@@ -574,7 +574,7 @@ async function processPendingReceipt(req, res) {
         });
 
         if (shouldRunInout) {
-          itemResult.inout = await runPendingInoutCopy(offer);
+          itemResult.inout = await runPendingInoutCopy(offer, poNo);
           if (itemResult.inout?.warning) {
             itemResult.warnings.push(itemResult.inout.warning);
           }
