@@ -2,6 +2,7 @@ const cards = document.querySelectorAll(".tool-box");
 const detailView = document.querySelector(".detail-view");
 const detailPanel = document.querySelector(".detail-panel");
 const closeButton = document.querySelector(".detail-close");
+const topBarVideo = document.querySelector(".top-bar-video");
 const detailKicker = document.querySelector(".detail-kicker");
 const detailTitle = document.querySelector("#detail-title");
 const detailDescription = document.querySelector(".detail-description");
@@ -143,6 +144,67 @@ const AUTO_SETTLEMENT_TARGET_FILES = [
   "5.수입정산서C3-1(26년)-주영웅,민승우,유일환.xlsm",
   "6.수입정산서C3-1(26년)-곽상희, 송예근.xlsm"
 ];
+
+function parseCssSeconds(value) {
+  const raw = String(value || "").split(",")[0].trim();
+
+  if (raw.endsWith("ms")) {
+    return Number.parseFloat(raw) / 1000;
+  }
+
+  if (raw.endsWith("s")) {
+    return Number.parseFloat(raw);
+  }
+
+  return Number.parseFloat(raw);
+}
+
+function getHeaderDogRunSeconds() {
+  if (!topBarVideo) {
+    return 10;
+  }
+
+  const seconds = parseCssSeconds(window.getComputedStyle(topBarVideo).animationDuration);
+  return Number.isFinite(seconds) && seconds > 0 ? seconds : 10;
+}
+
+function startHeaderDogVideo() {
+  if (!topBarVideo) {
+    return;
+  }
+
+  topBarVideo.loop = false;
+
+  if (Number.isFinite(topBarVideo.duration) && topBarVideo.duration > 0) {
+    const runSeconds = getHeaderDogRunSeconds();
+    topBarVideo.defaultPlaybackRate = topBarVideo.duration / runSeconds;
+    topBarVideo.playbackRate = topBarVideo.duration / runSeconds;
+  }
+
+  try {
+    topBarVideo.currentTime = 0;
+  } catch (error) {
+    console.warn("Header video reset skipped", error);
+  }
+
+  topBarVideo.play().catch(() => {});
+}
+
+function initializeHeaderDogVideo() {
+  if (!topBarVideo) {
+    return;
+  }
+
+  if (topBarVideo.readyState >= 1) {
+    startHeaderDogVideo();
+  } else {
+    topBarVideo.addEventListener("loadedmetadata", startHeaderDogVideo, { once: true });
+  }
+
+  topBarVideo.addEventListener("animationiteration", startHeaderDogVideo);
+}
+
+initializeHeaderDogVideo();
 
 function openDetail(card) {
   const title = card.querySelector("h2").textContent;

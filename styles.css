@@ -59,14 +59,15 @@ body.detail-open {
 }
 
 .top-bar-video {
+  --tb-video-w: min(760px, 58vw);
   position: absolute;
   top: 50%;
   left: 0;
-  width: min(760px, 58vw);
+  width: var(--tb-video-w);
   height: auto;
   aspect-ratio: 16 / 9;
   pointer-events: none;
-  animation: top-bar-dog-run 11s linear infinite;
+  animation: top-bar-dog-run 10s linear infinite;
   will-change: transform;
 }
 
@@ -83,7 +84,7 @@ body.detail-open {
 
 @keyframes top-bar-dog-run {
   from {
-    transform: translate3d(-58vw, -38%, 0);
+    transform: translate3d(calc(-1 * var(--tb-video-w)), -38%, 0);
   }
 
   to {
@@ -1389,21 +1390,11 @@ body.detail-open {
   }
 
   .top-bar-video {
-    width: 84vw;
+    --tb-video-w: 84vw;
   }
 
   .top-bar-video-backdrop {
     opacity: 0.4;
-  }
-
-  @keyframes top-bar-dog-run {
-    from {
-      transform: translate3d(-84vw, -38%, 0);
-    }
-
-    to {
-      transform: translate3d(100vw, -38%, 0);
-    }
   }
 
   .app-shell {
