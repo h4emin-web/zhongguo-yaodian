@@ -64,6 +64,11 @@ function Convert-ToNumber {
   return 0
 }
 
+function Format-NumberText {
+  param([double]$Value)
+  return $Value.ToString("0.##########", [Globalization.CultureInfo]::InvariantCulture)
+}
+
 function Convert-ToDateValue {
   param($Value)
   if ($Value -is [datetime]) { return $Value.Date }
@@ -132,6 +137,7 @@ $inText = U 0xC785
 $searchMacroName = "{0}_{1}" -f (U 0xC870,0xD68C), (U 0xBA54,0xC774,0xCEE4)
 $addMacroName = if ($env:PENDING_RECEIPT_INOUT_ADD_MACRO) { $env:PENDING_RECEIPT_INOUT_ADD_MACRO } else { U 0xCD9C,0xACE0,0xCD94,0xAC00 }
 $macroWarning = ""
+$quantityText = Format-NumberText $Quantity
 
 $excel = Get-RunningExcel
 $createdExcel = $false
@@ -210,7 +216,7 @@ try {
     Invoke-WithComRetry { $sheet.Cells.Item($newRow, 2).NumberFormat = "yyyy-mm-dd" } "format order date"
     Invoke-WithComRetry { $sheet.Cells.Item($newRow, 3).Value2 = $inText } "set direction"
     Invoke-WithComRetry { $sheet.Cells.Item($newRow, 5).Value2 = $ProductCode } "set product code"
-    Invoke-WithComRetry { $sheet.Cells.Item($newRow, 9).Value2 = $Quantity } "set quantity"
+    Invoke-WithComRetry { $sheet.Cells.Item($newRow, 9).Value2 = $quantityText } "set quantity"
     Invoke-WithComRetry { $sheet.Cells.Item($newRow, 10).ClearContents() } "clear unit price"
     Invoke-WithComRetry { $sheet.Cells.Item($newRow, 11).ClearContents() } "clear amount"
     Invoke-WithComRetry { $sheet.Cells.Item($newRow, 12).Value2 = $instockDateValue.ToString("yyyy-MM-dd") } "set due date"
@@ -236,7 +242,9 @@ try {
     sourceOrderNo = $source.OrderNo
     productCode = $ProductCode
     productName = $source.ProductName
-    quantity = $Quantity
+    quantity = $quantityText
+    searchedProductCode = $ProductCode
+    searchedDirection = $inText
     poDate = $poDateValue.ToString("yyyy-MM-dd")
     dueDate = $instockDateValue.ToString("yyyy-MM-dd")
     unitPriceCleared = $true
