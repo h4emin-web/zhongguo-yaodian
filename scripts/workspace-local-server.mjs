@@ -867,6 +867,15 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === "GET" && req.url === "/api/health") {
+    json(res, {
+      ok: true,
+      service: "haemin-workspace-local",
+      port: PORT
+    });
+    return;
+  }
+
   if (req.method !== "GET") {
     res.writeHead(405);
     res.end("Method not allowed");

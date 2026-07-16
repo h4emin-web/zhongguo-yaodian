@@ -961,7 +961,8 @@ body.detail-open {
 }
 
 .auto-exchange-fetch:disabled,
-.auto-settlement-save:disabled {
+.auto-settlement-save:disabled,
+.local-launcher-start:disabled {
   background: #9fb3cb;
   cursor: not-allowed;
 }

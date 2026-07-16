@@ -87,6 +87,7 @@ const pendingReceiptBatchPanel = document.querySelector(".pending-receipt-batch"
 const pendingReceiptBatchRows = document.querySelector(".pending-receipt-batch-rows");
 const pendingReceiptRun = document.querySelector(".pending-receipt-run");
 const pendingReceiptResult = document.querySelector(".pending-receipt-result");
+const localLauncherButtons = document.querySelectorAll(".local-launcher-start");
 const importCostPanel = document.querySelector(".import-cost-panel");
 const importPriceInput = document.querySelector("#import-price-input");
 const importPriceCurrency = document.querySelector("#import-price-currency");
@@ -105,6 +106,8 @@ const hasSupabaseKey = Boolean(
 const supabaseClient = hasSupabaseKey && window.supabase
   ? window.supabase.createClient(supabaseConfig.url, supabaseConfig.anonKey)
   : null;
+const LOCAL_AUTOMATION_BASE = "http://127.0.0.1:4173";
+const LOCAL_AUTOMATION_START_URL = "haemin-workspace://start";
 
 let lastFocusedCard = null;
 let modalLocked = false;
@@ -410,6 +413,9 @@ pendingReceiptBatchCount.addEventListener("change", () => {
 });
 pendingReceiptBatchRows.addEventListener("input", updatePendingReceiptState);
 pendingReceiptRun.addEventListener("click", runPendingReceiptProcess);
+localLauncherButtons.forEach((button) => {
+  button.addEventListener("click", startLocalAutomationLauncher);
+});
 
 importCertDropzone.addEventListener("click", () => importCertFileInput.click());
 importCertDropzone.addEventListener("keydown", (event) => {
@@ -1571,6 +1577,69 @@ function syncPendingReceiptMode() {
     if (currentCount !== desiredCount) {
       renderPendingReceiptRows();
     }
+  }
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function isLocalAutomationReady() {
+  const response = await fetch(`${LOCAL_AUTOMATION_BASE}/api/health`, {
+    method: "GET",
+    cache: "no-store"
+  });
+  return response.ok;
+}
+
+function getLocalLauncherStatusElement(button) {
+  const panel = button.closest(".wc-search-panel");
+  return panel?.querySelector(".auto-settlement-result, .pending-receipt-result") || null;
+}
+
+function renderLocalLauncherStatus(statusElement, message, status = "error") {
+  if (!statusElement) {
+    return;
+  }
+
+  statusElement.innerHTML = `<p class="status-${status === "ok" ? "ok" : "error"}">${escapeHtml(message)}</p>`;
+}
+
+async function startLocalAutomationLauncher(event) {
+  const button = event.currentTarget;
+  const statusElement = getLocalLauncherStatusElement(button);
+  const originalText = button.textContent;
+
+  button.disabled = true;
+  button.textContent = "실행기 확인 중";
+  renderLocalLauncherStatus(statusElement, "로컬 자동화 실행기 상태를 확인 중입니다.", "ok");
+
+  try {
+    const alreadyReady = await isLocalAutomationReady().catch(() => false);
+
+    if (alreadyReady) {
+      renderLocalLauncherStatus(statusElement, "로컬 자동화 실행기가 이미 켜져 있습니다.", "ok");
+      return;
+    }
+
+    button.textContent = "실행기 여는 중";
+    renderLocalLauncherStatus(statusElement, "Windows에서 로컬 자동화 실행기를 여는 중입니다. 권한 확인창이 뜨면 허용해주세요.", "ok");
+    window.location.href = LOCAL_AUTOMATION_START_URL;
+
+    for (let attempt = 0; attempt < 15; attempt += 1) {
+      await sleep(1000);
+      const ready = await isLocalAutomationReady().catch(() => false);
+
+      if (ready) {
+        renderLocalLauncherStatus(statusElement, "로컬 자동화 실행기가 켜졌습니다. 이제 다시 실행 버튼을 누르면 됩니다.", "ok");
+        return;
+      }
+    }
+
+    renderLocalLauncherStatus(statusElement, "실행기가 아직 연결되지 않았습니다. 처음 한 번 scripts/install-local-launcher-protocol.ps1을 실행한 뒤 다시 눌러주세요.");
+  } finally {
+    button.disabled = false;
+    button.textContent = originalText;
   }
 }
 
