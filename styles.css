@@ -49,7 +49,7 @@ body.detail-open {
   position: absolute;
   inset: 0;
   z-index: 2;
-  background: rgba(248, 251, 255, 0.3);
+  background: rgba(248, 251, 255, 0.16);
   pointer-events: none;
 }
 
@@ -63,10 +63,10 @@ body.detail-open {
 
 .top-bar-video-backdrop {
   z-index: 0;
-  object-fit: cover;
-  opacity: 0.62;
-  filter: blur(5px) saturate(1.16) brightness(1.02) contrast(1);
-  transform: scale(1.08);
+  object-fit: fill;
+  object-position: center center;
+  opacity: 0.84;
+  filter: saturate(1.08) brightness(1.01) contrast(1);
 }
 
 .brand {
