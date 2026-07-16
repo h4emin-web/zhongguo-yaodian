@@ -35,6 +35,10 @@ function normalizeDate(value) {
   return match ? `${match[1]}${match[2]}${match[3]}` : text;
 }
 
+function normalizeAmount(value) {
+  return String(value || "").replace(/,/g, "").trim();
+}
+
 function parseSearchResponse(text) {
   try {
     return JSON.parse(text);
@@ -206,10 +210,12 @@ async function fillTextAt(page, x, y, value) {
 
 async function clearPendingFields(page, payload) {
   const yyyymmdd = normalizeDate(payload.instockDate);
+  const quantity = normalizeAmount(payload.quantity);
   const inputs = await collectVisibleInputs(page);
   let dateFilled = false;
   let serialCleared = 0;
   let moneyCleared = 0;
+  let quantityFilled = false;
 
   const dateCandidates = inputs
     .filter((input) => {
@@ -240,11 +246,18 @@ async function clearPendingFields(page, payload) {
 
   const productInput = await getVisibleProductInput(page, payload.productCode);
   const rowY = productInput.y + productInput.height / 2;
+  const quantityOffset = Number(process.env.ECOUNT_PENDING_QTY_OFFSET || "545");
+
+  if (quantity) {
+    await fillTextAt(page, productInput.x + quantityOffset, rowY, quantity);
+    quantityFilled = true;
+  }
+
   await fillTextAt(page, productInput.x + 615, rowY, "");
   await fillTextAt(page, productInput.x + 685, rowY, "");
   await fillTextAt(page, productInput.x + 755, rowY, "");
 
-  return { dateFilled, serialCleared, moneyCleared };
+  return { dateFilled, serialCleared, moneyCleared, quantityFilled };
 }
 
 async function savePurchaseForm(page) {

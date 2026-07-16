@@ -123,6 +123,73 @@ function Run-WorkbookMacro {
   Invoke-WithComRetry { $Excel.Run($macro) | Out-Null } "macro: $MacroName"
 }
 
+function Invoke-FirstMacro {
+  param($Excel, $Workbook, $Sheet, [string[]]$MacroNames, [string]$Label)
+  $errors = @()
+
+  foreach ($macroName in $MacroNames) {
+    if (-not $macroName) { continue }
+    try {
+      Run-WorkbookMacro $Excel $Workbook $macroName
+      return $macroName
+    } catch {
+      $errors += ("{0}: {1}" -f $macroName, $_.Exception.Message)
+    }
+  }
+
+  if ($Sheet) {
+    foreach ($shape in @($Sheet.Shapes)) {
+      $shapeText = ""
+      $shapeAction = ""
+
+      try { $shapeText = [string]$shape.TextFrame2.TextRange.Text } catch {}
+      if (-not $shapeText) {
+        try { $shapeText = [string]$shape.TextFrame.Characters().Text } catch {}
+      }
+      try { $shapeAction = [string]$shape.OnAction } catch {}
+
+      $normalizedShapeText = $shapeText.Trim() -replace "\s+", ""
+      $matchesText = @($MacroNames | Where-Object {
+        if (-not $_) { return $false }
+        $normalizedMacroName = $_ -replace "\s+", ""
+        return $normalizedShapeText -eq $normalizedMacroName -or $normalizedShapeText -like ("*{0}*" -f $normalizedMacroName)
+      }).Count -gt 0
+      $matchesAction = @($MacroNames | Where-Object { $_ -and $shapeAction -like "*$_*" }).Count -gt 0
+
+      if (($matchesText -or $matchesAction) -and $shapeAction) {
+        try {
+          Invoke-WithComRetry { $Excel.Run($shapeAction) | Out-Null } "shape action: $shapeAction"
+          return $shapeAction
+        } catch {
+          $errors += ("shape {0}: {1}" -f $normalizedShapeText, $_.Exception.Message)
+        }
+      }
+    }
+  }
+
+  throw "$Label macro failed. $($errors -join ' / ')"
+}
+
+function Find-HeaderColumn {
+  param($Sheet, [string[]]$Needles, [int]$MaxRows = 8, [int]$MaxColumns = 80)
+
+  for ($row = 1; $row -le $MaxRows; $row += 1) {
+    for ($column = 1; $column -le $MaxColumns; $column += 1) {
+      $text = ([string]$Sheet.Cells.Item($row, $column).Text).Trim() -replace "\s+", ""
+      if (-not $text) { continue }
+
+      foreach ($needle in $Needles) {
+        $normalizedNeedle = $needle -replace "\s+", ""
+        if ($text -eq $normalizedNeedle -or $text -like "*$normalizedNeedle*") {
+          return $column
+        }
+      }
+    }
+  }
+
+  return 0
+}
+
 $resolvedPath = Resolve-WorkbookPath $WorkbookPath
 $poDateValue = Convert-ToDateValue $PoDate
 $instockDateValue = Convert-ToDateValue $InstockDate
@@ -135,9 +202,13 @@ if ($Quantity -le 0) { throw "Quantity must be greater than 0." }
 $sheetName = U 0xCD9C,0xACE0,0xC9C0,0xC2DC
 $inText = U 0xC785
 $searchMacroName = "{0}_{1}" -f (U 0xC870,0xD68C), (U 0xBA54,0xC774,0xCEE4)
-$addMacroName = if ($env:PENDING_RECEIPT_INOUT_ADD_MACRO) { $env:PENDING_RECEIPT_INOUT_ADD_MACRO } else { U 0xCD9C,0xACE0,0xCD94,0xAC00 }
+$orderNoMacroName = if ($env:PENDING_RECEIPT_INOUT_ORDERNO_MACRO) { $env:PENDING_RECEIPT_INOUT_ORDERNO_MACRO } else { "{0}{1}" -f (U 0xC624,0xB354,0xBC88,0xD638), (U 0xB123,0xAE30) }
+$addMacroName = if ($env:PENDING_RECEIPT_INOUT_ADD_MACRO) { $env:PENDING_RECEIPT_INOUT_ADD_MACRO } else { U 0xCD94,0xAC00 }
 $macroWarning = ""
 $quantityText = Format-NumberText $Quantity
+$ranOrderNoMacro = ""
+$ranAddMacro = ""
+$clearedDeliveryColumns = @()
 
 $excel = Get-RunningExcel
 $createdExcel = $false
@@ -222,11 +293,26 @@ try {
     Invoke-WithComRetry { $sheet.Cells.Item($newRow, 12).Value2 = $instockDateValue.ToString("yyyy-MM-dd") } "set due date"
     Invoke-WithComRetry { $sheet.Cells.Item($newRow, 12).NumberFormat = "yyyy-mm-dd" } "format due date"
 
+    $deliveryStatusColumn = Find-HeaderColumn $sheet @((U 0xBC30,0xC1A1,0xC5EC,0xBD80), (U 0xBC30,0xC1A1,0xC5EC,0xBD80,0x004F))
+    $deliveryDoneColumn = Find-HeaderColumn $sheet @((U 0xBC30,0xC1A1,0xC644,0xB8CC,0xC77C), (U 0xBC30,0xC1A1,0xC644,0xB8CC))
+
+    if ($deliveryStatusColumn -gt 0) {
+      Invoke-WithComRetry { $sheet.Cells.Item($newRow, $deliveryStatusColumn).ClearContents() } "clear delivery status"
+      $clearedDeliveryColumns += $deliveryStatusColumn
+    }
+    if ($deliveryDoneColumn -gt 0) {
+      Invoke-WithComRetry { $sheet.Cells.Item($newRow, $deliveryDoneColumn).ClearContents() } "clear delivery complete date"
+      $clearedDeliveryColumns += $deliveryDoneColumn
+    }
+
     try {
       Invoke-WithComRetry { $sheet.Range("A$newRow").Select() | Out-Null } "select new row"
-      Run-WorkbookMacro $excel $workbook $addMacroName
+      $ranOrderNoMacro = Invoke-FirstMacro $excel $workbook $sheet @($orderNoMacroName, "OrderNo", "OrderNoInsert", "InsertOrderNo") "in/out order no"
+      Invoke-WithComRetry { $sheet.Range("G$newRow").Select() | Out-Null } "select add cell"
+      $ranAddMacro = Invoke-FirstMacro $excel $workbook $sheet @($addMacroName, "Add", "Insert", "Append") "in/out add"
     } catch {
-      $macroWarning = "In/out add macro '$addMacroName' failed: $($_.Exception.Message)"
+      $macroWarning = "In/out order no/add macro failed: $($_.Exception.Message)"
+      throw $macroWarning
     }
 
     Invoke-WithComRetry { $workbook.Save() } "save in/out workbook"
@@ -249,6 +335,9 @@ try {
     dueDate = $instockDateValue.ToString("yyyy-MM-dd")
     unitPriceCleared = $true
     amountCleared = $true
+    deliveryColumnsCleared = $clearedDeliveryColumns
+    orderNoMacro = $ranOrderNoMacro
+    addMacro = $ranAddMacro
     warning = $macroWarning
   }
 
