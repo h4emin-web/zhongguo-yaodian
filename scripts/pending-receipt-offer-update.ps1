@@ -15,6 +15,19 @@ trap {
 
 $xlUp = -4162
 
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+public static class MouseClicker {
+  [DllImport("user32.dll")]
+  public static extern bool SetCursorPos(int X, int Y);
+  [DllImport("user32.dll")]
+  public static extern void mouse_event(int dwFlags, int dx, int dy, int cButtons, int dwExtraInfo);
+  public const int MOUSEEVENTF_LEFTDOWN = 0x0002;
+  public const int MOUSEEVENTF_LEFTUP = 0x0004;
+}
+"@
+
 function U {
   param([int[]]$Codes)
   return -join ($Codes | ForEach-Object { [char]$_ })
@@ -178,6 +191,39 @@ function Invoke-FirstMacro {
   throw "$Label macro failed. $($errors -join ' / ')"
 }
 
+function Click-WorksheetCellCenter {
+  param($Excel, $Sheet, [string]$Address, [string]$Label)
+
+  Invoke-WithComRetry { $Sheet.Activate() | Out-Null } "activate sheet for $Label"
+  $range = Invoke-WithComRetry { $Sheet.Range($Address) } "range for $Label"
+  $window = Invoke-WithComRetry { $Excel.ActiveWindow } "active window for $Label"
+  $x = Invoke-WithComRetry { $window.PointsToScreenPixelsX($range.Left + ($range.Width / 2)) } "screen x for $Label"
+  $y = Invoke-WithComRetry { $window.PointsToScreenPixelsY($range.Top + ($range.Height / 2)) } "screen y for $Label"
+
+  [MouseClicker]::SetCursorPos([int]$x, [int]$y) | Out-Null
+  Start-Sleep -Milliseconds 150
+  [MouseClicker]::mouse_event([MouseClicker]::MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
+  Start-Sleep -Milliseconds 80
+  [MouseClicker]::mouse_event([MouseClicker]::MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
+  Start-Sleep -Milliseconds 700
+  return "clicked:$Address"
+}
+
+function Invoke-MacroOrColumnButton {
+  param($Excel, $Workbook, $Sheet, [string[]]$MacroNames, [string]$ColumnLetter, [string]$Label)
+
+  try {
+    return Invoke-FirstMacro $Excel $Workbook $Sheet $MacroNames $Label
+  } catch {
+    $macroError = $_.Exception.Message
+    try {
+      return Click-WorksheetCellCenter $Excel $Sheet ("{0}1" -f $ColumnLetter) $Label
+    } catch {
+      throw "$Label failed. Macro error: $macroError / Click error: $($_.Exception.Message)"
+    }
+  }
+}
+
 $resolvedPath = Resolve-WorkbookPath $WorkbookPath
 $instockDateValue = Convert-ToDateValue $InstockDate
 if (-not $instockDateValue) { throw "Invalid instock date: $InstockDate" }
@@ -246,8 +292,9 @@ try {
 
     try {
       Invoke-WithComRetry { $sheet.Range("A$targetRow").Select() | Out-Null } "select offer row"
-      $ranOrderSelectMacro = Invoke-FirstMacro $excel $workbook $sheet @($orderSelectMacroName, "OrderSelect", "SelectOrder") "offer order select"
-      $ranUpdateMacro = Invoke-FirstMacro $excel $workbook $sheet @($updateMacroName, "Update", "Modify") "offer update"
+      $ranOrderSelectMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($orderSelectMacroName, "OrderSelect", "SelectOrder") "A" "offer order select"
+      Invoke-WithComRetry { $sheet.Range("K$targetRow").Select() | Out-Null } "select offer update cell"
+      $ranUpdateMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($updateMacroName, "Update", "Modify") "K" "offer update"
     } catch {
       $offerMacroWarning = "Offer list server update macro failed: $($_.Exception.Message)"
       throw $offerMacroWarning
