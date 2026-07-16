@@ -3,6 +3,7 @@ param(
   [Parameter(Mandatory=$true)][double]$Quantity,
   [Parameter(Mandatory=$true)][string]$PoDate,
   [Parameter(Mandatory=$true)][string]$InstockDate,
+  [string]$PoNo = "",
   [string]$WorkbookPath = "",
   [switch]$Commit
 )
@@ -253,10 +254,12 @@ $orderNoMacroName = if ($env:PENDING_RECEIPT_INOUT_ORDERNO_MACRO) { $env:PENDING
 $addMacroName = if ($env:PENDING_RECEIPT_INOUT_ADD_MACRO) { $env:PENDING_RECEIPT_INOUT_ADD_MACRO } else { U 0xCD94,0xAC00 }
 $macroWarning = ""
 $quantityText = Format-NumberText $Quantity
+$remarkText = $PoNo.Trim()
 $ranOrderSelectMacro = ""
 $ranOrderNoMacro = ""
 $ranAddMacro = ""
 $clearedDeliveryColumns = @()
+$remarkColumn = 0
 
 $excel = Get-RunningExcel
 $createdExcel = $false
@@ -341,6 +344,14 @@ try {
     Invoke-WithComRetry { $sheet.Cells.Item($newRow, 12).Value2 = $instockDateValue.ToString("yyyy-MM-dd") } "set due date"
     Invoke-WithComRetry { $sheet.Cells.Item($newRow, 12).NumberFormat = "yyyy-mm-dd" } "format due date"
 
+    $remarkColumn = Find-HeaderColumn $sheet @((U 0xBE44,0xACE0))
+    if ($remarkColumn -gt 0) {
+      Invoke-WithComRetry { $sheet.Cells.Item($newRow, $remarkColumn).ClearContents() } "clear remarks"
+      if ($remarkText) {
+        Invoke-WithComRetry { $sheet.Cells.Item($newRow, $remarkColumn).Value2 = $remarkText } "set remarks"
+      }
+    }
+
     $deliveryStatusColumn = Find-HeaderColumn $sheet @((U 0xBC30,0xC1A1,0xC5EC,0xBD80), (U 0xBC30,0xC1A1,0xC5EC,0xBD80,0x004F))
     $deliveryDoneColumn = Find-HeaderColumn $sheet @((U 0xBC30,0xC1A1,0xC644,0xB8CC,0xC77C), (U 0xBC30,0xC1A1,0xC644,0xB8CC))
 
@@ -379,12 +390,14 @@ try {
     productCode = $ProductCode
     productName = $source.ProductName
     quantity = $quantityText
+    poNo = $remarkText
     searchedProductCode = $ProductCode
     searchedDirection = $inText
     poDate = $poDateValue.ToString("yyyy-MM-dd")
     dueDate = $instockDateValue.ToString("yyyy-MM-dd")
     unitPriceCleared = $true
     amountCleared = $true
+    remarkColumn = $remarkColumn
     deliveryColumnsCleared = $clearedDeliveryColumns
     orderSelectMacro = $ranOrderSelectMacro
     orderNoMacro = $ranOrderNoMacro

@@ -453,7 +453,8 @@ async function runPendingInoutCopy(offer) {
     "-ProductCode", String(offer.productCode || ""),
     "-Quantity", String(offer.quantity || ""),
     "-PoDate", String(offer.poDate || ""),
-    "-InstockDate", String(offer.instockDate || "")
+    "-InstockDate", String(offer.instockDate || ""),
+    "-PoNo", String(offer.poNo || "")
   ];
 
   if (process.env.INOUT_ORDER_PATH) {
