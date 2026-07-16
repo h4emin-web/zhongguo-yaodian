@@ -12,6 +12,7 @@ const {
 
 const payloadPath = process.argv[2];
 let currentStep = "init";
+const dialogMessages = [];
 
 function setStep(step) {
   currentStep = step;
@@ -324,12 +325,6 @@ async function clearPendingFields(page, payload) {
 
 async function savePurchaseForm(page) {
   const saveText = "\uc800\uc7a5(F8)";
-  let dialogMessage = "";
-
-  page.on("dialog", async (dialog) => {
-    dialogMessage = dialog.message();
-    await dialog.accept();
-  });
 
   const saveButton = page.getByText(saveText, { exact: true }).first();
   const clicked = await saveButton.click({ timeout: 5000 }).then(() => true).catch(() => false);
@@ -340,7 +335,7 @@ async function savePurchaseForm(page) {
   }
 
   await page.waitForTimeout(6000);
-  return { dialogMessage };
+  return {};
 }
 
 async function main() {
@@ -359,6 +354,11 @@ async function main() {
   });
   const page = await browser.newPage({ viewport: { width: 1420, height: 900 } });
   let searchRows = [];
+
+  page.on("dialog", async (dialog) => {
+    dialogMessages.push(dialog.message());
+    await dialog.accept();
+  });
 
   try {
     page.on("response", async (response) => {
@@ -428,7 +428,8 @@ async function main() {
       instockDate: payload.instockDate,
       copyButton,
       ...clearResult,
-      dialogMessage: saveResult?.dialogMessage || "",
+      dialogMessage: dialogMessages.join(" / "),
+      dialogMessages,
       note: autoSave
         ? "Pending receipt purchase form was copied/cleared and saved."
         : "Pending receipt purchase form was copied/cleared. Save was not clicked."
