@@ -144,6 +144,49 @@ async function collectVisibleInputs(page) {
   return inputs;
 }
 
+async function collectVisibleControls(page) {
+  const controls = [];
+
+  for (const frame of page.frames()) {
+    const handles = await frame.locator("button, a, input, [role='button'], .btn, .btn-primary, .btn-default").elementHandles().catch(() => []);
+
+    for (let index = 0; index < handles.length; index += 1) {
+      const handle = handles[index];
+      const box = await handle.boundingBox().catch(() => null);
+
+      if (!box || box.width <= 0 || box.height <= 0) {
+        continue;
+      }
+
+      const meta = await handle.evaluate((element) => ({
+        text: (element.innerText || element.textContent || element.value || "").trim(),
+        title: element.getAttribute("title") || "",
+        ariaLabel: element.getAttribute("aria-label") || "",
+        id: element.id || "",
+        className: typeof element.className === "string" ? element.className : ""
+      })).catch(() => null);
+
+      if (!meta) {
+        continue;
+      }
+
+      controls.push({
+        frame,
+        handle,
+        index,
+        ...meta,
+        x: box.x,
+        y: box.y,
+        width: box.width,
+        height: box.height,
+        centerY: box.y + box.height / 2
+      });
+    }
+  }
+
+  return controls;
+}
+
 async function fillHandle(input, value) {
   await input.handle.click();
   await input.frame.waitForTimeout(100).catch(() => {});
@@ -158,17 +201,36 @@ async function fillHandle(input, value) {
 }
 
 async function clickCopyButton(page) {
-  const labels = ["복사", "전표복사", "자료복사", "복사(F3)"];
+  const controls = await collectVisibleControls(page);
+  const controlText = (control) => `${control.text} ${control.title} ${control.ariaLabel}`.replace(/\s+/g, "");
+  const saveCandidates = controls
+    .filter((control) => controlText(control).includes("저장"))
+    .sort((a, b) => a.y - b.y || a.x - b.x);
 
-  for (const label of labels) {
-    const clicked = await page.getByText(label, { exact: true }).first().click({ timeout: 1200 }).then(() => true).catch(() => false);
-    if (clicked) {
+  for (const save of saveCandidates) {
+    const sameToolbarControls = controls
+      .filter((control) => {
+        const text = controlText(control);
+        return control.x > save.x &&
+          Math.abs(control.centerY - save.centerY) <= 36 &&
+          !text.includes("저장") &&
+          !text.includes("사원") &&
+          !text.includes("검색");
+      })
+      .sort((a, b) => a.x - b.x);
+    const copyControl = sameToolbarControls.find((control) => controlText(control).includes("복사")) ||
+      sameToolbarControls[1] ||
+      sameToolbarControls[0];
+
+    if (copyControl) {
+      await copyControl.handle.click();
       await page.waitForTimeout(2500);
-      return label;
+      return `toolbar:${copyControl.text || copyControl.title || copyControl.ariaLabel || "copy"}`;
     }
   }
 
-  return "";
+  await writeFile("tmp/ecount-pending-copy-controls.json", JSON.stringify(controls.map(({ frame, handle, ...control }) => control), null, 2), "utf8").catch(() => {});
+  throw new Error("Could not locate the toolbar copy button next to Save.");
 }
 
 async function getVisibleProductInput(page, productCode) {
