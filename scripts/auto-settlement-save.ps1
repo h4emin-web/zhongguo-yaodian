@@ -465,6 +465,7 @@ try {
       poNo = $item.PoNo
       boardingDate = $boarding.ToString("yyyy-MM-dd")
       instockDate = $instock.ToString("yyyy-MM-dd")
+      declarationNo = $declarationNo
       ratio = $ratio
       ratioBasisValue = Convert-ToNumber $item.RatioBasisValue
       ratioBasisTotal = Convert-ToNumber $item.RatioBasisTotal
@@ -494,6 +495,7 @@ try {
       targetFile = $targetFile.Name
       targetPath = $targetFile.FullName
       exchangeRate = $exchange
+      declarationNo = $declarationNo
       mode = "batch"
       items = $results
     } | ConvertTo-Json -Depth 6 -Compress

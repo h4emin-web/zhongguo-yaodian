@@ -522,6 +522,24 @@ async function runPendingEcountCopy(offer) {
   }
 }
 
+async function runOfferDeclarationUpdate(item, declarationNo) {
+  const args = [
+    "-PoNo", String(item.poNo || ""),
+    "-DeclarationNo", String(declarationNo || "")
+  ];
+
+  if (process.env.OFFER_LIST_PATH) {
+    args.push("-WorkbookPath", process.env.OFFER_LIST_PATH);
+  }
+
+  if (process.env.AUTO_SETTLEMENT_OFFER_DECLARATION_COMMIT !== "0") {
+    args.push("-Commit");
+  }
+
+  const output = await runPowerShell(join(ROOT, "scripts", "offer-declaration-update.ps1"), args);
+  return parseJsonOutput(output);
+}
+
 async function processPendingReceipt(req, res) {
   try {
     const payload = await readBody(req);
@@ -709,7 +727,26 @@ async function saveAutoSettlement(req, res) {
     let ecountError = "";
     let inout = null;
     let inoutError = "";
+    let offerDeclaration = null;
+    let offerDeclarationError = "";
     const resultItems = Array.isArray(result.items) ? result.items : [result];
+    const declarationNo = result.declarationNo || resultItems.find((item) => item.declarationNo)?.declarationNo || "";
+
+    if (declarationNo && process.env.AUTO_SETTLEMENT_OFFER_DECLARATION_SAVE !== "0") {
+      try {
+        offerDeclaration = [];
+
+        for (const item of resultItems) {
+          offerDeclaration.push(await runOfferDeclarationUpdate(item, declarationNo));
+        }
+
+        if (offerDeclaration.length === 1 && !Array.isArray(result.items)) {
+          offerDeclaration = offerDeclaration[0];
+        }
+      } catch (error) {
+        offerDeclarationError = error instanceof Error ? error.message : String(error);
+      }
+    }
 
     if (process.env.AUTO_SETTLEMENT_INOUT_SAVE === "1") {
       try {
@@ -748,15 +785,20 @@ async function saveAutoSettlement(req, res) {
       }
     }
 
-    if (inoutError) {
+    if (offerDeclarationError || inoutError) {
+      const errorMessage = offerDeclarationError
+        ? `Settlement workbook was saved, but offer declaration update failed: ${offerDeclarationError}`
+        : `Settlement workbook was saved, but in/out order save failed: ${inoutError}`;
       json(res, {
         ok: false,
         excelSaved: true,
         ecountSaved: Boolean(ecount?.saved),
         ...result,
+        offerDeclaration,
+        offerDeclarationError,
         ecount,
         ecountError,
-        error: `수입정산서 원본 저장${ecount?.saved ? "과 ERP 구매 저장" : ""}은 완료됐지만 입출고 지시서 저장에 실패했습니다: ${inoutError}`
+        error: errorMessage
       }, 500);
       return;
     }
@@ -764,6 +806,7 @@ async function saveAutoSettlement(req, res) {
     json(res, {
       ok: true,
       ...result,
+      offerDeclaration,
       ecount,
       inout,
       warning: ecountError ? `ERP 구매 저장에 실패했습니다: ${ecountError}` : ""
