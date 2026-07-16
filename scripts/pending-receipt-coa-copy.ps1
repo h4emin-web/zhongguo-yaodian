@@ -4,6 +4,7 @@ param(
   [Parameter(Mandatory=$true)][string]$InstockDate,
   [string]$Quantity = "",
   [string]$Messrs = "",
+  [string]$BatchNo = "",
   [string]$SourceRoot = "",
   [string]$TargetRoot = "",
   [switch]$Commit
@@ -179,7 +180,7 @@ $coaFile = Find-CoaFile $poFolder.FullName
 if (-not $coaFile) { throw "COA file was not found under '$($poFolder.FullName)'." }
 
 $productFolder = Find-ProductFolder $targetRootPath $ProductName
-$batchNo = Get-BatchNo @($coaFile.BaseName, $poFolder.Name)
+$batchNo = if ($BatchNo.Trim()) { $BatchNo.Trim() } else { Get-BatchNo @($coaFile.BaseName, $poFolder.Name) }
 $dateToken = $instockDateValue.ToString("yyMMdd")
 $customer = if ($Messrs.Trim()) { $Messrs.Trim() } else { "CustomerCheckNeeded" }
 $quantityToken = if ($Quantity.Trim()) { $Quantity.Trim() } else { "QuantityCheckNeeded" }
