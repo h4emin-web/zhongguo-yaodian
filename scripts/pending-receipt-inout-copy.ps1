@@ -202,10 +202,12 @@ if ($Quantity -le 0) { throw "Quantity must be greater than 0." }
 $sheetName = U 0xCD9C,0xACE0,0xC9C0,0xC2DC
 $inText = U 0xC785
 $searchMacroName = "{0}_{1}" -f (U 0xC870,0xD68C), (U 0xBA54,0xC774,0xCEE4)
+$orderSelectMacroName = if ($env:PENDING_RECEIPT_INOUT_ORDER_SELECT_MACRO) { $env:PENDING_RECEIPT_INOUT_ORDER_SELECT_MACRO } else { "{0}{1}" -f (U 0xC624,0xB354), (U 0xC120,0xD0DD) }
 $orderNoMacroName = if ($env:PENDING_RECEIPT_INOUT_ORDERNO_MACRO) { $env:PENDING_RECEIPT_INOUT_ORDERNO_MACRO } else { "{0}{1}" -f (U 0xC624,0xB354,0xBC88,0xD638), (U 0xB123,0xAE30) }
 $addMacroName = if ($env:PENDING_RECEIPT_INOUT_ADD_MACRO) { $env:PENDING_RECEIPT_INOUT_ADD_MACRO } else { U 0xCD94,0xAC00 }
 $macroWarning = ""
 $quantityText = Format-NumberText $Quantity
+$ranOrderSelectMacro = ""
 $ranOrderNoMacro = ""
 $ranAddMacro = ""
 $clearedDeliveryColumns = @()
@@ -307,11 +309,13 @@ try {
 
     try {
       Invoke-WithComRetry { $sheet.Range("A$newRow").Select() | Out-Null } "select new row"
+      $ranOrderSelectMacro = Invoke-FirstMacro $excel $workbook $sheet @($orderSelectMacroName, "OrderSelect", "SelectOrder") "in/out order select"
+      Invoke-WithComRetry { $sheet.Range("A$newRow").Select() | Out-Null } "select new row after order select"
       $ranOrderNoMacro = Invoke-FirstMacro $excel $workbook $sheet @($orderNoMacroName, "OrderNo", "OrderNoInsert", "InsertOrderNo") "in/out order no"
       Invoke-WithComRetry { $sheet.Range("G$newRow").Select() | Out-Null } "select add cell"
       $ranAddMacro = Invoke-FirstMacro $excel $workbook $sheet @($addMacroName, "Add", "Insert", "Append") "in/out add"
     } catch {
-      $macroWarning = "In/out order no/add macro failed: $($_.Exception.Message)"
+      $macroWarning = "In/out order select/order no/add macro failed: $($_.Exception.Message)"
       throw $macroWarning
     }
 
@@ -336,6 +340,7 @@ try {
     unitPriceCleared = $true
     amountCleared = $true
     deliveryColumnsCleared = $clearedDeliveryColumns
+    orderSelectMacro = $ranOrderSelectMacro
     orderNoMacro = $ranOrderNoMacro
     addMacro = $ranAddMacro
     warning = $macroWarning
