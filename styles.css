@@ -255,6 +255,41 @@ body.detail-open {
   gap: 12px;
 }
 
+.hana-rate-brand {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hana-rate-logo {
+  position: relative;
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  background: #008485;
+  box-shadow: 0 8px 18px rgba(0, 132, 133, 0.18);
+}
+
+.hana-rate-logo::after {
+  content: "";
+  position: absolute;
+  right: 6px;
+  top: 7px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e6533d;
+  box-shadow: -9px 11px 0 rgba(255, 255, 255, 0.92);
+}
+
 .hana-rate-top p {
   margin: 0 0 3px;
   color: var(--muted);
