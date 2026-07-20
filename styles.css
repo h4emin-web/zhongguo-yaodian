@@ -29,7 +29,7 @@ body {
   min-height: 100vh;
   margin: 0;
   color: var(--text);
-  font-family: "Gowun Dodum", "Nanum Gothic", "Segoe UI", Arial, Helvetica, sans-serif;
+  font-family: "Nanum Gothic", "Segoe UI", Arial, Helvetica, sans-serif;
   background:
     radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.92) 0 18%, transparent 42%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(251, 252, 253, 0.98) 36%, #ffffff 100%),
@@ -125,28 +125,10 @@ body.detail-open {
   text-shadow: 0 2px 10px rgba(31, 36, 41, 0.08);
 }
 
-.brand-mark {
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border-radius: 8px;
-  color: #5f6872;
-  font-size: 20px;
-  font-weight: 800;
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow:
-    0 10px 22px rgba(31, 36, 41, 0.07),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    inset 0 -1px 0 rgba(112, 121, 130, 0.07);
-  backdrop-filter: blur(10px);
-}
-
 .brand h1 {
   margin: 0;
   color: #4f565e;
-  font-family: "Gowun Dodum", "Nanum Gothic", "Segoe UI", Arial, Helvetica, sans-serif;
+  font-family: "Nanum Gothic", "Segoe UI", Arial, Helvetica, sans-serif;
   font-size: clamp(22px, 3vw, 30px);
   font-weight: 800;
   line-height: 1.15;
