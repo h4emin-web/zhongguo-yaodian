@@ -334,7 +334,6 @@ async function fetchHanaExchangeRate({ showLoading = false } = {}) {
     renderHanaExchangeRate(data);
   } catch (error) {
     console.error(error);
-    dailyNewsLoaded = false;
     const message = error && typeof error === "object" && "message" in error
       ? error.message
       : String(error);
@@ -1742,6 +1741,7 @@ async function loadDailyNews({ force = false } = {}) {
     renderDailyNews(data);
   } catch (error) {
     console.error(error);
+    dailyNewsLoaded = false;
     const message = error && typeof error === "object" && "message" in error
       ? error.message
       : String(error);
