@@ -160,6 +160,7 @@ let currentDailyNews = [];
 let passwordVaultLoaded = false;
 let passwordVaultLoading = false;
 let currentPasswordVaultSheets = [];
+let passwordVaultAccessCode = "";
 let autoSettlementState = {
   mode: "single",
   settlementFile: "",
@@ -498,8 +499,9 @@ function requestProtectedToolAccess(toolLabel, onSuccess) {
     event.preventDefault();
 
     if (input.value === PROTECTED_TOOL_PASSWORD) {
+      const accessCode = input.value;
       closeAuth();
-      onSuccess();
+      onSuccess(accessCode);
       return;
     }
 
@@ -1748,12 +1750,13 @@ function openDailyNewsTool() {
   dailyNewsRefresh.focus();
 }
 
-function openPasswordVaultTool() {
+function openPasswordVaultTool(accessCode = "") {
   lastFocusedCard = passwordVaultItem;
+  passwordVaultAccessCode = accessCode || PROTECTED_TOOL_PASSWORD;
   modalLocked = false;
   detailKicker.textContent = "Tools";
   detailTitle.textContent = "패스워드";
-  detailDescription.textContent = "바탕화면 151515 엑셀파일에 정리된 홈페이지 계정 목록입니다.";
+  detailDescription.textContent = "서버에 저장된 홈페이지 계정 목록입니다.";
   showWcSearch(false);
   showPoReceive(false);
   showMfdsSearch(false);
@@ -1931,29 +1934,34 @@ async function loadPasswordVault({ force = false } = {}) {
   passwordVaultLoading = true;
   passwordVaultRefresh.disabled = true;
   passwordVaultStatus.innerHTML = "";
-  passwordVaultList.innerHTML = '<p class="empty-result">패스워드 엑셀을 불러오는 중입니다.</p>';
+  passwordVaultList.innerHTML = '<p class="empty-result">패스워드 목록을 불러오는 중입니다.</p>';
 
   try {
-    const ready = await isLocalAutomationReady().catch(() => false);
-
-    if (!ready) {
-      passwordVaultLoaded = false;
-      renderPasswordVaultError("로컬 자동화 실행기가 켜져 있어야 합니다. 실행 후 다시 불러오세요.");
-      return;
+    if (!supabaseClient) {
+      throw new Error("Supabase 연결 설정이 없어 패스워드 목록을 불러올 수 없습니다.");
     }
 
-    const response = await fetch(`${LOCAL_AUTOMATION_BASE}/api/password-vault`, {
-      method: "GET",
-      cache: "no-store"
+    const { data, error } = await supabaseClient.functions.invoke("password-vault", {
+      body: {
+        action: "load",
+        accessCode: passwordVaultAccessCode || PROTECTED_TOOL_PASSWORD
+      }
     });
-    const data = await response.json().catch(() => ({}));
 
-    if (!response.ok || !data.ok) {
+    if (error) {
+      throw error;
+    }
+
+    if (!data || !data.ok) {
       throw new Error(data.error || "패스워드 엑셀 조회에 실패했습니다.");
     }
 
+    if (!data.data) {
+      throw new Error("서버에 저장된 패스워드 목록이 아직 없습니다.");
+    }
+
     passwordVaultLoaded = true;
-    renderPasswordVault(data);
+    renderPasswordVault(data.data);
   } catch (error) {
     console.error(error);
     passwordVaultLoaded = false;

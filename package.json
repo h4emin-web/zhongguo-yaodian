@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "ecount:rate": "node scripts/ecount-exchange-rate.mjs",
-    "local": "node scripts/workspace-local-server.mjs"
+    "local": "node scripts/workspace-local-server.mjs",
+    "passwords:upload": "node scripts/password-vault-upload.mjs"
   },
   "dependencies": {
     "playwright": "^1.54.2",
