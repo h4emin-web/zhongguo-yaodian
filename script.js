@@ -7,6 +7,11 @@ const detailKicker = document.querySelector(".detail-kicker");
 const detailTitle = document.querySelector("#detail-title");
 const detailDescription = document.querySelector(".detail-description");
 const searchInput = document.querySelector("#workspace-search");
+const hanaRateCard = document.querySelector(".hana-rate-card");
+const hanaRateBase = document.querySelector(".hana-rate-base");
+const hanaRateSend = document.querySelector(".hana-rate-send");
+const hanaRateUpdated = document.querySelector(".hana-rate-updated");
+const hanaRateRefresh = document.querySelector(".hana-rate-refresh");
 const wcSearchPanel = document.querySelector(".wc-search-panel");
 const wcSearchInput = document.querySelector("#wc-search-input");
 const wcResults = document.querySelector(".wc-results");
@@ -111,6 +116,7 @@ const LOCAL_AUTOMATION_START_URL = "haemin-workspace://start";
 const PROTECTED_TOOL_PASSWORD = "1515";
 const STAR_BURST_COUNT = 12;
 const STAR_BURST_HUE_STEP = 47;
+const HANA_RATE_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 
 let lastFocusedCard = null;
 let modalLocked = false;
@@ -135,6 +141,7 @@ let currentGlobalMatches = { wc: [], mfds: [], cnph: [], usdmf: [], indiawc: [] 
 let worklogPeople = [];
 let worklogDateLabel = "";
 let starBurstHue = 0;
+let hanaRateTimer = null;
 let autoSettlementState = {
   mode: "single",
   settlementFile: "",
@@ -227,6 +234,123 @@ function initializeHeaderDogVideo() {
   }
 
   topBarVideo.addEventListener("animationiteration", startHeaderDogVideo);
+}
+
+function formatHanaRateValue(value) {
+  const numeric = Number(String(value ?? "").replace(/,/g, ""));
+
+  if (!Number.isFinite(numeric)) {
+    return "-";
+  }
+
+  return new Intl.NumberFormat("ko-KR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(numeric);
+}
+
+function formatHanaRateTimestamp(value) {
+  const date = value ? new Date(value) : new Date();
+
+  if (Number.isNaN(date.getTime())) {
+    return `${String(value || "").replace(/\s+/g, " ").trim()} 기준`;
+  }
+
+  const parts = new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: false
+  }).formatToParts(date);
+  const part = (type) => parts.find((item) => item.type === type)?.value || "";
+  const dayLabel = part("day").endsWith("일") ? part("day") : `${part("day")}일`;
+
+  return `${part("month")} ${dayLabel} ${part("hour")}시 ${part("minute")}분 기준`;
+}
+
+function renderHanaExchangeRate(data) {
+  if (!hanaRateCard || !hanaRateBase || !hanaRateSend || !hanaRateUpdated) {
+    return;
+  }
+
+  hanaRateCard.classList.remove("is-error");
+  hanaRateBase.textContent = formatHanaRateValue(data.baseRate);
+  hanaRateSend.textContent = formatHanaRateValue(data.sendRate);
+  hanaRateUpdated.textContent = formatHanaRateTimestamp(data.standardAt || data.fetchedAt);
+}
+
+function renderHanaExchangeRateError(message) {
+  if (!hanaRateCard || !hanaRateBase || !hanaRateSend || !hanaRateUpdated) {
+    return;
+  }
+
+  hanaRateCard.classList.add("is-error");
+  hanaRateBase.textContent = "-";
+  hanaRateSend.textContent = "-";
+  hanaRateUpdated.textContent = message || "환율 조회 실패";
+}
+
+async function fetchHanaExchangeRate({ showLoading = false } = {}) {
+  if (!hanaRateCard) {
+    return;
+  }
+
+  if (showLoading && hanaRateUpdated) {
+    hanaRateUpdated.textContent = "조회 중";
+    hanaRateCard.classList.remove("is-error");
+  }
+
+  if (!supabaseClient) {
+    renderHanaExchangeRateError("Supabase 연결 설정 필요");
+    return;
+  }
+
+  if (hanaRateRefresh) {
+    hanaRateRefresh.disabled = true;
+  }
+
+  try {
+    const { data, error } = await supabaseClient.functions.invoke("hana-exchange-rate", {
+      body: { currency: "USD" }
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data || !data.ok) {
+      throw new Error((data && data.error) || "하나은행 환율 조회 실패");
+    }
+
+    renderHanaExchangeRate(data);
+  } catch (error) {
+    console.error(error);
+    const message = error && typeof error === "object" && "message" in error
+      ? error.message
+      : String(error);
+    renderHanaExchangeRateError(`환율 조회 실패: ${message}`);
+  } finally {
+    if (hanaRateRefresh) {
+      hanaRateRefresh.disabled = false;
+    }
+  }
+}
+
+function initializeHanaExchangeRate() {
+  if (!hanaRateCard) {
+    return;
+  }
+
+  if (hanaRateRefresh) {
+    hanaRateRefresh.addEventListener("click", () => fetchHanaExchangeRate({ showLoading: true }));
+  }
+
+  fetchHanaExchangeRate({ showLoading: true });
+  hanaRateTimer = window.setInterval(() => {
+    fetchHanaExchangeRate();
+  }, HANA_RATE_REFRESH_INTERVAL_MS);
 }
 
 function createStarBurst(event) {
@@ -3224,6 +3348,7 @@ worklogDropzone.addEventListener("drop", (event) => {
   }
 });
 
+initializeHanaExchangeRate();
 loadWorklogFromStorage();
 
 if (location.hash === "#worklog") {
