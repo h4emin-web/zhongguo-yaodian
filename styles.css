@@ -402,6 +402,34 @@ body.detail-open {
   color: #aeb5bd;
 }
 
+.workspace-toggle.is-heart-popping::after {
+  content: "\2665";
+  color: #e84d5b;
+  animation: workspace-heart-pop 640ms cubic-bezier(0.16, 0.8, 0.2, 1) both;
+}
+
+@keyframes workspace-heart-pop {
+  0% {
+    color: #c8cdd3;
+    transform: translate(-50%, -50%) scale(0.82);
+  }
+
+  34% {
+    color: #e84d5b;
+    transform: translate(-50%, -50%) scale(1.22);
+  }
+
+  72% {
+    color: #e84d5b;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  100% {
+    color: #c8cdd3;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+}
+
 .hana-rate-card {
   margin-top: 29px;
   min-height: 132px;

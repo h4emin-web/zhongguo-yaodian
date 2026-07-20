@@ -148,6 +148,7 @@ let worklogPeople = [];
 let worklogDateLabel = "";
 let starBurstHue = 0;
 let hanaRateTimer = null;
+let workspaceHeartTimer = null;
 let dailyNewsLoaded = false;
 let dailyNewsLoading = false;
 let currentDailyNews = [];
@@ -378,6 +379,25 @@ function setWorkspaceExpanded(isExpanded) {
 function toggleWorkspaceContent() {
   const isExpanded = workspaceToggle?.getAttribute("aria-expanded") === "true";
   setWorkspaceExpanded(!isExpanded);
+  pulseWorkspaceHeart();
+}
+
+function pulseWorkspaceHeart() {
+  if (!workspaceToggle) {
+    return;
+  }
+
+  if (workspaceHeartTimer) {
+    window.clearTimeout(workspaceHeartTimer);
+  }
+
+  workspaceToggle.classList.remove("is-heart-popping");
+  void workspaceToggle.offsetWidth;
+  workspaceToggle.classList.add("is-heart-popping");
+  workspaceHeartTimer = window.setTimeout(() => {
+    workspaceToggle.classList.remove("is-heart-popping");
+    workspaceHeartTimer = null;
+  }, 640);
 }
 
 function createStarBurst(event) {
