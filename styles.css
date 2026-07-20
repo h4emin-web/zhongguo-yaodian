@@ -1138,11 +1138,12 @@ body.tool-auth-open {
   display: grid;
   place-items: center;
   border-radius: 8px;
-  color: #ffffff;
+  color: var(--accent);
   font-size: 13px;
   font-weight: 800;
-  background: var(--accent);
-  box-shadow: 0 9px 18px rgba(66, 88, 54, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(227, 234, 220, 0.96);
+  background: var(--surface);
+  box-shadow: 0 9px 18px rgba(66, 88, 54, 0.1), var(--surface-rim);
 }
 
 .daily-news-title {
