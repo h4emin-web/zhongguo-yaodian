@@ -137,6 +137,31 @@ body.detail-open {
   text-shadow: none;
 }
 
+.api-market-link {
+  position: absolute;
+  right: clamp(20px, 5vw, 64px);
+  bottom: 18px;
+  z-index: 3;
+  padding: 6px 0;
+  border: 0;
+  color: #111418;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+  text-decoration: none;
+  background: transparent;
+  text-shadow: none;
+  transition: transform 150ms ease, opacity 150ms ease;
+}
+
+.api-market-link:hover,
+.api-market-link:focus-visible {
+  transform: translateY(-1px);
+  outline: none;
+  opacity: 0.72;
+}
+
 .app-shell {
   width: min(100%, 1340px);
   margin: 34px auto 56px;
@@ -2081,6 +2106,12 @@ body.tool-auth-open {
 
   .top-bar-video-backdrop {
     opacity: 0.48;
+  }
+
+  .api-market-link {
+    right: 18px;
+    bottom: 14px;
+    font-size: 13px;
   }
 
   .app-shell {
