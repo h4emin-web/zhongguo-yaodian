@@ -338,34 +338,25 @@ body.detail-open {
 }
 
 .workspace-toggle-handle {
-  width: 74px;
-  height: 7px;
-  border-radius: 999px;
-  background: rgba(111, 149, 91, 0.32);
-  transition: transform 180ms ease, background 180ms ease;
+  display: none;
 }
 
 .workspace-toggle::after {
-  content: "";
+  content: "v";
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 12px;
-  height: 12px;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  transform: translate(-50%, 5px) rotate(45deg);
-  opacity: 0.68;
-  transition: transform 180ms ease, opacity 180ms ease;
-}
-
-.workspace-toggle[aria-expanded="true"] .workspace-toggle-handle {
-  background: rgba(111, 149, 91, 0.48);
-  transform: scaleX(0.72);
+  color: rgba(111, 149, 91, 0.76);
+  font-family: "Roboto", "Nanum Gothic", Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+  transform: translate(-50%, -50%);
+  transition: transform 180ms ease, color 180ms ease;
 }
 
 .workspace-toggle[aria-expanded="true"]::after {
-  transform: translate(-50%, 10px) rotate(225deg);
+  transform: translate(-50%, -50%) rotate(180deg);
 }
 
 .hana-rate-card {
