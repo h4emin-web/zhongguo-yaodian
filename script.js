@@ -108,6 +108,7 @@ const supabaseClient = hasSupabaseKey && window.supabase
   : null;
 const LOCAL_AUTOMATION_BASE = "http://127.0.0.1:4173";
 const LOCAL_AUTOMATION_START_URL = "haemin-workspace://start";
+const PROTECTED_TOOL_PASSWORD = "1515";
 
 let lastFocusedCard = null;
 let modalLocked = false;
@@ -223,6 +224,86 @@ function initializeHeaderDogVideo() {
   }
 
   topBarVideo.addEventListener("animationiteration", startHeaderDogVideo);
+}
+
+function requestProtectedToolAccess(toolLabel, onSuccess) {
+  const existingOverlay = document.querySelector(".tool-auth-overlay");
+  if (existingOverlay) {
+    existingOverlay.querySelector(".tool-auth-input")?.focus();
+    return;
+  }
+
+  const overlay = document.createElement("div");
+  overlay.className = "tool-auth-overlay";
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-modal", "true");
+  overlay.innerHTML = `
+    <form class="tool-auth-dialog">
+      <button class="tool-auth-close" type="button" aria-label="비밀번호 창 닫기">Close</button>
+      <p class="tool-auth-kicker">Protected Tool</p>
+      <h2>${toolLabel}</h2>
+      <label for="tool-auth-password">비밀번호</label>
+      <input id="tool-auth-password" class="tool-auth-input" type="password" inputmode="numeric" autocomplete="off" placeholder="비밀번호 입력">
+      <p class="tool-auth-error" aria-live="polite"></p>
+      <div class="tool-auth-actions">
+        <button class="tool-auth-cancel" type="button">취소</button>
+        <button class="tool-auth-submit" type="submit">확인</button>
+      </div>
+    </form>
+  `;
+
+  const form = overlay.querySelector(".tool-auth-dialog");
+  const input = overlay.querySelector(".tool-auth-input");
+  const error = overlay.querySelector(".tool-auth-error");
+  const cancelButton = overlay.querySelector(".tool-auth-cancel");
+  const closeAuthButton = overlay.querySelector(".tool-auth-close");
+  let closed = false;
+
+  function closeAuth() {
+    if (closed) {
+      return;
+    }
+
+    closed = true;
+    document.removeEventListener("keydown", handleAuthKeydown);
+    document.body.classList.remove("tool-auth-open");
+    overlay.remove();
+  }
+
+  function handleAuthKeydown(event) {
+    if (event.key === "Escape") {
+      closeAuth();
+    }
+  }
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    if (input.value === PROTECTED_TOOL_PASSWORD) {
+      closeAuth();
+      onSuccess();
+      return;
+    }
+
+    input.value = "";
+    error.textContent = "비밀번호가 맞지 않습니다.";
+    form.classList.remove("is-shaking");
+    void form.offsetWidth;
+    form.classList.add("is-shaking");
+    input.focus();
+  });
+
+  cancelButton.addEventListener("click", closeAuth);
+  closeAuthButton.addEventListener("click", closeAuth);
+  overlay.addEventListener("click", (event) => {
+    if (event.target === overlay) {
+      closeAuth();
+    }
+  });
+  document.addEventListener("keydown", handleAuthKeydown);
+  document.body.appendChild(overlay);
+  document.body.classList.add("tool-auth-open");
+  requestAnimationFrame(() => input.focus());
 }
 
 initializeHeaderDogVideo();
@@ -397,11 +478,11 @@ importCertItem.addEventListener("click", () => {
 });
 
 autoSettlementItem.addEventListener("click", () => {
-  openAutoSettlementTool();
+  requestProtectedToolAccess("자동정산", openAutoSettlementTool);
 });
 
 pendingReceiptItem.addEventListener("click", () => {
-  openPendingReceiptTool();
+  requestProtectedToolAccess("입고예정 처리", openPendingReceiptTool);
 });
 
 pendingReceiptMode.addEventListener("change", updatePendingReceiptState);
