@@ -246,8 +246,8 @@ function createStarBurst(event) {
 
   for (let index = 0; index < starCount; index += 1) {
     const angle = (Math.PI * 2 * index) / starCount + (Math.random() - 0.5) * 0.5;
-    const distance = reducedMotion ? 28 + Math.random() * 24 : 42 + Math.random() * 64;
-    const size = reducedMotion ? 12 + Math.random() * 6 : 14 + Math.random() * 12;
+    const distance = reducedMotion ? 34 + Math.random() * 28 : 56 + Math.random() * 76;
+    const size = reducedMotion ? 18 + Math.random() * 8 : 24 + Math.random() * 16;
     const hue = (hueBase + index * (360 / starCount) + Math.random() * 18) % 360;
     const lightness = index % 3 === 0 ? 66 : 74;
     const star = document.createElement("span");
