@@ -7,6 +7,8 @@ const detailKicker = document.querySelector(".detail-kicker");
 const detailTitle = document.querySelector("#detail-title");
 const detailDescription = document.querySelector(".detail-description");
 const searchInput = document.querySelector("#workspace-search");
+const workspaceToggle = document.querySelector(".workspace-toggle");
+const workspaceContent = document.querySelector("#workspace-content");
 const hanaRateCard = document.querySelector(".hana-rate-card");
 const hanaRateBase = document.querySelector(".hana-rate-base");
 const hanaRateSend = document.querySelector(".hana-rate-send");
@@ -360,6 +362,24 @@ function initializeHanaExchangeRate() {
   }, HANA_RATE_REFRESH_INTERVAL_MS);
 }
 
+function setWorkspaceExpanded(isExpanded) {
+  if (!workspaceToggle || !workspaceContent) {
+    return;
+  }
+
+  workspaceToggle.setAttribute("aria-expanded", String(isExpanded));
+  workspaceToggle.setAttribute("aria-label", isExpanded ? "작업 박스 접기" : "작업 박스 펼치기");
+  workspaceContent.classList.toggle("is-expanded", isExpanded);
+  workspaceContent.classList.toggle("is-collapsed", !isExpanded);
+  workspaceContent.setAttribute("aria-hidden", String(!isExpanded));
+  workspaceContent.inert = !isExpanded;
+}
+
+function toggleWorkspaceContent() {
+  const isExpanded = workspaceToggle?.getAttribute("aria-expanded") === "true";
+  setWorkspaceExpanded(!isExpanded);
+}
+
 function createStarBurst(event) {
   if (event.button !== undefined && event.button !== 0) {
     return;
@@ -478,6 +498,11 @@ function requestProtectedToolAccess(toolLabel, onSuccess) {
 
 initializeHeaderDogVideo();
 document.addEventListener("pointerdown", createStarBurst, { passive: true });
+setWorkspaceExpanded(false);
+
+if (workspaceToggle) {
+  workspaceToggle.addEventListener("click", toggleWorkspaceContent);
+}
 
 function openDetail(card) {
   const title = card.querySelector("h2").textContent;

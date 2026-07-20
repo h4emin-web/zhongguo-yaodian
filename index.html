@@ -30,6 +30,9 @@
       <div class="search-area">
         <label for="workspace-search">종합검색</label>
         <input id="workspace-search" type="search" placeholder="원료명, 성분명 등으로 K-DMF / 중국 약전 / WC &amp; COPP 통합검색" autocomplete="off">
+        <button class="workspace-toggle" type="button" aria-label="작업 박스 펼치기" aria-expanded="false" aria-controls="workspace-content">
+          <span class="workspace-toggle-handle" aria-hidden="true"></span>
+        </button>
       </div>
       <section class="hana-rate-card" aria-label="하나은행 USD 환율" aria-live="polite">
         <div class="hana-rate-top">
@@ -56,14 +59,14 @@
       </section>
     </div>
 
-    <div class="workspace-content">
-      <div class="workspace-main">
     <div class="global-search-head" hidden>
       <p class="wc-search-meta">K-DMF / 중국 약전 / WC &amp; COPP / 미국 DMF 검색 결과를 한 번에 엑셀로 추출합니다.</p>
       <button class="excel-export global-excel-export" type="button">엑셀 추출</button>
     </div>
     <div class="global-search-results" hidden aria-live="polite"></div>
 
+    <div class="workspace-content is-collapsed" id="workspace-content" aria-hidden="true">
+      <div class="workspace-main">
     <div class="workspace-grid" aria-label="workspace tools">
       <section class="tool-box" tabindex="0">
         <button class="card-share-button" type="button" aria-label="카카오톡으로 보내기">💬</button>
