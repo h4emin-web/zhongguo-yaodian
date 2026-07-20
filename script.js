@@ -109,8 +109,8 @@ const supabaseClient = hasSupabaseKey && window.supabase
 const LOCAL_AUTOMATION_BASE = "http://127.0.0.1:4173";
 const LOCAL_AUTOMATION_START_URL = "haemin-workspace://start";
 const PROTECTED_TOOL_PASSWORD = "1515";
-const STAR_BURST_COUNT = 10;
-const STAR_BURST_COLORS = ["#f7c95f", "#fff3a6", "#ffffff", "#8fbf6f"];
+const STAR_BURST_COUNT = 12;
+const STAR_BURST_HUE_STEP = 47;
 
 let lastFocusedCard = null;
 let modalLocked = false;
@@ -134,6 +134,7 @@ let currentGlobalKeyword = "";
 let currentGlobalMatches = { wc: [], mfds: [], cnph: [], usdmf: [], indiawc: [] };
 let worklogPeople = [];
 let worklogDateLabel = "";
+let starBurstHue = 0;
 let autoSettlementState = {
   mode: "single",
   settlementFile: "",
@@ -236,6 +237,8 @@ function createStarBurst(event) {
   const burst = document.createElement("div");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const starCount = reducedMotion ? 5 : STAR_BURST_COUNT;
+  const hueBase = starBurstHue;
+  starBurstHue = (starBurstHue + STAR_BURST_HUE_STEP) % 360;
 
   burst.className = "star-burst";
   burst.style.left = `${event.clientX}px`;
@@ -243,8 +246,10 @@ function createStarBurst(event) {
 
   for (let index = 0; index < starCount; index += 1) {
     const angle = (Math.PI * 2 * index) / starCount + (Math.random() - 0.5) * 0.5;
-    const distance = reducedMotion ? 20 + Math.random() * 16 : 26 + Math.random() * 44;
-    const size = 6 + Math.random() * 8;
+    const distance = reducedMotion ? 28 + Math.random() * 24 : 42 + Math.random() * 64;
+    const size = reducedMotion ? 12 + Math.random() * 6 : 14 + Math.random() * 12;
+    const hue = (hueBase + index * (360 / starCount) + Math.random() * 18) % 360;
+    const lightness = index % 3 === 0 ? 66 : 74;
     const star = document.createElement("span");
 
     star.className = "star-burst-star";
@@ -252,7 +257,7 @@ function createStarBurst(event) {
     star.style.setProperty("--y", `${Math.sin(angle) * distance}px`);
     star.style.setProperty("--size", `${size}px`);
     star.style.setProperty("--rotate", `${Math.round(Math.random() * 160 - 80)}deg`);
-    star.style.setProperty("--spark-color", STAR_BURST_COLORS[index % STAR_BURST_COLORS.length]);
+    star.style.setProperty("--spark-color", `hsl(${Math.round(hue)} 92% ${lightness}%)`);
     burst.appendChild(star);
   }
 
