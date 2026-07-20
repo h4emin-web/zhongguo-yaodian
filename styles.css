@@ -87,11 +87,17 @@ body.detail-open {
 }
 
 .top-bar-video-backdrop {
-  z-index: 0;
+  z-index: 1;
   object-fit: contain;
   object-position: center center;
-  opacity: 0.24;
-  filter: grayscale(0.92) saturate(0.16) brightness(1.18) contrast(1.02);
+  opacity: 0.62;
+  filter:
+    grayscale(1)
+    saturate(0)
+    brightness(1.18)
+    contrast(4.4)
+    drop-shadow(0 0 0.45px rgba(20, 23, 26, 0.95))
+    drop-shadow(0 1px 0.35px rgba(20, 23, 26, 0.35));
   mix-blend-mode: multiply;
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.45) 12%, #000 27%, #000 73%, rgba(0, 0, 0, 0.45) 88%, transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.45) 12%, #000 27%, #000 73%, rgba(0, 0, 0, 0.45) 88%, transparent 100%);
@@ -2089,7 +2095,7 @@ body.tool-auth-open {
   }
 
   .top-bar-video-backdrop {
-    opacity: 0.4;
+    opacity: 0.48;
   }
 
   .app-shell {
