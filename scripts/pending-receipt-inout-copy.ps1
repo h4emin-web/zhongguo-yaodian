@@ -28,8 +28,13 @@ public static class MouseClicker {
   public static extern bool SetCursorPos(int X, int Y);
   [DllImport("user32.dll")]
   public static extern void mouse_event(int dwFlags, int dx, int dy, int cButtons, int dwExtraInfo);
+  [DllImport("user32.dll")]
+  public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+  [DllImport("user32.dll")]
+  public static extern bool SetForegroundWindow(IntPtr hWnd);
   public const int MOUSEEVENTF_LEFTDOWN = 0x0002;
   public const int MOUSEEVENTF_LEFTUP = 0x0004;
+  public const int SW_RESTORE = 9;
 }
 "@
 
@@ -188,6 +193,11 @@ function Click-WorksheetCellCenter {
   param($Excel, $Sheet, [string]$Address, [string]$Label)
 
   Invoke-WithComRetry { $Sheet.Activate() | Out-Null } "activate sheet for $Label"
+  try {
+    [MouseClicker]::ShowWindow([IntPtr]$Excel.Hwnd, [MouseClicker]::SW_RESTORE) | Out-Null
+    [MouseClicker]::SetForegroundWindow([IntPtr]$Excel.Hwnd) | Out-Null
+    Start-Sleep -Milliseconds 250
+  } catch {}
   $range = Invoke-WithComRetry { $Sheet.Range($Address) } "range for $Label"
   $window = Invoke-WithComRetry { $Excel.ActiveWindow } "active window for $Label"
   $x = Invoke-WithComRetry { $window.PointsToScreenPixelsX($range.Left + ($range.Width / 2)) } "screen x for $Label"
@@ -202,10 +212,15 @@ function Click-WorksheetCellCenter {
   return "clicked:$Address"
 }
 
-function Click-TopButtonInColumn {
+function Invoke-TopButtonInColumn {
   param($Excel, $Sheet, [string]$ColumnLetter, [string[]]$Needles, [string]$Label)
 
   Invoke-WithComRetry { $Sheet.Activate() | Out-Null } "activate sheet for $Label"
+  try {
+    [MouseClicker]::ShowWindow([IntPtr]$Excel.Hwnd, [MouseClicker]::SW_RESTORE) | Out-Null
+    [MouseClicker]::SetForegroundWindow([IntPtr]$Excel.Hwnd) | Out-Null
+    Start-Sleep -Milliseconds 250
+  } catch {}
   $window = Invoke-WithComRetry { $Excel.ActiveWindow } "active window for $Label"
   Invoke-WithComRetry { $window.ScrollRow = 1 } "scroll row for $Label"
   Invoke-WithComRetry { $window.ScrollColumn = 1 } "scroll column for $Label"
@@ -245,6 +260,15 @@ function Click-TopButtonInColumn {
 
   $targetShape = $candidates | Sort-Object @{ Expression = { try { [double]$_.Top } catch { 999999 } } }, @{ Expression = { try { [double]$_.Left } catch { 999999 } } } | Select-Object -First 1
   if ($targetShape) {
+    $shapeName = try { [string]$targetShape.Name } catch { "" }
+    $shapeAction = try { [string]$targetShape.OnAction } catch { "" }
+
+    if ($shapeAction) {
+      Invoke-WithComRetry { $Excel.Run($shapeAction) | Out-Null } "shape action for $Label"
+      Start-Sleep -Milliseconds 1200
+      return ("shape-action:{0}:{1}" -f $shapeName, $shapeAction)
+    }
+
     $x = Invoke-WithComRetry { $window.PointsToScreenPixelsX($targetShape.Left + ($targetShape.Width / 2)) } "shape screen x for $Label"
     $y = Invoke-WithComRetry { $window.PointsToScreenPixelsY($targetShape.Top + ($targetShape.Height / 2)) } "shape screen y for $Label"
 
@@ -254,24 +278,23 @@ function Click-TopButtonInColumn {
     Start-Sleep -Milliseconds 80
     [MouseClicker]::mouse_event([MouseClicker]::MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
     Start-Sleep -Milliseconds 1200
-    $shapeName = try { [string]$targetShape.Name } catch { "" }
     return "clicked-shape:$shapeName"
   }
 
-  return Click-WorksheetCellCenter $Excel $Sheet ("{0}1" -f $ColumnLetter) $Label
+  throw "$Label top button was not found in column $ColumnLetter."
 }
 
 function Invoke-MacroOrColumnButton {
   param($Excel, $Workbook, $Sheet, [string[]]$MacroNames, [string]$ColumnLetter, [string]$Label)
 
   try {
-    return Click-TopButtonInColumn $Excel $Sheet $ColumnLetter $MacroNames $Label
+    return Invoke-TopButtonInColumn $Excel $Sheet $ColumnLetter $MacroNames $Label
   } catch {
-    $clickError = $_.Exception.Message
+    $buttonError = $_.Exception.Message
     try {
       return Invoke-FirstMacro $Excel $Workbook $Sheet $MacroNames $Label
     } catch {
-      throw "$Label failed. Click error: $clickError / Macro error: $($_.Exception.Message)"
+      throw "$Label failed. Button error: $buttonError / Macro error: $($_.Exception.Message)"
     }
   }
 }
@@ -289,6 +312,33 @@ function Find-HeaderColumn {
         if ($text -eq $normalizedNeedle -or $text -like "*$normalizedNeedle*") {
           return $column
         }
+      }
+    }
+  }
+
+  return 0
+}
+
+function Find-InoutOrderRow {
+  param($Sheet, [string]$OrderNo, [string]$ProductCode, [string]$PoNo, [int]$RemarkColumn)
+
+  $lastRow = Invoke-WithComRetry { $Sheet.Range("A500000").End($xlUp).Row } "last row for in/out verification"
+  $normalizedCode = Normalize-Code $ProductCode
+  $normalizedOrderNo = ([string]$OrderNo).Trim()
+  $normalizedPoNo = ([string]$PoNo).Trim()
+
+  for ($row = 3; $row -le $lastRow; $row += 1) {
+    $rowOrderNo = ([string]$Sheet.Cells.Item($row, 1).Text).Trim()
+    $rowCode = Normalize-Code $Sheet.Cells.Item($row, 5).Text
+
+    if ($normalizedOrderNo -and $rowOrderNo -eq $normalizedOrderNo) {
+      return $row
+    }
+
+    if ($normalizedCode -and $rowCode -eq $normalizedCode -and $RemarkColumn -gt 0) {
+      $rowRemark = ([string]$Sheet.Cells.Item($row, $RemarkColumn).Text).Trim()
+      if ($normalizedPoNo -and $rowRemark -eq $normalizedPoNo) {
+        return $row
       }
     }
   }
@@ -319,6 +369,8 @@ $ranOrderNoMacro = ""
 $ranAddMacro = ""
 $clearedDeliveryColumns = @()
 $remarkColumn = 0
+$savedOrderNo = ""
+$verifiedRow = 0
 
 $excel = Get-RunningExcel
 $createdExcel = $false
@@ -425,17 +477,29 @@ try {
 
     try {
       Invoke-WithComRetry { $sheet.Range("A$newRow").Select() | Out-Null } "select new row"
-      $ranOrderSelectMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($orderSelectMacroName, "OrderSelect", "SelectOrder") "A" "in/out order select"
+      $ranOrderSelectMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($orderSelectMacroName, "출고수정선택", "OrderSelect", "SelectOrder") "A" "in/out order select"
       Invoke-WithComRetry { $sheet.Range("A$newRow").Select() | Out-Null } "select new row after order select"
-      $ranOrderNoMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($orderNoMacroName, "OrderNo", "OrderNoInsert", "InsertOrderNo") "B" "in/out order no"
+      $ranOrderNoMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($orderNoMacroName, "오더번호", "OrderNo", "OrderNoInsert", "InsertOrderNo") "B" "in/out order no"
+      $savedOrderNo = ([string]$sheet.Cells.Item($newRow, 1).Text).Trim()
+      if (-not $savedOrderNo) {
+        throw "in/out order no button did not create an order number in column A."
+      }
       Invoke-WithComRetry { $sheet.Range("G$newRow").Select() | Out-Null } "select add cell"
-      $ranAddMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($addMacroName, "Add", "Insert", "Append") "G" "in/out add"
+      $ranAddMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($addMacroName, "출고삽입", "추가선택", "Add", "Insert", "Append") "G" "in/out add"
     } catch {
       $macroWarning = "In/out order select/order no/add macro failed: $($_.Exception.Message)"
       throw $macroWarning
     }
 
     Invoke-WithComRetry { $workbook.Save() } "save in/out workbook"
+
+    Invoke-WithComRetry { $sheet.Range("B1").Value2 = $ProductCode } "re-enter product search"
+    Run-WorkbookMacro $excel $workbook $searchMacroName
+    Start-Sleep -Milliseconds 1200
+    $verifiedRow = Find-InoutOrderRow $sheet $savedOrderNo $ProductCode $remarkText $remarkColumn
+    if ($verifiedRow -le 0) {
+      throw "In/out order save verification failed: order no '$savedOrderNo' was not found after add."
+    }
   }
 
   $result = [ordered]@{
@@ -450,6 +514,7 @@ try {
     productName = $source.ProductName
     quantity = $quantityText
     poNo = $remarkText
+    savedOrderNo = $savedOrderNo
     searchedProductCode = $ProductCode
     searchedDirection = $inText
     poDate = $poDateValue.ToString("yyyy-MM-dd")
@@ -461,6 +526,7 @@ try {
     orderSelectMacro = $ranOrderSelectMacro
     orderNoMacro = $ranOrderNoMacro
     addMacro = $ranAddMacro
+    verifiedRow = $verifiedRow
     warning = $macroWarning
   }
 

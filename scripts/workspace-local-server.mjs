@@ -555,9 +555,7 @@ async function processPendingReceipt(req, res) {
     }
 
     const shouldRunInout = process.env.PENDING_RECEIPT_INOUT_SAVE !== "0";
-    const shouldRunEcount = process.env.PENDING_RECEIPT_ECOUNT_SAVE === "1" || (
-      process.env.PENDING_RECEIPT_ECOUNT_SAVE !== "0" && process.env.AUTO_SETTLEMENT_ECOUNT_SAVE === "1"
-    );
+    const shouldRunEcount = process.env.PENDING_RECEIPT_ECOUNT_SAVE !== "0";
     const shouldRunCoa = process.env.PENDING_RECEIPT_COA_COPY !== "0";
     const results = [];
 

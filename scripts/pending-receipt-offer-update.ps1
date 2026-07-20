@@ -23,8 +23,13 @@ public static class MouseClicker {
   public static extern bool SetCursorPos(int X, int Y);
   [DllImport("user32.dll")]
   public static extern void mouse_event(int dwFlags, int dx, int dy, int cButtons, int dwExtraInfo);
+  [DllImport("user32.dll")]
+  public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+  [DllImport("user32.dll")]
+  public static extern bool SetForegroundWindow(IntPtr hWnd);
   public const int MOUSEEVENTF_LEFTDOWN = 0x0002;
   public const int MOUSEEVENTF_LEFTUP = 0x0004;
+  public const int SW_RESTORE = 9;
 }
 "@
 
@@ -73,6 +78,23 @@ function Normalize-PoNo {
     Replace(" ", "").
     Trim().
     ToUpperInvariant()
+}
+
+function Find-PoRow {
+  param($Sheet, [string]$NormalizedPoNo)
+
+  $lastRow = Invoke-WithComRetry { $Sheet.Range("A500000").End($xlUp).Row } "last row"
+
+  for ($row = 3; $row -le $lastRow; $row += 1) {
+    $candidates = @($Sheet.Cells.Item($row, 1).Text, $Sheet.Cells.Item($row, 2).Text, $Sheet.Cells.Item($row, 3).Text)
+    foreach ($candidate in $candidates) {
+      if ((Normalize-PoNo $candidate) -eq $NormalizedPoNo) {
+        return $row
+      }
+    }
+  }
+
+  return 0
 }
 
 function Convert-ToNumber {
@@ -195,6 +217,11 @@ function Click-WorksheetCellCenter {
   param($Excel, $Sheet, [string]$Address, [string]$Label)
 
   Invoke-WithComRetry { $Sheet.Activate() | Out-Null } "activate sheet for $Label"
+  try {
+    [MouseClicker]::ShowWindow([IntPtr]$Excel.Hwnd, [MouseClicker]::SW_RESTORE) | Out-Null
+    [MouseClicker]::SetForegroundWindow([IntPtr]$Excel.Hwnd) | Out-Null
+    Start-Sleep -Milliseconds 250
+  } catch {}
   $range = Invoke-WithComRetry { $Sheet.Range($Address) } "range for $Label"
   $window = Invoke-WithComRetry { $Excel.ActiveWindow } "active window for $Label"
   $x = Invoke-WithComRetry { $window.PointsToScreenPixelsX($range.Left + ($range.Width / 2)) } "screen x for $Label"
@@ -209,10 +236,15 @@ function Click-WorksheetCellCenter {
   return "clicked:$Address"
 }
 
-function Click-TopButtonInColumn {
+function Invoke-TopButtonInColumn {
   param($Excel, $Sheet, [string]$ColumnLetter, [string[]]$Needles, [string]$Label)
 
   Invoke-WithComRetry { $Sheet.Activate() | Out-Null } "activate sheet for $Label"
+  try {
+    [MouseClicker]::ShowWindow([IntPtr]$Excel.Hwnd, [MouseClicker]::SW_RESTORE) | Out-Null
+    [MouseClicker]::SetForegroundWindow([IntPtr]$Excel.Hwnd) | Out-Null
+    Start-Sleep -Milliseconds 250
+  } catch {}
   $window = Invoke-WithComRetry { $Excel.ActiveWindow } "active window for $Label"
   Invoke-WithComRetry { $window.ScrollRow = 1 } "scroll row for $Label"
   Invoke-WithComRetry { $window.ScrollColumn = 1 } "scroll column for $Label"
@@ -252,6 +284,15 @@ function Click-TopButtonInColumn {
 
   $targetShape = $candidates | Sort-Object @{ Expression = { try { [double]$_.Top } catch { 999999 } } }, @{ Expression = { try { [double]$_.Left } catch { 999999 } } } | Select-Object -First 1
   if ($targetShape) {
+    $shapeName = try { [string]$targetShape.Name } catch { "" }
+    $shapeAction = try { [string]$targetShape.OnAction } catch { "" }
+
+    if ($shapeAction) {
+      Invoke-WithComRetry { $Excel.Run($shapeAction) | Out-Null } "shape action for $Label"
+      Start-Sleep -Milliseconds 1200
+      return ("shape-action:{0}:{1}" -f $shapeName, $shapeAction)
+    }
+
     $x = Invoke-WithComRetry { $window.PointsToScreenPixelsX($targetShape.Left + ($targetShape.Width / 2)) } "shape screen x for $Label"
     $y = Invoke-WithComRetry { $window.PointsToScreenPixelsY($targetShape.Top + ($targetShape.Height / 2)) } "shape screen y for $Label"
 
@@ -261,24 +302,23 @@ function Click-TopButtonInColumn {
     Start-Sleep -Milliseconds 80
     [MouseClicker]::mouse_event([MouseClicker]::MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
     Start-Sleep -Milliseconds 1200
-    $shapeName = try { [string]$targetShape.Name } catch { "" }
     return "clicked-shape:$shapeName"
   }
 
-  return Click-WorksheetCellCenter $Excel $Sheet ("{0}1" -f $ColumnLetter) $Label
+  throw "$Label top button was not found in column $ColumnLetter."
 }
 
 function Invoke-MacroOrColumnButton {
   param($Excel, $Workbook, $Sheet, [string[]]$MacroNames, [string]$ColumnLetter, [string]$Label)
 
   try {
-    return Click-TopButtonInColumn $Excel $Sheet $ColumnLetter $MacroNames $Label
+    return Invoke-TopButtonInColumn $Excel $Sheet $ColumnLetter $MacroNames $Label
   } catch {
-    $clickError = $_.Exception.Message
+    $buttonError = $_.Exception.Message
     try {
       return Invoke-FirstMacro $Excel $Workbook $Sheet $MacroNames $Label
     } catch {
-      throw "$Label failed. Click error: $clickError / Macro error: $($_.Exception.Message)"
+      throw "$Label failed. Button error: $buttonError / Macro error: $($_.Exception.Message)"
     }
   }
 }
@@ -323,19 +363,7 @@ try {
   Invoke-WithComRetry { $sheet.Range("B1").Value2 = $normalizedPoNo } "enter PO search"
   try { Run-WorkbookMacro $excel $workbook $copyMacroName } catch {}
 
-  $lastRow = Invoke-WithComRetry { $sheet.Range("A500000").End($xlUp).Row } "last row"
-  $targetRow = 0
-
-  for ($row = 3; $row -le $lastRow; $row += 1) {
-    $candidates = @($sheet.Cells.Item($row, 1).Text, $sheet.Cells.Item($row, 2).Text, $sheet.Cells.Item($row, 3).Text)
-    foreach ($candidate in $candidates) {
-      if ((Normalize-PoNo $candidate) -eq $normalizedPoNo) {
-        $targetRow = $row
-        break
-      }
-    }
-    if ($targetRow -gt 0) { break }
-  }
+  $targetRow = Find-PoRow $sheet $normalizedPoNo
 
   if ($targetRow -le 0) {
     throw "PO '$PoNo' was not found in offer list."
@@ -343,6 +371,9 @@ try {
 
   $beforeStatus = [string]$sheet.Cells.Item($targetRow, 3).Text
   $beforeInstock = [string]$sheet.Cells.Item($targetRow, 25).Text
+  $verifiedRow = $targetRow
+  $verifiedStatus = ""
+  $verifiedInstock = ""
 
   if ($Commit) {
     Invoke-WithComRetry { $sheet.Cells.Item($targetRow, 3).Value2 = $statusInStock } "set status"
@@ -351,15 +382,32 @@ try {
 
     try {
       Invoke-WithComRetry { $sheet.Range("A$targetRow").Select() | Out-Null } "select offer row"
-      $ranOrderSelectMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($orderSelectMacroName, "OrderSelect", "SelectOrder") "A" "offer order select"
+      $ranOrderSelectMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($orderSelectMacroName, "PO수정선택", "OrderSelect", "SelectOrder") "A" "offer order select"
       Invoke-WithComRetry { $sheet.Range("K$targetRow").Select() | Out-Null } "select offer update cell"
-      $ranUpdateMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($updateMacroName, "Update", "Modify") "K" "offer update"
+      $ranUpdateMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($updateMacroName, "PO수정", "Update", "Modify") "K" "offer update"
     } catch {
       $offerMacroWarning = "Offer list server update macro failed: $($_.Exception.Message)"
       throw $offerMacroWarning
     }
 
     Invoke-WithComRetry { $workbook.Save() } "save offer workbook"
+
+    Invoke-WithComRetry { $sheet.Range("B1").Value2 = $normalizedPoNo } "re-enter PO search"
+    Run-WorkbookMacro $excel $workbook $copyMacroName
+    $verifiedRow = Find-PoRow $sheet $normalizedPoNo
+    if ($verifiedRow -le 0) {
+      throw "Offer list save verification failed: PO '$PoNo' was not found after update."
+    }
+
+    $verifiedStatus = ([string]$sheet.Cells.Item($verifiedRow, 3).Text).Trim()
+    $verifiedInstockDate = Convert-ToDateValue $sheet.Cells.Item($verifiedRow, 25).Value2
+    $verifiedInstock = if ($verifiedInstockDate) { $verifiedInstockDate.ToString("yyyy-MM-dd") } else { ([string]$sheet.Cells.Item($verifiedRow, 25).Text).Trim() }
+
+    if ($verifiedStatus -ne $statusInStock -or $verifiedInstock -ne $instockDateValue.ToString("yyyy-MM-dd")) {
+      throw ("Offer list save verification failed. status={0}, instock={1}" -f $verifiedStatus, $verifiedInstock)
+    }
+
+    $targetRow = $verifiedRow
   }
 
   $result = [ordered]@{
@@ -382,6 +430,9 @@ try {
     scNo = [string]$sheet.Cells.Item($targetRow, 14).Text
     orderSelectMacro = $ranOrderSelectMacro
     updateMacro = $ranUpdateMacro
+    verifiedRow = $verifiedRow
+    verifiedStatus = $verifiedStatus
+    verifiedInstockDate = $verifiedInstock
     warning = $offerMacroWarning
     before = @{
       status = $beforeStatus
