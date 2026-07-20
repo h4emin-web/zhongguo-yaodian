@@ -214,7 +214,11 @@
         <button class="tools-item" type="button" data-tool="auto-settlement">자동정산</button>
         <button class="tools-item" type="button" data-tool="pending-receipt">입고예정 처리</button>
         <button class="tools-item" type="button" data-tool="daily-news">오늘의 뉴스</button>
-        <button class="tools-item" type="button" data-tool="password-vault">패스워드</button>
+        <button class="tools-item" type="button" data-tool="calendar">캘린더</button>
+        <div class="dday-widget">
+          <p class="dday-widget-title">D-DAY</p>
+          <ul class="dday-list"></ul>
+        </div>
       </aside>
     </div>
     </main>
@@ -571,16 +575,28 @@
         </div>
         <div class="daily-news-list" aria-live="polite"></div>
       </div>
-      <div class="wc-search-panel password-vault-panel" hidden>
-        <div class="wc-search-head">
-          <div>
-            <label>패스워드</label>
-            <p class="wc-search-meta">바탕화면 151515 엑셀파일의 홈페이지 계정 목록</p>
-          </div>
-          <button class="excel-export password-vault-refresh" type="button">불러오기</button>
+      <div class="calendar-panel" hidden>
+        <div class="calendar-header">
+          <button class="calendar-nav calendar-prev" type="button" aria-label="이전 달">‹</button>
+          <p class="calendar-month-label"></p>
+          <button class="calendar-nav calendar-next" type="button" aria-label="다음 달">›</button>
         </div>
-        <div class="password-vault-status" aria-live="polite"></div>
-        <div class="password-vault-list" aria-live="polite"></div>
+        <div class="calendar-weekdays">
+          <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+        </div>
+        <div class="calendar-grid"></div>
+        <form class="calendar-add-form">
+          <div class="calendar-add-row">
+            <label for="calendar-add-date">날짜</label>
+            <input id="calendar-add-date" type="date" required>
+          </div>
+          <div class="calendar-add-row">
+            <label for="calendar-add-title">일정</label>
+            <input id="calendar-add-title" type="text" placeholder="일정 내용" autocomplete="off" required>
+          </div>
+          <button class="excel-export calendar-add-submit" type="submit">일정 추가</button>
+        </form>
+        <div class="calendar-event-list" aria-live="polite"></div>
       </div>
       <div class="po-receive-panel" hidden>
         <label for="po-receive-input">PO 번호</label>

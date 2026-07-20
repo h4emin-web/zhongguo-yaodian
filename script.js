@@ -63,7 +63,7 @@ const importCertResult = document.querySelector(".importcert-result");
 const autoSettlementItem = document.querySelector('.tools-item[data-tool="auto-settlement"]');
 const pendingReceiptItem = document.querySelector('.tools-item[data-tool="pending-receipt"]');
 const dailyNewsItem = document.querySelector('.tools-item[data-tool="daily-news"]');
-const passwordVaultItem = document.querySelector('.tools-item[data-tool="password-vault"]');
+const calendarItem = document.querySelector('.tools-item[data-tool="calendar"]');
 const autoSettlementPanel = document.querySelector(".auto-settlement-panel");
 const autoSettlementMode = document.querySelector("#auto-settlement-mode");
 const autoSettlementManager = document.querySelector("#auto-settlement-manager");
@@ -99,10 +99,16 @@ const pendingReceiptResult = document.querySelector(".pending-receipt-result");
 const dailyNewsPanel = document.querySelector(".daily-news-panel");
 const dailyNewsRefresh = document.querySelector(".daily-news-refresh");
 const dailyNewsList = document.querySelector(".daily-news-list");
-const passwordVaultPanel = document.querySelector(".password-vault-panel");
-const passwordVaultRefresh = document.querySelector(".password-vault-refresh");
-const passwordVaultList = document.querySelector(".password-vault-list");
-const passwordVaultStatus = document.querySelector(".password-vault-status");
+const calendarPanel = document.querySelector(".calendar-panel");
+const calendarMonthLabel = document.querySelector(".calendar-month-label");
+const calendarPrevButton = document.querySelector(".calendar-prev");
+const calendarNextButton = document.querySelector(".calendar-next");
+const calendarGrid = document.querySelector(".calendar-grid");
+const calendarAddForm = document.querySelector(".calendar-add-form");
+const calendarAddDate = document.querySelector("#calendar-add-date");
+const calendarAddTitle = document.querySelector("#calendar-add-title");
+const calendarEventList = document.querySelector(".calendar-event-list");
+const ddayList = document.querySelector(".dday-list");
 const localLauncherButtons = document.querySelectorAll(".local-launcher-start");
 const importCostPanel = document.querySelector(".import-cost-panel");
 const importPriceInput = document.querySelector("#import-price-input");
@@ -128,6 +134,8 @@ const PROTECTED_TOOL_PASSWORD = "1515";
 const STAR_BURST_COUNT = 12;
 const STAR_BURST_HUE_STEP = 47;
 const HANA_RATE_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
+const CALENDAR_STORAGE_KEY = "haemin-workspace-calendar-events";
+const WEEKDAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
 
 let lastFocusedCard = null;
 let modalLocked = false;
@@ -157,10 +165,10 @@ let workspaceHeartTimer = null;
 let dailyNewsLoaded = false;
 let dailyNewsLoading = false;
 let currentDailyNews = [];
-let passwordVaultLoaded = false;
-let passwordVaultLoading = false;
-let currentPasswordVaultSheets = [];
-let passwordVaultAccessCode = "";
+let calendarEvents = loadCalendarEvents();
+let calendarViewYear = new Date().getFullYear();
+let calendarViewMonth = new Date().getMonth();
+let calendarSelectedDate = formatDateKey(new Date());
 let autoSettlementState = {
   mode: "single",
   settlementFile: "",
@@ -529,6 +537,7 @@ function requestProtectedToolAccess(toolLabel, onSuccess) {
 initializeHeaderDogVideo();
 document.addEventListener("pointerdown", createStarBurst, { passive: true });
 setWorkspaceExpanded(false);
+renderDdayWidget();
 
 if (workspaceToggle) {
   workspaceToggle.addEventListener("click", toggleWorkspaceContent);
@@ -561,7 +570,7 @@ function openDetail(card) {
   showAutoSettlementPanel(false);
   showPendingReceiptPanel(false);
   showDailyNewsPanel(false);
-  showPasswordVaultPanel(false);
+  showCalendarPanel(false);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
   document.body.classList.add("detail-open");
@@ -715,10 +724,63 @@ pendingReceiptItem.addEventListener("click", () => {
 
 dailyNewsItem.addEventListener("click", openDailyNewsTool);
 dailyNewsRefresh.addEventListener("click", () => loadDailyNews({ force: true }));
-passwordVaultItem.addEventListener("click", () => {
-  requestProtectedToolAccess("패스워드", openPasswordVaultTool);
+
+calendarItem.addEventListener("click", () => {
+  requestProtectedToolAccess("캘린더", openCalendarTool);
 });
-passwordVaultRefresh.addEventListener("click", () => loadPasswordVault({ force: true }));
+
+calendarPrevButton.addEventListener("click", () => {
+  calendarViewMonth -= 1;
+  if (calendarViewMonth < 0) {
+    calendarViewMonth = 11;
+    calendarViewYear -= 1;
+  }
+  renderCalendarMonthLabel();
+  renderCalendarGrid();
+});
+
+calendarNextButton.addEventListener("click", () => {
+  calendarViewMonth += 1;
+  if (calendarViewMonth > 11) {
+    calendarViewMonth = 0;
+    calendarViewYear += 1;
+  }
+  renderCalendarMonthLabel();
+  renderCalendarGrid();
+});
+
+calendarGrid.addEventListener("click", (event) => {
+  const dayButton = event.target.closest(".calendar-day");
+  if (!dayButton) {
+    return;
+  }
+  calendarSelectedDate = dayButton.dataset.date;
+  calendarAddDate.value = calendarSelectedDate;
+  renderCalendarGrid();
+});
+
+calendarAddForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const dateKey = calendarAddDate.value;
+  const title = calendarAddTitle.value.trim();
+
+  if (!dateKey || !title) {
+    return;
+  }
+
+  addCalendarEvent(dateKey, title);
+  calendarAddTitle.value = "";
+  calendarSelectedDate = dateKey;
+  renderCalendarGrid();
+});
+
+calendarEventList.addEventListener("click", (event) => {
+  const deleteButton = event.target.closest(".calendar-event-delete");
+  if (!deleteButton) {
+    return;
+  }
+  deleteCalendarEvent(deleteButton.dataset.id);
+});
 
 pendingReceiptMode.addEventListener("change", updatePendingReceiptState);
 pendingReceiptInstock.addEventListener("input", updatePendingReceiptState);
@@ -1547,7 +1609,7 @@ function openImportCostCalculator() {
   showAutoSettlementPanel(false);
   showPendingReceiptPanel(false);
   showDailyNewsPanel(false);
-  showPasswordVaultPanel(false);
+  showCalendarPanel(false);
   showImportCostCalc(true);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
@@ -1588,11 +1650,160 @@ function showDailyNewsPanel(isDailyNews) {
   }
 }
 
-function showPasswordVaultPanel(isPasswordVault) {
-  passwordVaultPanel.hidden = !isPasswordVault;
+function formatDateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
-  if (isPasswordVault) {
-    loadPasswordVault();
+function parseDateKey(dateKey) {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function loadCalendarEvents() {
+  try {
+    const raw = localStorage.getItem(CALENDAR_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
+
+function saveCalendarEvents() {
+  localStorage.setItem(CALENDAR_STORAGE_KEY, JSON.stringify(calendarEvents));
+}
+
+function renderCalendarMonthLabel() {
+  calendarMonthLabel.textContent = `${calendarViewYear}년 ${calendarViewMonth + 1}월`;
+}
+
+function renderCalendarGrid() {
+  const firstDayOfWeek = new Date(calendarViewYear, calendarViewMonth, 1).getDay();
+  const daysInMonth = new Date(calendarViewYear, calendarViewMonth + 1, 0).getDate();
+  const totalCells = Math.ceil((firstDayOfWeek + daysInMonth) / 7) * 7;
+  const todayKey = formatDateKey(new Date());
+  const eventDateKeys = new Set(calendarEvents.map((event) => event.date));
+
+  let cellsHtml = "";
+
+  for (let i = 0; i < totalCells; i += 1) {
+    const cellDate = new Date(calendarViewYear, calendarViewMonth, i - firstDayOfWeek + 1);
+    const dateKey = formatDateKey(cellDate);
+    const isOtherMonth = cellDate.getMonth() !== calendarViewMonth;
+    const classes = ["calendar-day"];
+
+    if (isOtherMonth) {
+      classes.push("is-other-month");
+    }
+    if (dateKey === todayKey) {
+      classes.push("is-today");
+    }
+    if (dateKey === calendarSelectedDate) {
+      classes.push("is-selected");
+    }
+
+    cellsHtml += `
+      <button type="button" class="${classes.join(" ")}" data-date="${dateKey}">
+        <span>${cellDate.getDate()}</span>
+        ${eventDateKeys.has(dateKey) ? '<span class="calendar-day-dot"></span>' : ""}
+      </button>
+    `;
+  }
+
+  calendarGrid.innerHTML = cellsHtml;
+}
+
+function renderCalendarEventList() {
+  const sortedEvents = [...calendarEvents].sort((a, b) => a.date.localeCompare(b.date));
+
+  if (sortedEvents.length === 0) {
+    calendarEventList.innerHTML = '<p class="empty-result">등록된 일정이 없습니다.</p>';
+    return;
+  }
+
+  calendarEventList.innerHTML = sortedEvents.map((event) => {
+    const date = parseDateKey(event.date);
+    const label = `${date.getMonth() + 1}월 ${date.getDate()}일 (${WEEKDAY_LABELS[date.getDay()]})`;
+
+    return `
+      <div class="calendar-event-item">
+        <div class="calendar-event-item-info">
+          <p class="calendar-event-date">${escapeHtml(label)}</p>
+          <p class="calendar-event-title">${escapeHtml(event.title)}</p>
+        </div>
+        <button class="calendar-event-delete" type="button" data-id="${event.id}">삭제</button>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderDdayWidget() {
+  if (!ddayList) {
+    return;
+  }
+
+  const todayKey = formatDateKey(new Date());
+  const todayDate = parseDateKey(todayKey);
+  const upcomingEvents = calendarEvents
+    .filter((event) => event.date >= todayKey)
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  if (upcomingEvents.length === 0) {
+    ddayList.innerHTML = '<li class="dday-empty">등록된 일정이 없습니다.</li>';
+    return;
+  }
+
+  ddayList.innerHTML = upcomingEvents.map((event) => {
+    const eventDate = parseDateKey(event.date);
+    const diffDays = Math.round((eventDate - todayDate) / 86400000);
+    const badgeLabel = diffDays === 0 ? "D-DAY" : `D-${diffDays}`;
+    const badgeClass = diffDays === 0 ? "dday-item-badge is-today" : "dday-item-badge";
+
+    return `
+      <li class="dday-item">
+        <span class="dday-item-title">${escapeHtml(event.title)}</span>
+        <span class="${badgeClass}">${escapeHtml(badgeLabel)}</span>
+      </li>
+    `;
+  }).join("");
+}
+
+function addCalendarEvent(dateKey, title) {
+  calendarEvents.push({
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    date: dateKey,
+    title
+  });
+  saveCalendarEvents();
+  renderCalendarGrid();
+  renderCalendarEventList();
+  renderDdayWidget();
+}
+
+function deleteCalendarEvent(id) {
+  calendarEvents = calendarEvents.filter((event) => event.id !== id);
+  saveCalendarEvents();
+  renderCalendarGrid();
+  renderCalendarEventList();
+  renderDdayWidget();
+}
+
+function showCalendarPanel(isCalendar) {
+  calendarPanel.hidden = !isCalendar;
+
+  if (isCalendar) {
+    const today = new Date();
+    calendarViewYear = today.getFullYear();
+    calendarViewMonth = today.getMonth();
+    calendarSelectedDate = formatDateKey(today);
+    calendarAddDate.value = calendarSelectedDate;
+    renderCalendarMonthLabel();
+    renderCalendarGrid();
+    renderCalendarEventList();
   }
 }
 
@@ -1670,7 +1881,7 @@ function openImportCertTool() {
   showAutoSettlementPanel(false);
   showPendingReceiptPanel(false);
   showDailyNewsPanel(false);
-  showPasswordVaultPanel(false);
+  showCalendarPanel(false);
   showImportCertPanel(true);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
@@ -1694,7 +1905,7 @@ function openAutoSettlementTool() {
   showImportCertPanel(false);
   showPendingReceiptPanel(false);
   showDailyNewsPanel(false);
-  showPasswordVaultPanel(false);
+  showCalendarPanel(false);
   showAutoSettlementPanel(true);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
@@ -1719,7 +1930,7 @@ function openPendingReceiptTool() {
   showAutoSettlementPanel(false);
   showPendingReceiptPanel(true);
   showDailyNewsPanel(false);
-  showPasswordVaultPanel(false);
+  showCalendarPanel(false);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
   document.body.classList.add("detail-open");
@@ -1742,21 +1953,20 @@ function openDailyNewsTool() {
   showImportCertPanel(false);
   showAutoSettlementPanel(false);
   showPendingReceiptPanel(false);
-  showPasswordVaultPanel(false);
   showDailyNewsPanel(true);
+  showCalendarPanel(false);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
   document.body.classList.add("detail-open");
   dailyNewsRefresh.focus();
 }
 
-function openPasswordVaultTool(accessCode = "") {
-  lastFocusedCard = passwordVaultItem;
-  passwordVaultAccessCode = accessCode || PROTECTED_TOOL_PASSWORD;
+function openCalendarTool() {
+  lastFocusedCard = calendarItem;
   modalLocked = false;
   detailKicker.textContent = "Tools";
-  detailTitle.textContent = "패스워드";
-  detailDescription.textContent = "서버에 저장된 홈페이지 계정 목록입니다.";
+  detailTitle.textContent = "캘린더";
+  detailDescription.textContent = "이번 달 일정을 확인하고 새 일정을 추가할 수 있습니다.";
   showWcSearch(false);
   showPoReceive(false);
   showMfdsSearch(false);
@@ -1768,11 +1978,10 @@ function openPasswordVaultTool(accessCode = "") {
   showAutoSettlementPanel(false);
   showPendingReceiptPanel(false);
   showDailyNewsPanel(false);
-  showPasswordVaultPanel(true);
+  showCalendarPanel(true);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
   document.body.classList.add("detail-open");
-  passwordVaultRefresh.focus();
 }
 
 function renderDailyNewsError(message) {
@@ -1847,131 +2056,6 @@ async function loadDailyNews({ force = false } = {}) {
   } finally {
     dailyNewsLoading = false;
     dailyNewsRefresh.disabled = false;
-  }
-}
-
-function renderPasswordVaultError(message) {
-  passwordVaultStatus.innerHTML = `<p class="status-error">${escapeHtml(message)}</p>`;
-  passwordVaultList.innerHTML = "";
-}
-
-function normalizePasswordVaultRows(rows) {
-  return (Array.isArray(rows) ? rows : [])
-    .map((row) => (Array.isArray(row) ? row : [row]).map((cell) => String(cell || "").trim()))
-    .filter((row) => row.some(Boolean));
-}
-
-function buildPasswordVaultTableModel(rows) {
-  const normalizedRows = normalizePasswordVaultRows(rows);
-  const maxColumns = normalizedRows.reduce((max, row) => Math.max(max, row.length), 0);
-
-  if (!maxColumns) {
-    return { headers: [], rows: [] };
-  }
-
-  const firstRow = normalizedRows[0] || [];
-  const headerPattern = /홈페이지|사이트|주소|url|아이디|id|계정|비번|비밀번호|pw|password|메모|비고/i;
-  const firstRowHasHeader = firstRow.filter(Boolean).length >= 2 && firstRow.some((cell) => headerPattern.test(cell));
-  const headers = firstRowHasHeader
-    ? Array.from({ length: maxColumns }, (_, index) => firstRow[index] || `항목 ${index + 1}`)
-    : Array.from({ length: maxColumns }, (_, index) => `항목 ${index + 1}`);
-  const bodyRows = firstRowHasHeader ? normalizedRows.slice(1) : normalizedRows;
-
-  return {
-    headers,
-    rows: bodyRows.map((row) => Array.from({ length: maxColumns }, (_, index) => row[index] || ""))
-  };
-}
-
-function renderPasswordVault(data) {
-  const sheets = Array.isArray(data.sheets) ? data.sheets : [];
-  currentPasswordVaultSheets = sheets;
-
-  if (sheets.length === 0) {
-    passwordVaultStatus.innerHTML = "";
-    passwordVaultList.innerHTML = '<p class="empty-result">표시할 패스워드 목록이 없습니다.</p>';
-    return;
-  }
-
-  const updatedAt = data.updatedAt ? formatHanaRateTimestamp(data.updatedAt) : "방금 기준";
-  passwordVaultStatus.innerHTML = `<p class="daily-news-meta">${escapeHtml(data.file || "151515.xlsx")} · ${escapeHtml(updatedAt)}</p>`;
-  passwordVaultList.innerHTML = sheets.map((sheet) => {
-    const model = buildPasswordVaultTableModel(sheet.rows);
-
-    if (model.rows.length === 0) {
-      return "";
-    }
-
-    return `
-      <section class="password-vault-sheet">
-        <h3>${escapeHtml(sheet.name || "Sheet")}</h3>
-        <div class="password-vault-table-wrap">
-          <table class="password-vault-table">
-            <thead>
-              <tr>
-                ${model.headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("")}
-              </tr>
-            </thead>
-            <tbody>
-              ${model.rows.map((row) => `
-                <tr>
-                  ${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-        </div>
-      </section>
-    `;
-  }).join("") || '<p class="empty-result">표시할 패스워드 목록이 없습니다.</p>';
-}
-
-async function loadPasswordVault({ force = false } = {}) {
-  if (passwordVaultLoading || (!force && passwordVaultLoaded && currentPasswordVaultSheets.length > 0)) {
-    return;
-  }
-
-  passwordVaultLoading = true;
-  passwordVaultRefresh.disabled = true;
-  passwordVaultStatus.innerHTML = "";
-  passwordVaultList.innerHTML = '<p class="empty-result">패스워드 목록을 불러오는 중입니다.</p>';
-
-  try {
-    if (!supabaseClient) {
-      throw new Error("Supabase 연결 설정이 없어 패스워드 목록을 불러올 수 없습니다.");
-    }
-
-    const { data, error } = await supabaseClient.functions.invoke("password-vault", {
-      body: {
-        action: "load",
-        accessCode: passwordVaultAccessCode || PROTECTED_TOOL_PASSWORD
-      }
-    });
-
-    if (error) {
-      throw error;
-    }
-
-    if (!data || !data.ok) {
-      throw new Error(data.error || "패스워드 엑셀 조회에 실패했습니다.");
-    }
-
-    if (!data.data) {
-      throw new Error("서버에 저장된 패스워드 목록이 아직 없습니다.");
-    }
-
-    passwordVaultLoaded = true;
-    renderPasswordVault(data.data);
-  } catch (error) {
-    console.error(error);
-    passwordVaultLoaded = false;
-    const message = error && typeof error === "object" && "message" in error
-      ? error.message
-      : String(error);
-    renderPasswordVaultError(`패스워드 조회 실패: ${message}`);
-  } finally {
-    passwordVaultLoading = false;
-    passwordVaultRefresh.disabled = false;
   }
 }
 
@@ -2183,7 +2267,7 @@ async function isLocalAutomationReady() {
 
 function getLocalLauncherStatusElement(button) {
   const panel = button.closest(".wc-search-panel");
-  return panel?.querySelector(".auto-settlement-result, .pending-receipt-result, .password-vault-status") || null;
+  return panel?.querySelector(".auto-settlement-result, .pending-receipt-result") || null;
 }
 
 function renderLocalLauncherStatus(statusElement, message, status = "error") {
