@@ -202,11 +202,11 @@ body.detail-open {
   display: grid;
   grid-template-columns: minmax(0, 1fr) var(--workspace-side-width);
   gap: var(--workspace-column-gap);
-  align-items: stretch;
+  align-items: start;
 }
 
 .search-area {
-  align-self: center;
+  align-self: start;
 }
 
 .search-area label {
@@ -242,6 +242,7 @@ body.detail-open {
 }
 
 .hana-rate-card {
+  margin-top: 29px;
   min-height: 132px;
   padding: 17px 18px 16px;
   border: 1px solid rgba(227, 234, 220, 0.95);
@@ -1754,6 +1755,10 @@ body.tool-auth-open {
   .search-row {
     min-height: 0;
     grid-template-columns: 1fr;
+  }
+
+  .hana-rate-card {
+    margin-top: 0;
   }
 }
 
