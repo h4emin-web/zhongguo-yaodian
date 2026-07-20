@@ -6,7 +6,13 @@
   --card: #ffffff;
   --text: #1f2a1d;
   --muted: #6f7c6a;
-  --shadow: 0 18px 45px rgba(70, 94, 56, 0.08);
+  --surface: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(249, 252, 246, 0.94));
+  --surface-soft: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 251, 241, 0.92));
+  --surface-rim: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(111, 149, 91, 0.08);
+  --shadow: 0 20px 42px rgba(66, 88, 54, 0.1), 0 4px 12px rgba(66, 88, 54, 0.06), var(--surface-rim);
+  --shadow-soft: 0 12px 28px rgba(66, 88, 54, 0.08), 0 2px 8px rgba(66, 88, 54, 0.05), var(--surface-rim);
+  --shadow-deep: 0 30px 70px rgba(45, 63, 36, 0.16), 0 12px 24px rgba(66, 88, 54, 0.1), var(--surface-rim);
+  --shadow-lift: 0 34px 78px rgba(45, 63, 36, 0.18), 0 14px 28px rgba(66, 88, 54, 0.12), var(--surface-rim);
   --workspace-side-width: minmax(240px, 290px);
   --workspace-column-gap: 32px;
 }
@@ -25,6 +31,7 @@ body {
   color: var(--text);
   font-family: "Nanum Gothic", "Segoe UI", Arial, Helvetica, sans-serif;
   background:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.92) 0 18%, transparent 42%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(251, 252, 248, 0.98) 36%, #ffffff 100%),
     linear-gradient(135deg, rgba(190, 215, 170, 0.18), transparent 34%),
     linear-gradient(315deg, rgba(229, 241, 215, 0.24), transparent 30%),
@@ -52,6 +59,7 @@ body.detail-open {
     radial-gradient(circle at 22% 72%, rgba(217, 235, 201, 0.55) 0 20%, transparent 48%),
     linear-gradient(90deg, #dceacb 0%, #e6f1d9 44%, #d7e7c6 100%);
   backdrop-filter: blur(18px);
+  box-shadow: 0 24px 62px rgba(72, 98, 56, 0.14), inset 0 -1px 0 rgba(255, 255, 255, 0.62);
 }
 
 .top-bar::after {
@@ -122,7 +130,10 @@ body.detail-open {
   font-weight: 800;
   border: 1px solid rgba(255, 255, 255, 0.72);
   background: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 10px 24px rgba(70, 94, 56, 0.18);
+  box-shadow:
+    0 14px 30px rgba(70, 94, 56, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(111, 149, 91, 0.12);
   backdrop-filter: blur(10px);
 }
 
@@ -139,6 +150,7 @@ body.detail-open {
   width: min(100%, 1340px);
   margin: 34px auto 56px;
   padding: 0 clamp(20px, 4vw, 36px);
+  perspective: 1200px;
 }
 
 .side-tools {
@@ -150,8 +162,9 @@ body.detail-open {
   padding: 18px;
   border: 1px solid rgba(227, 234, 220, 0.95);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--surface);
   box-shadow: var(--shadow);
+  transform-style: preserve-3d;
 }
 
 .tools-item {
@@ -169,6 +182,7 @@ body.detail-open {
   font-weight: 700;
   background: transparent;
   cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, color 160ms ease, box-shadow 160ms ease;
 }
 
 .tools-item + .tools-item::before {
@@ -184,10 +198,12 @@ body.detail-open {
 
 .tools-item:hover,
 .tools-item:focus-visible {
+  transform: translateX(3px);
   outline: none;
   color: var(--accent);
   border-color: rgba(111, 149, 91, 0.22);
-  background: var(--accent-soft);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(241, 247, 236, 0.92));
+  box-shadow: var(--shadow-soft);
 }
 
 .workspace {
@@ -301,14 +317,16 @@ body.detail-open {
   font-family: inherit;
   font-size: 17px;
   font-weight: 700;
-  background: rgba(255, 255, 255, 0.98);
+  background: var(--surface);
   box-shadow: var(--shadow);
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
 .search-area input:focus {
+  transform: translateY(-1px);
   outline: none;
   border-color: rgba(111, 149, 91, 0.48);
-  box-shadow: 0 20px 52px rgba(70, 94, 56, 0.12);
+  box-shadow: var(--shadow-deep);
 }
 
 .search-area input::placeholder {
@@ -325,16 +343,20 @@ body.detail-open {
   border: 1px solid rgba(227, 234, 220, 0.96);
   border-radius: 8px;
   color: var(--accent);
-  background: rgba(255, 255, 255, 0.98);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(249, 252, 246, 0.96)),
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.9), transparent 58%);
   box-shadow: var(--shadow);
   cursor: pointer;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
 
 .workspace-toggle:hover,
 .workspace-toggle:focus-visible {
+  transform: translateY(-2px);
   outline: none;
   border-color: rgba(111, 149, 91, 0.36);
-  box-shadow: 0 20px 52px rgba(70, 94, 56, 0.12);
+  box-shadow: var(--shadow-deep);
 }
 
 .workspace-toggle-handle {
@@ -365,8 +387,17 @@ body.detail-open {
   padding: 17px 18px 16px;
   border: 1px solid rgba(227, 234, 220, 0.95);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--surface);
   box-shadow: var(--shadow);
+  transform-style: preserve-3d;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.hana-rate-card:hover,
+.hana-rate-card:focus-within {
+  transform: translateY(-2px);
+  border-color: rgba(111, 149, 91, 0.28);
+  box-shadow: var(--shadow-deep);
 }
 
 .hana-rate-top {
@@ -417,15 +448,19 @@ body.detail-open {
   font-family: inherit;
   font-size: 12px;
   font-weight: 800;
-  background: var(--accent-soft);
+  background: var(--surface-soft);
+  box-shadow: 0 7px 16px rgba(66, 88, 54, 0.07), var(--surface-rim);
   cursor: pointer;
+  transition: transform 140ms ease, background 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
 }
 
 .hana-rate-refresh:hover,
 .hana-rate-refresh:focus-visible {
+  transform: translateY(-1px);
   outline: none;
   border-color: rgba(111, 149, 91, 0.42);
   background: #eaf4e2;
+  box-shadow: 0 10px 18px rgba(66, 88, 54, 0.1), var(--surface-rim);
 }
 
 .hana-rate-refresh:disabled {
@@ -489,7 +524,7 @@ body.detail-open {
   padding: 18px 20px;
   border: 1px solid rgba(227, 234, 220, 0.95);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--surface);
   box-shadow: var(--shadow);
 }
 
@@ -553,14 +588,43 @@ body.detail-open {
 
 .tool-box {
   position: relative;
+  isolation: isolate;
+  overflow: hidden;
   min-height: 178px;
   padding: 24px;
   border: 1px solid rgba(227, 234, 220, 0.95);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--surface);
   box-shadow: var(--shadow);
   cursor: pointer;
-  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+  transform-style: preserve-3d;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.tool-box::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), transparent 48%),
+    linear-gradient(135deg, rgba(111, 149, 91, 0.07), transparent 38%);
+  pointer-events: none;
+}
+
+.tool-box::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: auto 18px 0;
+  height: 1px;
+  background: rgba(111, 149, 91, 0.12);
+  pointer-events: none;
+}
+
+.tool-box > * {
+  position: relative;
+  z-index: 1;
 }
 
 .card-share-button {
@@ -591,10 +655,11 @@ body.detail-open {
 
 .tool-box:hover,
 .tool-box:focus-visible {
-  transform: translateY(-4px);
+  transform: perspective(900px) translateY(-7px) rotateX(1.2deg);
   outline: none;
   border-color: rgba(111, 149, 91, 0.32);
-  box-shadow: 0 24px 55px rgba(70, 94, 56, 0.12);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(247, 252, 242, 0.96));
+  box-shadow: var(--shadow-lift);
 }
 
 .tool-kicker {
@@ -606,7 +671,8 @@ body.detail-open {
   font-size: 12px;
   font-weight: 800;
   line-height: 1;
-  background: var(--accent-soft);
+  background: linear-gradient(180deg, #f7fbf3, #eaf4e2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86), 0 7px 14px rgba(66, 88, 54, 0.07);
 }
 
 .tool-box h2 {
@@ -653,8 +719,8 @@ body.detail-open {
   padding: clamp(28px, 5vw, 56px);
   border: 1px solid rgba(227, 234, 220, 0.95);
   border-radius: 8px;
-  background: #ffffff;
-  box-shadow: 0 30px 90px rgba(38, 54, 32, 0.22);
+  background: var(--surface);
+  box-shadow: 0 34px 96px rgba(38, 54, 32, 0.24), var(--surface-rim);
   transform: translateY(18px) scale(0.98);
   transition: transform 180ms ease;
 }
@@ -679,10 +745,13 @@ body.detail-open {
   font-weight: 800;
   background: var(--accent);
   cursor: pointer;
+  box-shadow: 0 12px 24px rgba(66, 88, 54, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition: transform 140ms ease, background 140ms ease, box-shadow 140ms ease;
 }
 
 .detail-close:hover,
 .detail-close:focus-visible {
+  transform: translateY(-1px);
   outline: none;
   background: #5f8752;
 }
@@ -708,8 +777,8 @@ body.tool-auth-open {
   padding: 30px;
   border: 1px solid rgba(227, 234, 220, 0.96);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 28px 80px rgba(38, 54, 32, 0.22);
+  background: var(--surface);
+  box-shadow: 0 30px 86px rgba(38, 54, 32, 0.23), var(--surface-rim);
 }
 
 .tool-auth-dialog.is-shaking {
@@ -768,7 +837,8 @@ body.tool-auth-open {
   font-size: 18px;
   font-weight: 800;
   letter-spacing: 0;
-  background: #ffffff;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
 }
 
 .tool-auth-input:focus {
@@ -946,10 +1016,13 @@ body.tool-auth-open {
   font-weight: 800;
   background: var(--accent);
   cursor: pointer;
+  box-shadow: 0 12px 24px rgba(66, 88, 54, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition: transform 140ms ease, background 140ms ease, box-shadow 140ms ease;
 }
 
 .excel-export:hover,
 .excel-export:focus-visible {
+  transform: translateY(-1px);
   outline: none;
   background: #5f8752;
 }
@@ -964,13 +1037,16 @@ body.tool-auth-open {
   font-family: inherit;
   font-size: 17px;
   font-weight: 700;
-  background: #ffffff;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
 }
 
 .wc-search-panel input:focus {
+  transform: translateY(-1px);
   outline: none;
   border-color: rgba(111, 149, 91, 0.5);
-  box-shadow: 0 0 0 4px rgba(111, 149, 91, 0.12);
+  box-shadow: 0 0 0 4px rgba(111, 149, 91, 0.12), var(--shadow-soft);
 }
 
 .wc-search-meta {
@@ -991,7 +1067,8 @@ body.tool-auth-open {
   padding: 16px;
   border: 1px solid #e3eadc;
   border-radius: 8px;
-  background: #fdfefb;
+  background: var(--surface-soft);
+  box-shadow: var(--shadow-soft);
 }
 
 .wc-result-item p {
@@ -1041,14 +1118,18 @@ body.tool-auth-open {
   border-radius: 8px;
   color: var(--text);
   text-decoration: none;
-  background: #fdfefb;
+  background: var(--surface-soft);
+  box-shadow: var(--shadow-soft);
+  transition: transform 150ms ease, border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
 }
 
 .daily-news-item a:hover,
 .daily-news-item a:focus-visible {
+  transform: translateY(-2px);
   outline: none;
   border-color: rgba(111, 149, 91, 0.34);
   background: var(--accent-soft);
+  box-shadow: var(--shadow);
 }
 
 .daily-news-rank {
@@ -1061,6 +1142,7 @@ body.tool-auth-open {
   font-size: 13px;
   font-weight: 800;
   background: var(--accent);
+  box-shadow: 0 9px 18px rgba(66, 88, 54, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .daily-news-title {
@@ -1110,13 +1192,16 @@ body.tool-auth-open {
   font-family: inherit;
   font-size: 17px;
   font-weight: 700;
-  background: #ffffff;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
 }
 
 .margin-calc-field input:focus {
+  transform: translateY(-1px);
   outline: none;
   border-color: rgba(111, 149, 91, 0.5);
-  box-shadow: 0 0 0 4px rgba(111, 149, 91, 0.12);
+  box-shadow: 0 0 0 4px rgba(111, 149, 91, 0.12), var(--shadow-soft);
 }
 
 .importcert-dropzone {
@@ -1127,15 +1212,18 @@ body.tool-auth-open {
   justify-content: center;
   border: 2px dashed #d5e2cc;
   border-radius: 12px;
-  background: #fdfefb;
+  background: var(--surface-soft);
+  box-shadow: var(--shadow-soft);
   cursor: pointer;
-  transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+  transition: transform 150ms ease, background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
 }
 
 .importcert-dropzone:hover,
 .importcert-dropzone:focus-visible {
+  transform: translateY(-2px);
   outline: none;
   border-color: rgba(111, 149, 91, 0.5);
+  box-shadow: var(--shadow);
 }
 
 .importcert-dropzone.is-dragover {
@@ -1209,7 +1297,8 @@ body.tool-auth-open {
   font-family: inherit;
   font-size: 15px;
   font-weight: 700;
-  background: #ffffff;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
   cursor: pointer;
 }
 
@@ -1281,6 +1370,7 @@ body.tool-auth-open {
   font-weight: 800;
   background: #e8f7ef;
   border: 1px solid #bfe6d2;
+  box-shadow: var(--shadow-soft);
 }
 
 .po-receive-panel {
@@ -1310,13 +1400,16 @@ body.tool-auth-open {
   font-family: inherit;
   font-size: 17px;
   font-weight: 700;
-  background: #ffffff;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
 }
 
 .po-receive-row input:focus {
+  transform: translateY(-1px);
   outline: none;
   border-color: rgba(111, 149, 91, 0.5);
-  box-shadow: 0 0 0 4px rgba(111, 149, 91, 0.12);
+  box-shadow: 0 0 0 4px rgba(111, 149, 91, 0.12), var(--shadow-soft);
 }
 
 .po-receive-submit {
@@ -1330,10 +1423,13 @@ body.tool-auth-open {
   font-weight: 800;
   background: var(--accent);
   cursor: pointer;
+  box-shadow: 0 12px 24px rgba(66, 88, 54, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition: transform 140ms ease, background 140ms ease, box-shadow 140ms ease;
 }
 
 .po-receive-submit:hover,
 .po-receive-submit:focus-visible {
+  transform: translateY(-1px);
   outline: none;
   background: #5f8752;
 }
@@ -1380,7 +1476,8 @@ body.tool-auth-open {
   border: 1px solid #e3eadc;
   border-radius: 8px;
   overflow: hidden;
-  background: #fff;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
 }
 
 .pending-receipt-batch {
@@ -1388,7 +1485,8 @@ body.tool-auth-open {
   border: 1px solid #e3eadc;
   border-radius: 8px;
   overflow: hidden;
-  background: #fff;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
 }
 
 .auto-settlement-batch-head,
@@ -1517,9 +1615,10 @@ body.tool-auth-open {
   font-size: 15px;
   font-weight: 800;
   text-align: center;
-  background: #fdfefb;
+  background: var(--surface-soft);
+  box-shadow: var(--shadow-soft);
   cursor: pointer;
-  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, color 160ms ease, box-shadow 160ms ease;
 }
 
 .auto-settlement-dropzone p {
@@ -1529,10 +1628,12 @@ body.tool-auth-open {
 .auto-settlement-dropzone:hover,
 .auto-settlement-dropzone:focus-visible,
 .auto-settlement-dropzone.is-dragover {
+  transform: translateY(-2px);
   outline: none;
   border-color: var(--accent);
   color: var(--accent);
   background: var(--accent-soft);
+  box-shadow: var(--shadow);
 }
 
 .auto-settlement-summary {
@@ -1548,7 +1649,8 @@ body.tool-auth-open {
   gap: 12px;
   border: 1px solid #e3eadc;
   border-radius: 8px;
-  background: #fdfefb;
+  background: var(--surface-soft);
+  box-shadow: var(--shadow-soft);
 }
 
 .auto-settlement-summary strong {
@@ -1603,7 +1705,8 @@ body.tool-auth-open {
   padding: 16px 18px;
   border: 1px solid #e3eadc;
   border-radius: 8px;
-  background: #fdfefb;
+  background: var(--surface-soft);
+  box-shadow: var(--shadow-soft);
 }
 
 .cnph-criteria ul {
@@ -1668,8 +1771,9 @@ body.tool-auth-open {
   gap: 20px;
   flex-wrap: wrap;
   border-bottom: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.94);
+  background: var(--surface);
   backdrop-filter: blur(18px);
+  box-shadow: 0 14px 34px rgba(66, 88, 54, 0.09), var(--surface-rim);
 }
 
 .worklog-topbar-title h2 {
@@ -1700,7 +1804,8 @@ body.tool-auth-open {
   font-family: inherit;
   font-size: 15px;
   font-weight: 700;
-  background: #ffffff;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
 }
 
 .worklog-topbar-actions input:focus {
@@ -1720,10 +1825,13 @@ body.tool-auth-open {
   font-weight: 800;
   background: var(--accent);
   cursor: pointer;
+  box-shadow: 0 12px 24px rgba(66, 88, 54, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition: transform 140ms ease, background 140ms ease, box-shadow 140ms ease;
 }
 
 .worklog-close:hover,
 .worklog-close:focus-visible {
+  transform: translateY(-1px);
   outline: none;
   background: #5f8752;
 }
@@ -1771,7 +1879,7 @@ body.tool-auth-open {
   color: var(--accent);
   font-size: 22px;
   font-weight: 800;
-  background: #ffffff;
+  background: var(--surface);
   box-shadow: var(--shadow);
 }
 
@@ -1789,7 +1897,7 @@ body.tool-auth-open {
 .worklog-person {
   border: 1px solid #e3eadc;
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--surface);
   box-shadow: var(--shadow);
 }
 
@@ -1834,7 +1942,8 @@ body.tool-auth-open {
   padding: 18px 20px;
   border: 1px solid #edf3e8;
   border-radius: 10px;
-  background: #fdfefb;
+  background: var(--surface-soft);
+  box-shadow: var(--shadow-soft);
 }
 
 .worklog-entry-head {
@@ -1906,7 +2015,8 @@ body.tool-auth-open {
   color: var(--muted);
   font-weight: 800;
   text-align: center;
-  background: #fdfefb;
+  background: var(--surface-soft);
+  box-shadow: var(--shadow-soft);
 }
 
 @media (max-width: 900px) {
