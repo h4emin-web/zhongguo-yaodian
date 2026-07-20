@@ -109,6 +109,8 @@ const supabaseClient = hasSupabaseKey && window.supabase
 const LOCAL_AUTOMATION_BASE = "http://127.0.0.1:4173";
 const LOCAL_AUTOMATION_START_URL = "haemin-workspace://start";
 const PROTECTED_TOOL_PASSWORD = "1515";
+const STAR_BURST_COUNT = 10;
+const STAR_BURST_COLORS = ["#f7c95f", "#fff3a6", "#ffffff", "#8fbf6f"];
 
 let lastFocusedCard = null;
 let modalLocked = false;
@@ -226,6 +228,38 @@ function initializeHeaderDogVideo() {
   topBarVideo.addEventListener("animationiteration", startHeaderDogVideo);
 }
 
+function createStarBurst(event) {
+  if (event.button !== undefined && event.button !== 0) {
+    return;
+  }
+
+  const burst = document.createElement("div");
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const starCount = reducedMotion ? 5 : STAR_BURST_COUNT;
+
+  burst.className = "star-burst";
+  burst.style.left = `${event.clientX}px`;
+  burst.style.top = `${event.clientY}px`;
+
+  for (let index = 0; index < starCount; index += 1) {
+    const angle = (Math.PI * 2 * index) / starCount + (Math.random() - 0.5) * 0.5;
+    const distance = reducedMotion ? 20 + Math.random() * 16 : 26 + Math.random() * 44;
+    const size = 6 + Math.random() * 8;
+    const star = document.createElement("span");
+
+    star.className = "star-burst-star";
+    star.style.setProperty("--x", `${Math.cos(angle) * distance}px`);
+    star.style.setProperty("--y", `${Math.sin(angle) * distance}px`);
+    star.style.setProperty("--size", `${size}px`);
+    star.style.setProperty("--rotate", `${Math.round(Math.random() * 160 - 80)}deg`);
+    star.style.setProperty("--spark-color", STAR_BURST_COLORS[index % STAR_BURST_COLORS.length]);
+    burst.appendChild(star);
+  }
+
+  document.body.appendChild(burst);
+  burst.addEventListener("animationend", () => burst.remove(), { once: true });
+}
+
 function requestProtectedToolAccess(toolLabel, onSuccess) {
   const existingOverlay = document.querySelector(".tool-auth-overlay");
   if (existingOverlay) {
@@ -307,6 +341,7 @@ function requestProtectedToolAccess(toolLabel, onSuccess) {
 }
 
 initializeHeaderDogVideo();
+document.addEventListener("pointerdown", createStarBurst, { passive: true });
 
 function openDetail(card) {
   const title = card.querySelector("h2").textContent;

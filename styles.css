@@ -592,6 +592,52 @@ body.tool-auth-open {
   }
 }
 
+.star-burst {
+  position: fixed;
+  z-index: 95;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.star-burst-star {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--size);
+  height: var(--size);
+  background: var(--spark-color);
+  clip-path: polygon(50% 0%, 61% 34%, 98% 35%, 68% 56%, 79% 91%, 50% 70%, 21% 91%, 32% 56%, 2% 35%, 39% 34%);
+  filter: drop-shadow(0 3px 5px rgba(111, 149, 91, 0.18));
+  transform: translate(-50%, -50%) scale(0.2) rotate(0deg);
+  animation: star-burst-pop 620ms cubic-bezier(0.16, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes star-burst-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2) rotate(0deg);
+  }
+
+  18% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.05) rotate(var(--rotate));
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate(var(--x), var(--y)) scale(0.15) rotate(var(--rotate));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .star-burst-star {
+    animation-duration: 360ms;
+  }
+}
+
 .detail-kicker {
   width: fit-content;
   margin: 0 0 18px;
