@@ -902,6 +902,68 @@ body.tool-auth-open {
   margin-top: 8px;
 }
 
+.daily-news-list {
+  display: grid;
+  gap: 12px;
+}
+
+.daily-news-meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.daily-news-items {
+  max-height: min(480px, 48vh);
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  display: grid;
+  gap: 10px;
+  list-style: none;
+}
+
+.daily-news-item a {
+  min-height: 56px;
+  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  border: 1px solid #e3eadc;
+  border-radius: 8px;
+  color: var(--text);
+  text-decoration: none;
+  background: #fdfefb;
+}
+
+.daily-news-item a:hover,
+.daily-news-item a:focus-visible {
+  outline: none;
+  border-color: rgba(111, 149, 91, 0.34);
+  background: var(--accent-soft);
+}
+
+.daily-news-rank {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  background: var(--accent);
+}
+
+.daily-news-title {
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.42;
+}
+
 .wc-result-item strong {
   color: var(--muted);
   font-weight: 800;

@@ -60,6 +60,7 @@ const importCertFileInput = document.querySelector(".importcert-file-input");
 const importCertResult = document.querySelector(".importcert-result");
 const autoSettlementItem = document.querySelector('.tools-item[data-tool="auto-settlement"]');
 const pendingReceiptItem = document.querySelector('.tools-item[data-tool="pending-receipt"]');
+const dailyNewsItem = document.querySelector('.tools-item[data-tool="daily-news"]');
 const autoSettlementPanel = document.querySelector(".auto-settlement-panel");
 const autoSettlementMode = document.querySelector("#auto-settlement-mode");
 const autoSettlementManager = document.querySelector("#auto-settlement-manager");
@@ -92,6 +93,9 @@ const pendingReceiptBatchPanel = document.querySelector(".pending-receipt-batch"
 const pendingReceiptBatchRows = document.querySelector(".pending-receipt-batch-rows");
 const pendingReceiptRun = document.querySelector(".pending-receipt-run");
 const pendingReceiptResult = document.querySelector(".pending-receipt-result");
+const dailyNewsPanel = document.querySelector(".daily-news-panel");
+const dailyNewsRefresh = document.querySelector(".daily-news-refresh");
+const dailyNewsList = document.querySelector(".daily-news-list");
 const localLauncherButtons = document.querySelectorAll(".local-launcher-start");
 const importCostPanel = document.querySelector(".import-cost-panel");
 const importPriceInput = document.querySelector("#import-price-input");
@@ -142,6 +146,9 @@ let worklogPeople = [];
 let worklogDateLabel = "";
 let starBurstHue = 0;
 let hanaRateTimer = null;
+let dailyNewsLoaded = false;
+let dailyNewsLoading = false;
+let currentDailyNews = [];
 let autoSettlementState = {
   mode: "single",
   settlementFile: "",
@@ -327,6 +334,7 @@ async function fetchHanaExchangeRate({ showLoading = false } = {}) {
     renderHanaExchangeRate(data);
   } catch (error) {
     console.error(error);
+    dailyNewsLoaded = false;
     const message = error && typeof error === "object" && "message" in error
       ? error.message
       : String(error);
@@ -498,6 +506,7 @@ function openDetail(card) {
   showImportCertPanel(false);
   showAutoSettlementPanel(false);
   showPendingReceiptPanel(false);
+  showDailyNewsPanel(false);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
   document.body.classList.add("detail-open");
@@ -648,6 +657,9 @@ autoSettlementItem.addEventListener("click", () => {
 pendingReceiptItem.addEventListener("click", () => {
   requestProtectedToolAccess("입고예정 처리", openPendingReceiptTool);
 });
+
+dailyNewsItem.addEventListener("click", openDailyNewsTool);
+dailyNewsRefresh.addEventListener("click", () => loadDailyNews({ force: true }));
 
 pendingReceiptMode.addEventListener("change", updatePendingReceiptState);
 pendingReceiptInstock.addEventListener("input", updatePendingReceiptState);
@@ -1475,6 +1487,7 @@ function openImportCostCalculator() {
   showImportCertPanel(false);
   showAutoSettlementPanel(false);
   showPendingReceiptPanel(false);
+  showDailyNewsPanel(false);
   showImportCostCalc(true);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
@@ -1504,6 +1517,14 @@ function showPendingReceiptPanel(isPendingReceipt) {
   if (isPendingReceipt) {
     renderPendingReceiptRows();
     renderPendingReceiptResult();
+  }
+}
+
+function showDailyNewsPanel(isDailyNews) {
+  dailyNewsPanel.hidden = !isDailyNews;
+
+  if (isDailyNews) {
+    loadDailyNews();
   }
 }
 
@@ -1580,6 +1601,7 @@ function openImportCertTool() {
   showImportCostCalc(false);
   showAutoSettlementPanel(false);
   showPendingReceiptPanel(false);
+  showDailyNewsPanel(false);
   showImportCertPanel(true);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
@@ -1602,6 +1624,7 @@ function openAutoSettlementTool() {
   showImportCostCalc(false);
   showImportCertPanel(false);
   showPendingReceiptPanel(false);
+  showDailyNewsPanel(false);
   showAutoSettlementPanel(true);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
@@ -1625,10 +1648,108 @@ function openPendingReceiptTool() {
   showImportCertPanel(false);
   showAutoSettlementPanel(false);
   showPendingReceiptPanel(true);
+  showDailyNewsPanel(false);
   detailView.classList.add("is-open");
   detailView.setAttribute("aria-hidden", "false");
   document.body.classList.add("detail-open");
   pendingReceiptPo.focus();
+}
+
+function openDailyNewsTool() {
+  lastFocusedCard = dailyNewsItem;
+  modalLocked = false;
+  detailKicker.textContent = "News";
+  detailTitle.textContent = "오늘의 뉴스";
+  detailDescription.textContent = "데일리팜 메인에 올라온 오늘의 TOP 10 뉴스입니다.";
+  showWcSearch(false);
+  showPoReceive(false);
+  showMfdsSearch(false);
+  showCnphSearch(false);
+  showUsdmfSearch(false);
+  showIndiawcSearch(false);
+  showImportCostCalc(false);
+  showImportCertPanel(false);
+  showAutoSettlementPanel(false);
+  showPendingReceiptPanel(false);
+  showDailyNewsPanel(true);
+  detailView.classList.add("is-open");
+  detailView.setAttribute("aria-hidden", "false");
+  document.body.classList.add("detail-open");
+  dailyNewsRefresh.focus();
+}
+
+function renderDailyNewsError(message) {
+  dailyNewsList.innerHTML = `<p class="status-error">${escapeHtml(message)}</p>`;
+}
+
+function renderDailyNews(data) {
+  const news = Array.isArray(data.news) ? data.news : [];
+  currentDailyNews = news;
+
+  if (news.length === 0) {
+    dailyNewsList.innerHTML = '<p class="empty-result">뉴스를 찾지 못했습니다.</p>';
+    return;
+  }
+
+  const fetchedAt = data.fetchedAt ? formatHanaRateTimestamp(data.fetchedAt) : "방금 기준";
+
+  dailyNewsList.innerHTML = `
+    <p class="daily-news-meta">데일리팜 메인 · ${escapeHtml(fetchedAt)}</p>
+    <ol class="daily-news-items">
+      ${news.map((item, index) => {
+        const rank = Number(item.rank) || index + 1;
+        return `
+          <li class="daily-news-item">
+            <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">
+              <span class="daily-news-rank">${rank}</span>
+              <span class="daily-news-title">${escapeHtml(item.title)}</span>
+            </a>
+          </li>
+        `;
+      }).join("")}
+    </ol>
+  `;
+}
+
+async function loadDailyNews({ force = false } = {}) {
+  if (dailyNewsLoading || (!force && dailyNewsLoaded && currentDailyNews.length > 0)) {
+    return;
+  }
+
+  if (!supabaseClient) {
+    renderDailyNewsError("Supabase 연결 설정이 없어 뉴스를 불러올 수 없습니다.");
+    return;
+  }
+
+  dailyNewsLoading = true;
+  dailyNewsRefresh.disabled = true;
+  dailyNewsList.innerHTML = '<p class="empty-result">데일리팜 TOP 10 뉴스를 불러오는 중입니다.</p>';
+
+  try {
+    const { data, error } = await supabaseClient.functions.invoke("dailypharm-top-news", {
+      body: {}
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data || !data.ok) {
+      throw new Error((data && data.error) || "뉴스 조회 실패");
+    }
+
+    dailyNewsLoaded = true;
+    renderDailyNews(data);
+  } catch (error) {
+    console.error(error);
+    const message = error && typeof error === "object" && "message" in error
+      ? error.message
+      : String(error);
+    renderDailyNewsError(`뉴스 조회 실패: ${message}`);
+  } finally {
+    dailyNewsLoading = false;
+    dailyNewsRefresh.disabled = false;
+  }
 }
 
 function extractPoNo(text) {
