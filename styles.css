@@ -1212,6 +1212,75 @@ body.tool-auth-open {
   line-height: 1.42;
 }
 
+.password-vault-actions {
+  margin: 14px 0 0;
+}
+
+.password-vault-status {
+  margin-top: 14px;
+}
+
+.password-vault-list {
+  margin-top: 16px;
+  display: grid;
+  gap: 16px;
+}
+
+.password-vault-sheet {
+  padding: 16px;
+  border: 1px solid #e8ebef;
+  border-radius: 8px;
+  background: var(--surface-soft);
+  box-shadow: var(--shadow-soft);
+}
+
+.password-vault-sheet h3 {
+  margin: 0 0 12px;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.password-vault-table-wrap {
+  max-height: min(520px, 48vh);
+  overflow: auto;
+  border: 1px solid rgba(232, 235, 239, 0.98);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.password-vault-table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.password-vault-table th,
+.password-vault-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #edf0f3;
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.password-vault-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  color: var(--muted);
+  font-weight: 800;
+  background: #fbfcfd;
+}
+
+.password-vault-table tr:last-child td {
+  border-bottom: 0;
+}
+
 .wc-result-item strong {
   color: var(--muted);
   font-weight: 800;

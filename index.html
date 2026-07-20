@@ -214,6 +214,7 @@
         <button class="tools-item" type="button" data-tool="auto-settlement">자동정산</button>
         <button class="tools-item" type="button" data-tool="pending-receipt">입고예정 처리</button>
         <button class="tools-item" type="button" data-tool="daily-news">오늘의 뉴스</button>
+        <button class="tools-item" type="button" data-tool="password-vault">패스워드</button>
       </aside>
     </div>
     </main>
@@ -569,6 +570,20 @@
           <button class="excel-export daily-news-refresh" type="button">새로고침</button>
         </div>
         <div class="daily-news-list" aria-live="polite"></div>
+      </div>
+      <div class="wc-search-panel password-vault-panel" hidden>
+        <div class="wc-search-head">
+          <div>
+            <label>패스워드</label>
+            <p class="wc-search-meta">바탕화면 151515 엑셀파일의 홈페이지 계정 목록</p>
+          </div>
+          <button class="excel-export password-vault-refresh" type="button">불러오기</button>
+        </div>
+        <div class="auto-settlement-actions password-vault-actions">
+          <button class="excel-export local-launcher-start" type="button">로컬 자동화 실행기 켜기</button>
+        </div>
+        <div class="password-vault-status" aria-live="polite"></div>
+        <div class="password-vault-list" aria-live="polite"></div>
       </div>
       <div class="po-receive-panel" hidden>
         <label for="po-receive-input">PO 번호</label>

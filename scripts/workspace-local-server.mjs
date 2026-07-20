@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { spawn, spawnSync } from "node:child_process";
 import { extname, join, normalize } from "node:path";
@@ -829,6 +829,46 @@ function requireEcountEnv() {
   }
 }
 
+function resolvePasswordVaultPath() {
+  const workbookPath = process.env.PASSWORD_VAULT_PATH || join(process.env.USERPROFILE || homedir(), "Desktop", "151515.xlsx");
+
+  if (!existsSync(workbookPath)) {
+    throw new Error(`Password workbook was not found: ${workbookPath}`);
+  }
+
+  return workbookPath;
+}
+
+async function loadPasswordVault(req, res) {
+  try {
+    const workbookPath = resolvePasswordVaultPath();
+    const password = process.env.PASSWORD_VAULT_EXCEL_PASSWORD;
+
+    if (!password) {
+      throw new Error("PASSWORD_VAULT_EXCEL_PASSWORD is required in .env.local.");
+    }
+
+    const output = await runPowerShell(join(ROOT, "scripts", "password-vault-read.ps1"), [
+      "-WorkbookPath", workbookPath,
+      "-Password", password
+    ]);
+    const result = parseJsonOutput(output);
+    const info = await stat(workbookPath).catch(() => null);
+
+    json(res, {
+      ok: true,
+      ...result,
+      file: result.file || "151515.xlsx",
+      updatedAt: info ? info.mtime.toISOString() : result.updatedAt
+    });
+  } catch (error) {
+    json(res, {
+      ok: false,
+      error: error instanceof Error ? error.message : String(error)
+    }, 500);
+  }
+}
+
 async function startEcountPurchaseFill(req, res) {
   try {
     const payload = await readBody(req);
@@ -915,6 +955,11 @@ const server = createServer(async (req, res) => {
       service: "haemin-workspace-local",
       port: PORT
     });
+    return;
+  }
+
+  if (req.method === "GET" && req.url === "/api/password-vault") {
+    await loadPasswordVault(req, res);
     return;
   }
 
