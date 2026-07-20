@@ -384,7 +384,7 @@ body.detail-open {
   position: absolute;
   left: 50%;
   top: 50%;
-  color: #111418;
+  color: #c8cdd3;
   font-family: "Segoe UI Symbol", "Nanum Gothic", "Segoe UI", Arial, Helvetica, sans-serif;
   font-size: 29px;
   font-weight: 400;
@@ -399,7 +399,7 @@ body.detail-open {
 
 .workspace-toggle:hover::after,
 .workspace-toggle:focus-visible::after {
-  color: #000000;
+  color: #aeb5bd;
 }
 
 .hana-rate-card {
