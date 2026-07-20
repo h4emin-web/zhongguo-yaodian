@@ -194,8 +194,8 @@ body.detail-open {
   text-align: left;
   color: var(--text);
   font-family: inherit;
-  font-size: 15px;
-  line-height: 1.35;
+  font-size: 16px;
+  line-height: 1.38;
   font-weight: 700;
   background: transparent;
   cursor: pointer;
