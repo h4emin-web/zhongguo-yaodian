@@ -155,6 +155,7 @@ body.detail-open {
 }
 
 .tools-item {
+  position: relative;
   width: 100%;
   min-height: 58px;
   padding: 16px 17px;
@@ -168,6 +169,17 @@ body.detail-open {
   font-weight: 700;
   background: transparent;
   cursor: pointer;
+}
+
+.tools-item + .tools-item::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: -7px;
+  height: 1px;
+  background: rgba(227, 234, 220, 0.92);
+  pointer-events: none;
 }
 
 .tools-item:hover,
