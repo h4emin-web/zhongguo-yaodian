@@ -743,6 +743,22 @@ body.detail-open {
   display: none;
 }
 
+.tool-category-list .tool-box {
+  width: 100%;
+}
+
+.tool-category-list .tool-box::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: -7px;
+  display: block;
+  height: 1px;
+  background: rgba(232, 235, 239, 0.92);
+  pointer-events: none;
+}
+
 .tool-box > * {
   position: relative;
   z-index: 1;

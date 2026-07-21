@@ -892,6 +892,54 @@ if (workspaceToggle) {
   workspaceToggle.addEventListener("click", toggleWorkspaceContent);
 }
 
+function organizeWorkspaceCatalog() {
+  const catalog = document.querySelector(".workspace-catalog");
+
+  if (!catalog) {
+    return;
+  }
+
+  const categories = Array.from(catalog.querySelectorAll(".tool-category"));
+  const findCategory = (title) => categories.find((category) => (
+    category.querySelector(".tool-category-head h2")?.textContent.trim() === title
+  ));
+  const automationCategory = findCategory("업무 자동화");
+  const infoCategory = findCategory("정보");
+  const searchCategory = findCategory("자료 검색 · 기록");
+
+  [automationCategory, infoCategory, searchCategory].forEach((category) => {
+    if (category) {
+      catalog.appendChild(category);
+    }
+  });
+
+  if (!searchCategory) {
+    return;
+  }
+
+  const searchGrid = searchCategory.querySelector(".workspace-grid");
+  const automationList = automationCategory?.querySelector(".tool-category-list");
+  const searchBoxes = Array.from(searchCategory.querySelectorAll(".tool-box"));
+  const findBox = (title) => searchBoxes.find((box) => (
+    box.querySelector("h2")?.textContent.trim().includes(title)
+  ));
+  const worklogBox = findBox("업무일지");
+
+  if (automationList && worklogBox) {
+    automationList.appendChild(worklogBox);
+  }
+
+  ["K-DMF 검색", "중국 약전", "중국 WC & COPP", "인도 WC", "미국 DMF"].forEach((title) => {
+    const box = findBox(title);
+
+    if (searchGrid && box) {
+      searchGrid.appendChild(box);
+    }
+  });
+}
+
+organizeWorkspaceCatalog();
+
 function openDetail(card) {
   const title = card.querySelector("h2").textContent;
 
