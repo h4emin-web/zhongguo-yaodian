@@ -4,10 +4,8 @@ const detailPanel = document.querySelector(".detail-panel");
 const closeButton = document.querySelector(".detail-close");
 const topBarVideo = document.querySelector(".top-bar-video");
 const marketIndexStrip = document.querySelector(".market-index-strip");
-const marketIndexKospiRate = document.querySelector(".market-index-kospi .market-index-rate");
-const marketIndexKosdaqRate = document.querySelector(".market-index-kosdaq .market-index-rate");
-const marketIndexKospiValue = document.querySelector(".market-index-kospi .market-index-value");
-const marketIndexKosdaqValue = document.querySelector(".market-index-kosdaq .market-index-value");
+const marketIndexKospi = document.querySelector(".market-index-kospi strong");
+const marketIndexKosdaq = document.querySelector(".market-index-kosdaq strong");
 const detailKicker = document.querySelector(".detail-kicker");
 const detailTitle = document.querySelector("#detail-title");
 const detailDescription = document.querySelector(".detail-description");
@@ -532,19 +530,19 @@ function formatMarketIndexValue(value) {
   }).format(number);
 }
 
-function setMarketIndexItem(rateElement, valueElement, item) {
-  if (!rateElement) {
+function formatMarketIndexLabel(item) {
+  return `${formatMarketIndexValue(item.value)} (${formatMarketIndexRate(item.changeRate)})`;
+}
+
+function setMarketIndexItem(element, item) {
+  if (!element) {
     return;
   }
 
-  const wrapper = rateElement.closest(".market-index-item");
+  const wrapper = element.closest(".market-index-item");
   wrapper?.classList.remove("is-up", "is-down", "is-flat", "is-error");
   wrapper?.classList.add(item.direction === "up" ? "is-up" : item.direction === "down" ? "is-down" : "is-flat");
-  rateElement.textContent = formatMarketIndexRate(item.changeRate);
-
-  if (valueElement) {
-    valueElement.textContent = formatMarketIndexValue(item.value);
-  }
+  element.textContent = formatMarketIndexLabel(item);
 }
 
 function renderMarketIndexTrend(data) {
@@ -556,27 +554,20 @@ function renderMarketIndexTrend(data) {
   const kospi = items.find((item) => item.code === "KOSPI");
   const kosdaq = items.find((item) => item.code === "KOSDAQ");
 
-  setMarketIndexItem(marketIndexKospiRate, marketIndexKospiValue, kospi || { changeRate: 0, direction: "flat", value: 0 });
-  setMarketIndexItem(marketIndexKosdaqRate, marketIndexKosdaqValue, kosdaq || { changeRate: 0, direction: "flat", value: 0 });
+  setMarketIndexItem(marketIndexKospi, kospi || { changeRate: 0, direction: "flat", value: 0 });
+  setMarketIndexItem(marketIndexKosdaq, kosdaq || { changeRate: 0, direction: "flat", value: 0 });
 }
 
 function renderMarketIndexError() {
-  [
-    [marketIndexKospiRate, marketIndexKospiValue],
-    [marketIndexKosdaqRate, marketIndexKosdaqValue]
-  ].forEach(([rateElement, valueElement]) => {
-    if (!rateElement) {
+  [marketIndexKospi, marketIndexKosdaq].forEach((element) => {
+    if (!element) {
       return;
     }
 
-    const wrapper = rateElement.closest(".market-index-item");
+    const wrapper = element.closest(".market-index-item");
     wrapper?.classList.remove("is-up", "is-down", "is-flat");
     wrapper?.classList.add("is-error");
-    rateElement.textContent = "-";
-
-    if (valueElement) {
-      valueElement.textContent = "-";
-    }
+    element.textContent = "-";
   });
 }
 

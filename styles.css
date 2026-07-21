@@ -174,19 +174,11 @@ body.detail-open {
 
 .market-index-item {
   display: inline-flex;
-  align-items: flex-end;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.market-index-row {
-  display: inline-flex;
   align-items: center;
   gap: 5px;
 }
 
-.market-index-item strong,
-.market-index-value {
+.market-index-item strong {
   color: rgba(79, 86, 94, 0.64);
   font-size: 12px;
   font-weight: 800;
@@ -2770,8 +2762,7 @@ body.tool-auth-open {
     font-size: 11px;
   }
 
-  .market-index-item strong,
-  .market-index-value {
+  .market-index-item strong {
     font-size: 11px;
   }
 
