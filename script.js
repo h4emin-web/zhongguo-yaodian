@@ -108,6 +108,7 @@ const calendarAddForm = document.querySelector(".calendar-add-form");
 const calendarAddDate = document.querySelector("#calendar-add-date");
 const calendarAddTitle = document.querySelector("#calendar-add-title");
 const calendarEventList = document.querySelector(".calendar-event-list");
+const calendarSelectedDateLabel = document.querySelector(".calendar-selected-date-label");
 const ddayList = document.querySelector(".dday-list");
 const localLauncherButtons = document.querySelectorAll(".local-launcher-start");
 const importCostPanel = document.querySelector(".import-cost-panel");
@@ -136,6 +137,96 @@ const STAR_BURST_HUE_STEP = 47;
 const HANA_RATE_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 const CALENDAR_STORAGE_KEY = "haemin-workspace-calendar-events";
 const WEEKDAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
+
+// Exact dates (including lunar-based holidays and 대체공휴일) for the years
+// this calendar is most likely to be used in. Years outside this range fall
+// back to FIXED_HOLIDAYS_MMDD below (fixed-date holidays only).
+const KR_HOLIDAYS = {
+  "2025-01-01": "신정",
+  "2025-01-27": "임시공휴일",
+  "2025-01-28": "설날 연휴",
+  "2025-01-29": "설날",
+  "2025-01-30": "설날 연휴",
+  "2025-03-01": "삼일절",
+  "2025-03-03": "대체공휴일",
+  "2025-05-05": "어린이날·부처님오신날",
+  "2025-05-06": "대체공휴일",
+  "2025-06-06": "현충일",
+  "2025-08-15": "광복절",
+  "2025-10-03": "개천절",
+  "2025-10-05": "추석 연휴",
+  "2025-10-06": "추석",
+  "2025-10-07": "추석 연휴",
+  "2025-10-08": "대체공휴일",
+  "2025-10-09": "한글날",
+  "2025-12-25": "성탄절",
+  "2026-01-01": "신정",
+  "2026-02-16": "설날 연휴",
+  "2026-02-17": "설날",
+  "2026-02-18": "설날 연휴",
+  "2026-03-01": "삼일절",
+  "2026-03-02": "대체공휴일",
+  "2026-05-05": "어린이날",
+  "2026-05-24": "부처님오신날",
+  "2026-05-25": "대체공휴일",
+  "2026-06-06": "현충일",
+  "2026-07-17": "제헌절",
+  "2026-08-15": "광복절",
+  "2026-08-17": "대체공휴일",
+  "2026-09-24": "추석 연휴",
+  "2026-09-25": "추석",
+  "2026-09-26": "추석 연휴",
+  "2026-10-03": "개천절",
+  "2026-10-05": "대체공휴일",
+  "2026-10-09": "한글날",
+  "2026-12-25": "성탄절",
+  "2027-01-01": "신정",
+  "2027-02-06": "설날 연휴",
+  "2027-02-07": "설날",
+  "2027-02-08": "설날 연휴",
+  "2027-02-09": "대체공휴일",
+  "2027-03-01": "삼일절",
+  "2027-05-05": "어린이날",
+  "2027-05-13": "부처님오신날",
+  "2027-06-06": "현충일",
+  "2027-06-07": "대체공휴일",
+  "2027-07-17": "제헌절",
+  "2027-08-15": "광복절",
+  "2027-08-16": "대체공휴일",
+  "2027-09-14": "추석 연휴",
+  "2027-09-15": "추석",
+  "2027-09-16": "추석 연휴",
+  "2027-10-03": "개천절",
+  "2027-10-04": "대체공휴일",
+  "2027-10-09": "한글날",
+  "2027-10-11": "대체공휴일",
+  "2027-12-25": "성탄절",
+  "2027-12-27": "대체공휴일"
+};
+
+// Fallback for years outside KR_HOLIDAYS: fixed-date holidays only (no lunar
+// dates, no substitute-holiday adjustments).
+const FIXED_HOLIDAYS_MMDD = {
+  "01-01": "신정",
+  "03-01": "삼일절",
+  "05-05": "어린이날",
+  "06-06": "현충일",
+  "08-15": "광복절",
+  "10-03": "개천절",
+  "10-09": "한글날",
+  "12-25": "성탄절"
+};
+
+function getHolidayLabel(dateKey) {
+  if (KR_HOLIDAYS[dateKey]) {
+    return KR_HOLIDAYS[dateKey];
+  }
+  const year = Number(dateKey.slice(0, 4));
+  if (year >= 2025 && year <= 2027) {
+    return null;
+  }
+  return FIXED_HOLIDAYS_MMDD[dateKey.slice(5)] || null;
+}
 
 let lastFocusedCard = null;
 let modalLocked = false;
@@ -537,7 +628,6 @@ function requestProtectedToolAccess(toolLabel, onSuccess) {
 initializeHeaderDogVideo();
 document.addEventListener("pointerdown", createStarBurst, { passive: true });
 setWorkspaceExpanded(false);
-renderDdayWidget();
 
 if (workspaceToggle) {
   workspaceToggle.addEventListener("click", toggleWorkspaceContent);
@@ -757,6 +847,7 @@ calendarGrid.addEventListener("click", (event) => {
   calendarSelectedDate = dayButton.dataset.date;
   calendarAddDate.value = calendarSelectedDate;
   renderCalendarGrid();
+  renderCalendarEventList();
 });
 
 calendarAddForm.addEventListener("submit", (event) => {
@@ -768,10 +859,9 @@ calendarAddForm.addEventListener("submit", (event) => {
     return;
   }
 
+  calendarSelectedDate = dateKey;
   addCalendarEvent(dateKey, title);
   calendarAddTitle.value = "";
-  calendarSelectedDate = dateKey;
-  renderCalendarGrid();
 });
 
 calendarEventList.addEventListener("click", (event) => {
@@ -1686,14 +1776,24 @@ function renderCalendarGrid() {
   const daysInMonth = new Date(calendarViewYear, calendarViewMonth + 1, 0).getDate();
   const totalCells = Math.ceil((firstDayOfWeek + daysInMonth) / 7) * 7;
   const todayKey = formatDateKey(new Date());
-  const eventDateKeys = new Set(calendarEvents.map((event) => event.date));
+  const eventsByDate = new Map();
 
+  calendarEvents.forEach((event) => {
+    if (!eventsByDate.has(event.date)) {
+      eventsByDate.set(event.date, []);
+    }
+    eventsByDate.get(event.date).push(event);
+  });
+
+  const MAX_VISIBLE_CHIPS = 2;
   let cellsHtml = "";
 
   for (let i = 0; i < totalCells; i += 1) {
     const cellDate = new Date(calendarViewYear, calendarViewMonth, i - firstDayOfWeek + 1);
     const dateKey = formatDateKey(cellDate);
     const isOtherMonth = cellDate.getMonth() !== calendarViewMonth;
+    const dayOfWeek = cellDate.getDay();
+    const holidayLabel = getHolidayLabel(dateKey);
     const classes = ["calendar-day"];
 
     if (isOtherMonth) {
@@ -1705,11 +1805,23 @@ function renderCalendarGrid() {
     if (dateKey === calendarSelectedDate) {
       classes.push("is-selected");
     }
+    if (dayOfWeek === 0 || dayOfWeek === 6 || holidayLabel) {
+      classes.push("is-red");
+    }
+
+    const dayEvents = eventsByDate.get(dateKey) || [];
+    const visibleChips = dayEvents.slice(0, MAX_VISIBLE_CHIPS)
+      .map((event) => `<span class="calendar-day-event-chip">${escapeHtml(event.title)}</span>`)
+      .join("");
+    const moreLabel = dayEvents.length > MAX_VISIBLE_CHIPS
+      ? `<span class="calendar-day-event-more">+${dayEvents.length - MAX_VISIBLE_CHIPS}</span>`
+      : "";
 
     cellsHtml += `
       <button type="button" class="${classes.join(" ")}" data-date="${dateKey}">
-        <span>${cellDate.getDate()}</span>
-        ${eventDateKeys.has(dateKey) ? '<span class="calendar-day-dot"></span>' : ""}
+        <span class="calendar-day-number">${cellDate.getDate()}</span>
+        ${holidayLabel ? `<span class="calendar-day-holiday">${escapeHtml(holidayLabel)}</span>` : ""}
+        <div class="calendar-day-events">${visibleChips}${moreLabel}</div>
       </button>
     `;
   }
@@ -1718,27 +1830,27 @@ function renderCalendarGrid() {
 }
 
 function renderCalendarEventList() {
-  const sortedEvents = [...calendarEvents].sort((a, b) => a.date.localeCompare(b.date));
+  const date = parseDateKey(calendarSelectedDate);
+  const label = `${date.getMonth() + 1}월 ${date.getDate()}일 (${WEEKDAY_LABELS[date.getDay()]}) 일정`;
+  calendarSelectedDateLabel.textContent = label;
 
-  if (sortedEvents.length === 0) {
-    calendarEventList.innerHTML = '<p class="empty-result">등록된 일정이 없습니다.</p>';
+  const eventsForDay = calendarEvents
+    .filter((event) => event.date === calendarSelectedDate)
+    .sort((a, b) => a.id.localeCompare(b.id));
+
+  if (eventsForDay.length === 0) {
+    calendarEventList.innerHTML = '<p class="empty-result">이 날짜에 등록된 일정이 없습니다.</p>';
     return;
   }
 
-  calendarEventList.innerHTML = sortedEvents.map((event) => {
-    const date = parseDateKey(event.date);
-    const label = `${date.getMonth() + 1}월 ${date.getDate()}일 (${WEEKDAY_LABELS[date.getDay()]})`;
-
-    return `
-      <div class="calendar-event-item">
-        <div class="calendar-event-item-info">
-          <p class="calendar-event-date">${escapeHtml(label)}</p>
-          <p class="calendar-event-title">${escapeHtml(event.title)}</p>
-        </div>
-        <button class="calendar-event-delete" type="button" data-id="${event.id}">삭제</button>
+  calendarEventList.innerHTML = eventsForDay.map((event) => `
+    <div class="calendar-event-item">
+      <div class="calendar-event-item-info">
+        <p class="calendar-event-title">${escapeHtml(event.title)}</p>
       </div>
-    `;
-  }).join("");
+      <button class="calendar-event-delete" type="button" data-id="${event.id}">삭제</button>
+    </div>
+  `).join("");
 }
 
 function renderDdayWidget() {
@@ -1804,6 +1916,7 @@ function showCalendarPanel(isCalendar) {
     renderCalendarMonthLabel();
     renderCalendarGrid();
     renderCalendarEventList();
+    renderDdayWidget();
   }
 }
 
@@ -1963,7 +2076,7 @@ function openDailyNewsTool() {
 
 function openCalendarTool() {
   lastFocusedCard = calendarItem;
-  modalLocked = false;
+  modalLocked = true;
   detailKicker.textContent = "Tools";
   detailTitle.textContent = "캘린더";
   detailDescription.textContent = "이번 달 일정을 확인하고 새 일정을 추가할 수 있습니다.";

@@ -215,10 +215,6 @@
         <button class="tools-item" type="button" data-tool="pending-receipt">입고예정 처리</button>
         <button class="tools-item" type="button" data-tool="daily-news">오늘의 뉴스</button>
         <button class="tools-item" type="button" data-tool="calendar">캘린더</button>
-        <div class="dday-widget">
-          <p class="dday-widget-title">D-DAY</p>
-          <ul class="dday-list"></ul>
-        </div>
       </aside>
     </div>
     </main>
@@ -585,6 +581,12 @@
           <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
         </div>
         <div class="calendar-grid"></div>
+        <div class="calendar-dday">
+          <p class="calendar-dday-title">D-DAY</p>
+          <ul class="dday-list"></ul>
+        </div>
+        <p class="calendar-selected-date-label"></p>
+        <div class="calendar-event-list" aria-live="polite"></div>
         <form class="calendar-add-form">
           <div class="calendar-add-row">
             <label for="calendar-add-date">날짜</label>
@@ -596,7 +598,6 @@
           </div>
           <button class="excel-export calendar-add-submit" type="submit">일정 추가</button>
         </form>
-        <div class="calendar-event-list" aria-live="polite"></div>
       </div>
       <div class="po-receive-panel" hidden>
         <label for="po-receive-input">PO 번호</label>
