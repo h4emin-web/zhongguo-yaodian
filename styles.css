@@ -1404,12 +1404,30 @@ body.tool-auth-open {
 }
 
 .calendar-stock-card {
+  position: relative;
   margin: 0 0 18px;
   padding: 16px;
   border: 1px solid rgba(232, 235, 239, 0.96);
   border-radius: 8px;
   background: var(--surface-soft);
   box-shadow: var(--shadow-soft);
+}
+
+.side-tools .calendar-stock-card {
+  grid-column: 1 / -1;
+  margin: 2px 0 0;
+  padding: 14px;
+}
+
+.side-tools .calendar-stock-card::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: -8px;
+  height: 1px;
+  background: rgba(232, 235, 239, 0.92);
+  pointer-events: none;
 }
 
 .calendar-stock-top {
@@ -1501,6 +1519,20 @@ body.tool-auth-open {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
+}
+
+.side-tools .calendar-stock-main {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.side-tools .calendar-stock-price {
+  font-size: 24px;
+}
+
+.side-tools .calendar-stock-values {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .calendar-stock-values div {

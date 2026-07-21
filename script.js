@@ -2259,9 +2259,6 @@ function showCalendarPanel(isCalendar) {
     renderCalendarGrid();
     renderCalendarEventList();
     renderDdayWidget();
-    startRznomicsStockUpdates();
-  } else {
-    stopRznomicsStockUpdates();
   }
 }
 
@@ -4235,6 +4232,7 @@ worklogDropzone.addEventListener("drop", (event) => {
 });
 
 initializeHanaExchangeRate();
+startRznomicsStockUpdates();
 loadWorklogFromStorage();
 
 if (location.hash === "#worklog") {
