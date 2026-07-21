@@ -497,7 +497,7 @@ body.detail-open {
   place-items: center;
   border: 0;
   border-radius: 8px;
-  color: var(--accent);
+  color: rgba(112, 121, 130, 0.46);
   font-family: inherit;
   font-size: 19px;
   font-weight: 800;
@@ -517,6 +517,7 @@ body.detail-open {
 .hana-rate-refresh:focus-visible {
   transform: translateY(-1px);
   outline: none;
+  color: rgba(112, 121, 130, 0.62);
   background: transparent;
 }
 
@@ -1455,7 +1456,7 @@ body.tool-auth-open {
   place-items: center;
   border: 0;
   border-radius: 8px;
-  color: var(--accent);
+  color: rgba(112, 121, 130, 0.46);
   font-family: inherit;
   font-size: 18px;
   font-weight: 800;
@@ -1469,6 +1470,7 @@ body.tool-auth-open {
 .calendar-stock-refresh:focus-visible {
   transform: translateY(-1px);
   outline: none;
+  color: rgba(112, 121, 130, 0.62);
 }
 
 .calendar-stock-refresh:disabled {
