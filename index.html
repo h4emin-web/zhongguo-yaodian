@@ -589,14 +589,29 @@
         <div class="calendar-event-list" aria-live="polite"></div>
         <form class="calendar-add-form">
           <div class="calendar-add-row">
-            <label for="calendar-add-date">날짜</label>
+            <label for="calendar-add-date">시작일</label>
             <input id="calendar-add-date" type="date" required>
           </div>
           <div class="calendar-add-row">
+            <label for="calendar-add-end-date">종료일 (연속일정)</label>
+            <input id="calendar-add-end-date" type="date">
+          </div>
+          <div class="calendar-add-row calendar-add-row-full">
             <label for="calendar-add-title">일정</label>
             <input id="calendar-add-title" type="text" placeholder="일정 내용" autocomplete="off" required>
           </div>
-          <button class="excel-export calendar-add-submit" type="submit">일정 추가</button>
+          <div class="calendar-add-row">
+            <label for="calendar-add-color">색상</label>
+            <input id="calendar-add-color" type="color" value="#707982">
+          </div>
+          <div class="calendar-add-row calendar-add-row-full">
+            <label for="calendar-add-memo">메모 (선택)</label>
+            <textarea id="calendar-add-memo" rows="2" placeholder="메모"></textarea>
+          </div>
+          <div class="calendar-add-row-full calendar-add-actions">
+            <button class="excel-export calendar-add-cancel-edit" type="button" hidden>수정 취소</button>
+            <button class="excel-export calendar-add-submit" type="submit">일정 추가</button>
+          </div>
         </form>
       </div>
       <div class="po-receive-panel" hidden>

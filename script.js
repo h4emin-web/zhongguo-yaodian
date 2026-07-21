@@ -106,7 +106,12 @@ const calendarNextButton = document.querySelector(".calendar-next");
 const calendarGrid = document.querySelector(".calendar-grid");
 const calendarAddForm = document.querySelector(".calendar-add-form");
 const calendarAddDate = document.querySelector("#calendar-add-date");
+const calendarAddEndDate = document.querySelector("#calendar-add-end-date");
 const calendarAddTitle = document.querySelector("#calendar-add-title");
+const calendarAddColor = document.querySelector("#calendar-add-color");
+const calendarAddMemo = document.querySelector("#calendar-add-memo");
+const calendarAddSubmit = document.querySelector(".calendar-add-submit");
+const calendarAddCancelEdit = document.querySelector(".calendar-add-cancel-edit");
 const calendarEventList = document.querySelector(".calendar-event-list");
 const calendarSelectedDateLabel = document.querySelector(".calendar-selected-date-label");
 const ddayList = document.querySelector(".dday-list");
@@ -136,6 +141,7 @@ const STAR_BURST_COUNT = 12;
 const STAR_BURST_HUE_STEP = 47;
 const HANA_RATE_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 const CALENDAR_STORAGE_KEY = "haemin-workspace-calendar-events";
+const DEFAULT_EVENT_COLOR = "#707982";
 const WEEKDAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
 
 // Exact dates (including lunar-based holidays and 대체공휴일) for the years
@@ -260,6 +266,7 @@ let calendarEvents = loadCalendarEvents();
 let calendarViewYear = new Date().getFullYear();
 let calendarViewMonth = new Date().getMonth();
 let calendarSelectedDate = formatDateKey(new Date());
+let editingCalendarEventId = null;
 let autoSettlementState = {
   mode: "single",
   settlementFile: "",
@@ -845,31 +852,59 @@ calendarGrid.addEventListener("click", (event) => {
     return;
   }
   calendarSelectedDate = dayButton.dataset.date;
-  calendarAddDate.value = calendarSelectedDate;
+  resetCalendarAddForm();
   renderCalendarGrid();
   renderCalendarEventList();
 });
 
 calendarAddForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  const dateKey = calendarAddDate.value;
+  let startDate = calendarAddDate.value;
+  let endDate = calendarAddEndDate.value || startDate;
   const title = calendarAddTitle.value.trim();
+  const color = calendarAddColor.value || DEFAULT_EVENT_COLOR;
+  const memo = calendarAddMemo.value.trim();
 
-  if (!dateKey || !title) {
+  if (!startDate || !title) {
     return;
   }
 
-  calendarSelectedDate = dateKey;
-  addCalendarEvent(dateKey, title);
-  calendarAddTitle.value = "";
+  if (endDate < startDate) {
+    [startDate, endDate] = [endDate, startDate];
+  }
+
+  calendarSelectedDate = startDate;
+
+  if (editingCalendarEventId) {
+    updateCalendarEvent(editingCalendarEventId, {
+      date: startDate,
+      endDate: endDate !== startDate ? endDate : "",
+      title,
+      color,
+      memo
+    });
+  } else {
+    addCalendarEvent(startDate, endDate, title, color, memo);
+  }
+
+  resetCalendarAddForm();
+});
+
+calendarAddCancelEdit.addEventListener("click", () => {
+  resetCalendarAddForm();
 });
 
 calendarEventList.addEventListener("click", (event) => {
   const deleteButton = event.target.closest(".calendar-event-delete");
-  if (!deleteButton) {
+  if (deleteButton) {
+    deleteCalendarEvent(deleteButton.dataset.id);
     return;
   }
-  deleteCalendarEvent(deleteButton.dataset.id);
+
+  const editButton = event.target.closest(".calendar-event-edit");
+  if (editButton) {
+    startEditingCalendarEvent(editButton.dataset.id);
+  }
 });
 
 pendingReceiptMode.addEventListener("change", updatePendingReceiptState);
@@ -1771,6 +1806,19 @@ function renderCalendarMonthLabel() {
   calendarMonthLabel.textContent = `${calendarViewYear}년 ${calendarViewMonth + 1}월`;
 }
 
+function getEventEndDate(event) {
+  return event.endDate || event.date;
+}
+
+function eventCoversDate(event, dateKey) {
+  return dateKey >= event.date && dateKey <= getEventEndDate(event);
+}
+
+function formatDateLabel(dateKey) {
+  const date = parseDateKey(dateKey);
+  return `${date.getMonth() + 1}월 ${date.getDate()}일`;
+}
+
 function renderCalendarGrid() {
   const firstDayOfWeek = new Date(calendarViewYear, calendarViewMonth, 1).getDay();
   const daysInMonth = new Date(calendarViewYear, calendarViewMonth + 1, 0).getDate();
@@ -1779,10 +1827,17 @@ function renderCalendarGrid() {
   const eventsByDate = new Map();
 
   calendarEvents.forEach((event) => {
-    if (!eventsByDate.has(event.date)) {
-      eventsByDate.set(event.date, []);
+    const endDate = parseDateKey(getEventEndDate(event));
+    const cursor = parseDateKey(event.date);
+
+    while (cursor <= endDate) {
+      const key = formatDateKey(cursor);
+      if (!eventsByDate.has(key)) {
+        eventsByDate.set(key, []);
+      }
+      eventsByDate.get(key).push(event);
+      cursor.setDate(cursor.getDate() + 1);
     }
-    eventsByDate.get(event.date).push(event);
   });
 
   const MAX_VISIBLE_CHIPS = 2;
@@ -1811,7 +1866,7 @@ function renderCalendarGrid() {
 
     const dayEvents = eventsByDate.get(dateKey) || [];
     const visibleChips = dayEvents.slice(0, MAX_VISIBLE_CHIPS)
-      .map((event) => `<span class="calendar-day-event-chip">${escapeHtml(event.title)}</span>`)
+      .map((event) => `<span class="calendar-day-event-chip" style="background:${escapeHtml(event.color || DEFAULT_EVENT_COLOR)}">${escapeHtml(event.title)}</span>`)
       .join("");
     const moreLabel = dayEvents.length > MAX_VISIBLE_CHIPS
       ? `<span class="calendar-day-event-more">+${dayEvents.length - MAX_VISIBLE_CHIPS}</span>`
@@ -1835,7 +1890,7 @@ function renderCalendarEventList() {
   calendarSelectedDateLabel.textContent = label;
 
   const eventsForDay = calendarEvents
-    .filter((event) => event.date === calendarSelectedDate)
+    .filter((event) => eventCoversDate(event, calendarSelectedDate))
     .sort((a, b) => a.id.localeCompare(b.id));
 
   if (eventsForDay.length === 0) {
@@ -1843,14 +1898,26 @@ function renderCalendarEventList() {
     return;
   }
 
-  calendarEventList.innerHTML = eventsForDay.map((event) => `
-    <div class="calendar-event-item">
-      <div class="calendar-event-item-info">
-        <p class="calendar-event-title">${escapeHtml(event.title)}</p>
+  calendarEventList.innerHTML = eventsForDay.map((event) => {
+    const endDate = getEventEndDate(event);
+    const isRange = endDate !== event.date;
+
+    return `
+      <div class="calendar-event-item">
+        <div class="calendar-event-item-info">
+          <p class="calendar-event-title">
+            <span class="calendar-event-color-dot" style="background:${escapeHtml(event.color || DEFAULT_EVENT_COLOR)}"></span>${escapeHtml(event.title)}
+          </p>
+          ${isRange ? `<p class="calendar-event-range">${escapeHtml(formatDateLabel(event.date))} ~ ${escapeHtml(formatDateLabel(endDate))}</p>` : ""}
+          ${event.memo ? `<p class="calendar-event-memo">${escapeHtml(event.memo)}</p>` : ""}
+        </div>
+        <div class="calendar-event-item-actions">
+          <button class="calendar-event-edit" type="button" data-id="${event.id}">수정</button>
+          <button class="calendar-event-delete" type="button" data-id="${event.id}">삭제</button>
+        </div>
       </div>
-      <button class="calendar-event-delete" type="button" data-id="${event.id}">삭제</button>
-    </div>
-  `).join("");
+    `;
+  }).join("");
 }
 
 function renderDdayWidget() {
@@ -1861,7 +1928,7 @@ function renderDdayWidget() {
   const todayKey = formatDateKey(new Date());
   const todayDate = parseDateKey(todayKey);
   const upcomingEvents = calendarEvents
-    .filter((event) => event.date >= todayKey)
+    .filter((event) => getEventEndDate(event) >= todayKey)
     .sort((a, b) => a.date.localeCompare(b.date));
 
   if (upcomingEvents.length === 0) {
@@ -1870,10 +1937,20 @@ function renderDdayWidget() {
   }
 
   ddayList.innerHTML = upcomingEvents.map((event) => {
-    const eventDate = parseDateKey(event.date);
-    const diffDays = Math.round((eventDate - todayDate) / 86400000);
-    const badgeLabel = diffDays === 0 ? "D-DAY" : `D-${diffDays}`;
-    const badgeClass = diffDays === 0 ? "dday-item-badge is-today" : "dday-item-badge";
+    const eventStartDate = parseDateKey(event.date);
+    const diffDays = Math.round((eventStartDate - todayDate) / 86400000);
+    let badgeLabel;
+    let badgeClass = "dday-item-badge";
+
+    if (diffDays === 0) {
+      badgeLabel = "D-DAY";
+      badgeClass += " is-today";
+    } else if (diffDays > 0) {
+      badgeLabel = `D-${diffDays}`;
+    } else {
+      badgeLabel = "진행중";
+      badgeClass += " is-today";
+    }
 
     return `
       <li class="dday-item">
@@ -1884,12 +1961,27 @@ function renderDdayWidget() {
   }).join("");
 }
 
-function addCalendarEvent(dateKey, title) {
+function addCalendarEvent(dateKey, endDateKey, title, color, memo) {
   calendarEvents.push({
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     date: dateKey,
-    title
+    endDate: endDateKey && endDateKey !== dateKey ? endDateKey : "",
+    title,
+    color: color || DEFAULT_EVENT_COLOR,
+    memo: memo || ""
   });
+  saveCalendarEvents();
+  renderCalendarGrid();
+  renderCalendarEventList();
+  renderDdayWidget();
+}
+
+function updateCalendarEvent(id, updates) {
+  const target = calendarEvents.find((event) => event.id === id);
+  if (!target) {
+    return;
+  }
+  Object.assign(target, updates);
   saveCalendarEvents();
   renderCalendarGrid();
   renderCalendarEventList();
@@ -1902,6 +1994,38 @@ function deleteCalendarEvent(id) {
   renderCalendarGrid();
   renderCalendarEventList();
   renderDdayWidget();
+
+  if (editingCalendarEventId === id) {
+    resetCalendarAddForm();
+  }
+}
+
+function resetCalendarAddForm() {
+  editingCalendarEventId = null;
+  calendarAddForm.reset();
+  calendarAddDate.value = calendarSelectedDate;
+  calendarAddEndDate.value = "";
+  calendarAddColor.value = DEFAULT_EVENT_COLOR;
+  calendarAddMemo.value = "";
+  calendarAddSubmit.textContent = "일정 추가";
+  calendarAddCancelEdit.hidden = true;
+}
+
+function startEditingCalendarEvent(id) {
+  const event = calendarEvents.find((item) => item.id === id);
+  if (!event) {
+    return;
+  }
+
+  editingCalendarEventId = id;
+  calendarAddDate.value = event.date;
+  calendarAddEndDate.value = getEventEndDate(event) !== event.date ? getEventEndDate(event) : "";
+  calendarAddTitle.value = event.title;
+  calendarAddColor.value = event.color || DEFAULT_EVENT_COLOR;
+  calendarAddMemo.value = event.memo || "";
+  calendarAddSubmit.textContent = "일정 수정";
+  calendarAddCancelEdit.hidden = false;
+  calendarAddTitle.focus();
 }
 
 function showCalendarPanel(isCalendar) {
@@ -1912,7 +2036,7 @@ function showCalendarPanel(isCalendar) {
     calendarViewYear = today.getFullYear();
     calendarViewMonth = today.getMonth();
     calendarSelectedDate = formatDateKey(today);
-    calendarAddDate.value = calendarSelectedDate;
+    resetCalendarAddForm();
     renderCalendarMonthLabel();
     renderCalendarGrid();
     renderCalendarEventList();
