@@ -435,19 +435,16 @@ body.detail-open {
   margin-top: 29px;
   min-height: 132px;
   padding: 17px 18px 16px;
-  border: 1px solid rgba(232, 235, 239, 0.95);
+  border: 0;
   border-radius: 8px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
+  background: transparent;
+  box-shadow: none;
   transform-style: preserve-3d;
-  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
 
 .hana-rate-card:hover,
 .hana-rate-card:focus-within {
-  transform: translateY(-2px);
-  border-color: rgba(112, 121, 130, 0.28);
-  box-shadow: var(--shadow-deep);
+  transform: none;
 }
 
 .hana-rate-top {
@@ -502,10 +499,10 @@ body.detail-open {
   font-size: 19px;
   font-weight: 800;
   line-height: 1;
-  background: var(--surface-soft);
-  box-shadow: 0 5px 12px rgba(31, 36, 41, 0.04), var(--surface-rim);
+  background: transparent;
+  box-shadow: none;
   cursor: pointer;
-  transition: transform 140ms ease, background 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+  transition: transform 140ms ease, border-color 140ms ease;
 }
 
 .hana-rate-refresh span {
@@ -518,8 +515,7 @@ body.detail-open {
   transform: translateY(-1px);
   outline: none;
   border-color: rgba(112, 121, 130, 0.42);
-  background: #f3f4f6;
-  box-shadow: 0 7px 14px rgba(31, 36, 41, 0.055), var(--surface-rim);
+  background: transparent;
 }
 
 .hana-rate-refresh:disabled {
@@ -1409,7 +1405,7 @@ body.tool-auth-open {
   padding: 16px;
   border: 0;
   border-radius: 8px;
-  background: var(--surface-soft);
+  background: transparent;
   box-shadow: none;
 }
 
@@ -1461,10 +1457,10 @@ body.tool-auth-open {
   font-family: inherit;
   font-size: 18px;
   font-weight: 800;
-  background: #ffffff;
+  background: transparent;
   cursor: pointer;
-  box-shadow: var(--shadow-soft);
-  transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+  box-shadow: none;
+  transition: transform 150ms ease, border-color 150ms ease;
 }
 
 .calendar-stock-refresh:hover,
@@ -1472,7 +1468,6 @@ body.tool-auth-open {
   transform: translateY(-1px);
   outline: none;
   border-color: rgba(112, 121, 130, 0.36);
-  box-shadow: var(--shadow);
 }
 
 .calendar-stock-refresh:disabled {
