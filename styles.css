@@ -1403,6 +1403,148 @@ body.tool-auth-open {
   display: none;
 }
 
+.calendar-stock-card {
+  margin: 0 0 18px;
+  padding: 16px;
+  border: 1px solid rgba(232, 235, 239, 0.96);
+  border-radius: 8px;
+  background: var(--surface-soft);
+  box-shadow: var(--shadow-soft);
+}
+
+.calendar-stock-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.calendar-stock-top p {
+  margin: 0 0 4px;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.calendar-stock-top strong {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.calendar-stock-refresh {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(232, 235, 239, 0.98);
+  border-radius: 8px;
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  background: #ffffff;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.calendar-stock-refresh:hover,
+.calendar-stock-refresh:focus-visible {
+  transform: translateY(-1px);
+  outline: none;
+  border-color: rgba(112, 121, 130, 0.36);
+  box-shadow: var(--shadow);
+}
+
+.calendar-stock-refresh:disabled {
+  cursor: progress;
+  opacity: 0.58;
+}
+
+.calendar-stock-main {
+  margin-top: 14px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.calendar-stock-price {
+  color: var(--text);
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.calendar-stock-change {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.calendar-stock-card.is-up .calendar-stock-change {
+  color: #c73d32;
+}
+
+.calendar-stock-card.is-down .calendar-stock-change {
+  color: #2f6fc8;
+}
+
+.calendar-stock-card.is-error .calendar-stock-change,
+.calendar-stock-card.is-error .calendar-stock-updated {
+  color: #c73d32;
+}
+
+.calendar-stock-values {
+  margin: 14px 0 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.calendar-stock-values div {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(232, 235, 239, 0.82);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.calendar-stock-values dt {
+  margin: 0 0 5px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.calendar-stock-values dd {
+  margin: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.calendar-stock-updated {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+@media (max-width: 620px) {
+  .calendar-stock-values {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .calendar-stock-price {
+    font-size: 24px;
+  }
+}
+
 .calendar-selected-date-label {
   margin: 0 0 10px;
   color: var(--text);
