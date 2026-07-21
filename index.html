@@ -72,8 +72,13 @@
     <div class="global-search-results" hidden aria-live="polite"></div>
 
     <div class="workspace-content is-collapsed" id="workspace-content" aria-hidden="true">
-      <div class="workspace-main">
-    <div class="workspace-grid" aria-label="workspace tools">
+      <div class="workspace-catalog" aria-label="workspace tools">
+        <section class="tool-category">
+          <div class="tool-category-head">
+            <p>Search</p>
+            <h2>자료 검색 · 기록</h2>
+          </div>
+    <div class="workspace-grid" aria-label="자료 검색과 기록">
       <section class="tool-box" tabindex="0">
         <button class="card-share-button" type="button" aria-label="카카오톡으로 보내기">💬</button>
         <p class="tool-kicker">Search</p>
@@ -210,13 +215,27 @@
         <p class="worklog-box-date">불러온 업무일지 없음</p>
       </section>
     </div>
-      </div>
+        </section>
 
-      <aside class="side-tools" aria-label="tools">
+        <section class="tool-category">
+          <div class="tool-category-head">
+            <p>Automation</p>
+            <h2>업무 자동화</h2>
+          </div>
+      <div class="side-tools tool-category-list" aria-label="업무 자동화">
         <button class="tools-item" type="button" data-tool="import-cost-calculator">예상수입원가 마진율</button>
         <button class="tools-item" type="button" data-tool="import-cert-extractor">수입신고필증</button>
         <button class="tools-item" type="button" data-tool="auto-settlement">자동정산</button>
         <button class="tools-item" type="button" data-tool="pending-receipt">입고예정 처리</button>
+      </div>
+        </section>
+
+        <section class="tool-category">
+          <div class="tool-category-head">
+            <p>Info</p>
+            <h2>정보</h2>
+          </div>
+      <div class="side-tools tool-category-list" aria-label="정보">
         <button class="tools-item" type="button" data-tool="daily-news">오늘의 뉴스</button>
         <button class="tools-item" type="button" data-tool="calendar">캘린더</button>
         <section class="calendar-stock-card" aria-label="알지노믹스 주식 가격" aria-live="polite">
@@ -234,7 +253,9 @@
             <span class="calendar-stock-change">조회 중</span>
           </div>
         </section>
-      </aside>
+      </div>
+        </section>
+      </div>
     </div>
     </main>
   </div>

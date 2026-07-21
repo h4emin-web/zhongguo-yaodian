@@ -224,6 +224,16 @@ body.detail-open {
   transform-style: preserve-3d;
 }
 
+.tool-category-list {
+  position: static;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  transform-style: flat;
+}
+
 .tools-item {
   position: relative;
   width: 100%;
@@ -240,6 +250,11 @@ body.detail-open {
   background: transparent;
   cursor: pointer;
   transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.tool-category-list .tools-item {
+  min-height: 0;
+  padding: 15px 17px;
 }
 
 .tools-item + .tools-item::before {
@@ -271,10 +286,7 @@ body.detail-open {
 }
 
 .workspace-content {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--workspace-side-width);
-  gap: var(--workspace-column-gap);
-  align-items: start;
+  display: block;
   transform-origin: center top;
   transition:
     max-height 360ms cubic-bezier(0.16, 0.8, 0.2, 1),
@@ -301,30 +313,16 @@ body.detail-open {
   clip-path: inset(0 0 0 0 round 0);
 }
 
-.workspace-content.is-expanded .tool-box,
-.workspace-content.is-expanded .side-tools {
+.workspace-content.is-expanded .tool-category {
   animation: workspace-spread 360ms cubic-bezier(0.16, 0.8, 0.2, 1) both;
 }
 
-.workspace-content.is-expanded .tool-box:nth-child(2) {
+.workspace-content.is-expanded .tool-category:nth-child(2) {
   animation-delay: 30ms;
 }
 
-.workspace-content.is-expanded .tool-box:nth-child(3) {
+.workspace-content.is-expanded .tool-category:nth-child(3) {
   animation-delay: 60ms;
-}
-
-.workspace-content.is-expanded .tool-box:nth-child(4) {
-  animation-delay: 90ms;
-}
-
-.workspace-content.is-expanded .tool-box:nth-child(5) {
-  animation-delay: 120ms;
-}
-
-.workspace-content.is-expanded .tool-box:nth-child(6),
-.workspace-content.is-expanded .side-tools {
-  animation-delay: 150ms;
 }
 
 @keyframes workspace-spread {
@@ -341,6 +339,44 @@ body.detail-open {
 
 .workspace-main {
   min-width: 0;
+}
+
+.workspace-catalog {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.tool-category {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid rgba(232, 235, 239, 0.95);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.tool-category-head {
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(232, 235, 239, 0.92);
+}
+
+.tool-category-head p {
+  margin: 0 0 5px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.tool-category-head h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.25;
 }
 
 .search-row {
@@ -680,44 +716,31 @@ body.detail-open {
 
 .workspace-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(240px, 1fr));
-  gap: 24px;
+  grid-template-columns: 1fr;
+  gap: 8px;
 }
 
 .tool-box {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  min-height: 178px;
-  padding: 24px;
-  border: 1px solid rgba(232, 235, 239, 0.95);
+  min-height: 0;
+  padding: 15px 17px;
+  border: 1px solid transparent;
   border-radius: 8px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
+  background: transparent;
+  box-shadow: none;
   cursor: pointer;
   transform-style: preserve-3d;
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
 }
 
 .tool-box::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.72), transparent 48%),
-    linear-gradient(135deg, rgba(112, 121, 130, 0.07), transparent 38%);
-  pointer-events: none;
+  display: none;
 }
 
 .tool-box::after {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  inset: auto 18px 0;
-  height: 1px;
-  background: rgba(112, 121, 130, 0.12);
-  pointer-events: none;
+  display: none;
 }
 
 .tool-box > * {
@@ -745,6 +768,10 @@ body.detail-open {
   cursor: pointer;
 }
 
+.workspace-catalog .card-share-button {
+  display: none;
+}
+
 .card-share-button:hover,
 .card-share-button:focus-visible {
   outline: none;
@@ -753,40 +780,32 @@ body.detail-open {
 
 .tool-box:hover,
 .tool-box:focus-visible {
-  transform: perspective(900px) translateY(-7px) rotateX(1.2deg);
+  transform: translateX(3px);
   outline: none;
-  border-color: rgba(112, 121, 130, 0.32);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(250, 251, 252, 0.96));
-  box-shadow: var(--shadow-lift);
+  border-color: rgba(112, 121, 130, 0.22);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(247, 248, 250, 0.92));
+  box-shadow: var(--shadow-soft);
 }
 
 .tool-kicker {
-  width: fit-content;
-  margin: 0 0 18px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  color: var(--accent);
-  font-size: 12px;
-  font-weight: 800;
-  line-height: 1;
-  background: linear-gradient(180deg, #ffffff, #f3f4f6);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 5px 10px rgba(31, 36, 41, 0.04);
+  display: none;
 }
 
 .tool-box h2 {
-  margin: 0 0 10px;
+  margin: 0;
   color: var(--text);
-  font-size: 23px;
+  font-size: 16px;
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.35;
 }
 
 .tool-box p:last-child {
-  max-width: 34ch;
-  margin: 0;
+  max-width: none;
+  margin: 4px 0 0;
   color: var(--muted);
-  font-size: 15px;
-  line-height: 1.55;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
 }
 
 .detail-view {
@@ -2691,9 +2710,19 @@ body.tool-auth-open {
   box-shadow: var(--shadow-soft);
 }
 
+@media (max-width: 1100px) {
+  .workspace-catalog {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 900px) {
   .app-shell,
   .workspace-content {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace-catalog {
     grid-template-columns: 1fr;
   }
 
@@ -2703,6 +2732,10 @@ body.tool-auth-open {
     grid-row: auto;
     margin-top: 0;
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .tool-category-list {
+    grid-template-columns: 1fr;
   }
 
   .tools-item {
