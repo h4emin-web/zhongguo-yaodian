@@ -3,6 +3,9 @@ const detailView = document.querySelector(".detail-view");
 const detailPanel = document.querySelector(".detail-panel");
 const closeButton = document.querySelector(".detail-close");
 const topBarVideo = document.querySelector(".top-bar-video");
+const marketIndexStrip = document.querySelector(".market-index-strip");
+const marketIndexKospi = document.querySelector(".market-index-kospi strong");
+const marketIndexKosdaq = document.querySelector(".market-index-kosdaq strong");
 const detailKicker = document.querySelector(".detail-kicker");
 const detailTitle = document.querySelector("#detail-title");
 const detailDescription = document.querySelector(".detail-description");
@@ -147,6 +150,7 @@ const STAR_BURST_COUNT = 12;
 const STAR_BURST_HUE_STEP = 47;
 const HANA_RATE_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 const RZNOMICS_STOCK_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+const MARKET_INDEX_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const CALENDAR_STORAGE_KEY = "haemin-workspace-calendar-events";
 const EVENT_COLORS = [
   "#FF9EEB",
@@ -276,6 +280,7 @@ let worklogDateLabel = "";
 let starBurstHue = 0;
 let hanaRateTimer = null;
 let rznomicsStockTimer = null;
+let marketIndexTimer = null;
 let workspaceHeartTimer = null;
 let dailyNewsLoaded = false;
 let dailyNewsLoading = false;
@@ -495,6 +500,99 @@ function initializeHanaExchangeRate() {
   hanaRateTimer = window.setInterval(() => {
     fetchHanaExchangeRate();
   }, HANA_RATE_REFRESH_INTERVAL_MS);
+}
+
+function formatMarketIndexRate(value) {
+  const number = Number(value);
+
+  if (!Number.isFinite(number)) {
+    return "-";
+  }
+
+  if (number === 0) {
+    return "0.00%";
+  }
+
+  const sign = number > 0 ? "+" : "-";
+  return `${sign}${Math.abs(number).toFixed(2)}%`;
+}
+
+function setMarketIndexItem(element, item) {
+  if (!element) {
+    return;
+  }
+
+  const wrapper = element.closest(".market-index-item");
+  wrapper?.classList.remove("is-up", "is-down", "is-flat", "is-error");
+  wrapper?.classList.add(item.direction === "up" ? "is-up" : item.direction === "down" ? "is-down" : "is-flat");
+  element.textContent = formatMarketIndexRate(item.changeRate);
+}
+
+function renderMarketIndexTrend(data) {
+  if (!marketIndexStrip) {
+    return;
+  }
+
+  const items = Array.isArray(data.indices) ? data.indices : [];
+  const kospi = items.find((item) => item.code === "KOSPI");
+  const kosdaq = items.find((item) => item.code === "KOSDAQ");
+
+  setMarketIndexItem(marketIndexKospi, kospi || { changeRate: 0, direction: "flat" });
+  setMarketIndexItem(marketIndexKosdaq, kosdaq || { changeRate: 0, direction: "flat" });
+}
+
+function renderMarketIndexError() {
+  [marketIndexKospi, marketIndexKosdaq].forEach((element) => {
+    if (!element) {
+      return;
+    }
+
+    const wrapper = element.closest(".market-index-item");
+    wrapper?.classList.remove("is-up", "is-down", "is-flat");
+    wrapper?.classList.add("is-error");
+    element.textContent = "-";
+  });
+}
+
+async function fetchMarketIndexTrend() {
+  if (!marketIndexStrip) {
+    return;
+  }
+
+  if (!supabaseClient) {
+    renderMarketIndexError();
+    return;
+  }
+
+  try {
+    const { data, error } = await supabaseClient.functions.invoke("market-index-trend", {
+      body: {}
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data || !data.ok) {
+      throw new Error((data && data.error) || "시장 지수 조회 실패");
+    }
+
+    renderMarketIndexTrend(data);
+  } catch (error) {
+    console.error(error);
+    renderMarketIndexError();
+  }
+}
+
+function initializeMarketIndexTrend() {
+  if (!marketIndexStrip) {
+    return;
+  }
+
+  fetchMarketIndexTrend();
+  marketIndexTimer = window.setInterval(() => {
+    fetchMarketIndexTrend();
+  }, MARKET_INDEX_REFRESH_INTERVAL_MS);
 }
 
 function formatKrwStockValue(value) {
@@ -4206,6 +4304,7 @@ worklogDropzone.addEventListener("drop", (event) => {
 });
 
 initializeHanaExchangeRate();
+initializeMarketIndexTrend();
 startRznomicsStockUpdates();
 loadWorklogFromStorage();
 

@@ -156,6 +156,46 @@ body.detail-open {
   transition: transform 150ms ease, opacity 150ms ease;
 }
 
+.market-index-strip {
+  position: absolute;
+  right: clamp(20px, 5vw, 64px);
+  top: 18px;
+  z-index: 3;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 14px;
+  color: rgba(79, 86, 94, 0.56);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.market-index-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.market-index-item strong {
+  color: rgba(79, 86, 94, 0.64);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.market-index-item.is-up strong {
+  color: rgba(199, 61, 50, 0.72);
+}
+
+.market-index-item.is-down strong {
+  color: rgba(47, 111, 200, 0.72);
+}
+
+.market-index-item.is-error strong {
+  color: rgba(185, 64, 64, 0.72);
+}
+
 .api-market-link:hover,
 .api-market-link:focus-visible {
   transform: translateY(-1px);
@@ -2713,6 +2753,17 @@ body.tool-auth-open {
     right: 18px;
     bottom: 14px;
     font-size: 13px;
+  }
+
+  .market-index-strip {
+    right: 18px;
+    top: 14px;
+    gap: 10px;
+    font-size: 11px;
+  }
+
+  .market-index-item strong {
+    font-size: 11px;
   }
 
   .app-shell {
