@@ -582,8 +582,11 @@
         </div>
         <div class="calendar-grid"></div>
         <div class="calendar-dday">
-          <p class="calendar-dday-title">D-DAY</p>
-          <ul class="dday-list"></ul>
+          <button class="calendar-dday-toggle" type="button" aria-expanded="true" aria-controls="calendar-dday-list">
+            <span class="calendar-dday-title">D-DAY</span>
+            <span class="calendar-dday-caret" aria-hidden="true">▾</span>
+          </button>
+          <ul class="dday-list" id="calendar-dday-list"></ul>
         </div>
         <p class="calendar-selected-date-label"></p>
         <div class="calendar-event-list" aria-live="polite"></div>

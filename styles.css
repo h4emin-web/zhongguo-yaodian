@@ -1366,12 +1366,41 @@ body.tool-auth-open {
   border-top: 1px solid rgba(232, 235, 239, 0.92);
 }
 
+.calendar-dday-toggle {
+  width: 100%;
+  padding: 0 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
 .calendar-dday-title {
-  margin: 0 0 10px;
+  margin: 0;
   color: var(--muted);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.06em;
+}
+
+.calendar-dday-caret {
+  color: var(--muted);
+  font-size: 13px;
+  transition: transform 160ms ease;
+}
+
+.calendar-dday.is-collapsed .calendar-dday-caret {
+  transform: rotate(-90deg);
+}
+
+.calendar-dday.is-collapsed .calendar-dday-toggle {
+  padding-bottom: 0;
+}
+
+.calendar-dday.is-collapsed .dday-list {
+  display: none;
 }
 
 .calendar-selected-date-label {

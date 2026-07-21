@@ -115,6 +115,8 @@ const calendarAddCancelEdit = document.querySelector(".calendar-add-cancel-edit"
 const calendarEventList = document.querySelector(".calendar-event-list");
 const calendarSelectedDateLabel = document.querySelector(".calendar-selected-date-label");
 const ddayList = document.querySelector(".dday-list");
+const calendarDday = document.querySelector(".calendar-dday");
+const calendarDdayToggle = document.querySelector(".calendar-dday-toggle");
 const localLauncherButtons = document.querySelectorAll(".local-launcher-start");
 const importCostPanel = document.querySelector(".import-cost-panel");
 const importPriceInput = document.querySelector("#import-price-input");
@@ -892,6 +894,11 @@ calendarAddForm.addEventListener("submit", (event) => {
 
 calendarAddCancelEdit.addEventListener("click", () => {
   resetCalendarAddForm();
+});
+
+calendarDdayToggle.addEventListener("click", () => {
+  const isCollapsed = calendarDday.classList.toggle("is-collapsed");
+  calendarDdayToggle.setAttribute("aria-expanded", String(!isCollapsed));
 });
 
 calendarEventList.addEventListener("click", (event) => {
