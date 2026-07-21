@@ -745,6 +745,7 @@ body.detail-open {
 
 .tool-category-list .tool-box {
   width: 100%;
+  overflow: visible;
 }
 
 .tool-category-list .tool-box::before {
