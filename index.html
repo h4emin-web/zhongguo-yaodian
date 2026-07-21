@@ -593,19 +593,19 @@
         <form class="calendar-add-form">
           <div class="calendar-add-row">
             <label for="calendar-add-date">시작일</label>
-            <input id="calendar-add-date" type="date" required>
+            <input id="calendar-add-date" type="text" inputmode="numeric" placeholder="YYYY-MM-DD" maxlength="10" pattern="\d{4}-\d{2}-\d{2}" autocomplete="off" required>
           </div>
           <div class="calendar-add-row">
             <label for="calendar-add-end-date">종료일 (연속일정)</label>
-            <input id="calendar-add-end-date" type="date">
+            <input id="calendar-add-end-date" type="text" inputmode="numeric" placeholder="YYYY-MM-DD" maxlength="10" pattern="\d{4}-\d{2}-\d{2}" autocomplete="off">
           </div>
           <div class="calendar-add-row calendar-add-row-full">
             <label for="calendar-add-title">일정</label>
             <input id="calendar-add-title" type="text" placeholder="일정 내용" autocomplete="off" required>
           </div>
-          <div class="calendar-add-row">
-            <label for="calendar-add-color">색상</label>
-            <input id="calendar-add-color" type="color" value="#707982">
+          <div class="calendar-add-row calendar-add-row-full">
+            <label id="calendar-add-color-label">색상</label>
+            <div class="calendar-color-swatches" role="radiogroup" aria-labelledby="calendar-add-color-label"></div>
           </div>
           <div class="calendar-add-row calendar-add-row-full">
             <label for="calendar-add-memo">메모 (선택)</label>

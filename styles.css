@@ -1345,9 +1345,9 @@ body.tool-auth-open {
   overflow: hidden;
   padding: 2px 5px;
   border-radius: 4px;
-  color: #ffffff;
+  color: #2b2f33;
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.4;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -1447,9 +1447,31 @@ body.tool-auth-open {
   height: 46px;
 }
 
-.calendar-add-row input[type="color"] {
-  padding: 5px;
+.calendar-color-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.calendar-color-swatch {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 999px;
   cursor: pointer;
+  transition: transform 140ms ease, border-color 140ms ease;
+}
+
+.calendar-color-swatch:hover,
+.calendar-color-swatch:focus-visible {
+  outline: none;
+  transform: scale(1.1);
+}
+
+.calendar-color-swatch.is-selected {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--surface);
 }
 
 .calendar-add-row textarea {

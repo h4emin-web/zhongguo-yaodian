@@ -108,7 +108,7 @@ const calendarAddForm = document.querySelector(".calendar-add-form");
 const calendarAddDate = document.querySelector("#calendar-add-date");
 const calendarAddEndDate = document.querySelector("#calendar-add-end-date");
 const calendarAddTitle = document.querySelector("#calendar-add-title");
-const calendarAddColor = document.querySelector("#calendar-add-color");
+const calendarColorSwatches = document.querySelector(".calendar-color-swatches");
 const calendarAddMemo = document.querySelector("#calendar-add-memo");
 const calendarAddSubmit = document.querySelector(".calendar-add-submit");
 const calendarAddCancelEdit = document.querySelector(".calendar-add-cancel-edit");
@@ -143,7 +143,17 @@ const STAR_BURST_COUNT = 12;
 const STAR_BURST_HUE_STEP = 47;
 const HANA_RATE_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 const CALENDAR_STORAGE_KEY = "haemin-workspace-calendar-events";
-const DEFAULT_EVENT_COLOR = "#707982";
+const EVENT_COLORS = [
+  "#FF9EEB",
+  "#FFB199",
+  "#FFE699",
+  "#C2FF99",
+  "#99FFD6",
+  "#99E6FF",
+  "#B399FF",
+  "#FF99B8"
+];
+const DEFAULT_EVENT_COLOR = EVENT_COLORS[0];
 const WEEKDAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
 
 // Exact dates (including lunar-based holidays and 대체공휴일) for the years
@@ -269,6 +279,7 @@ let calendarViewYear = new Date().getFullYear();
 let calendarViewMonth = new Date().getMonth();
 let calendarSelectedDate = formatDateKey(new Date());
 let editingCalendarEventId = null;
+let selectedCalendarColor = DEFAULT_EVENT_COLOR;
 let autoSettlementState = {
   mode: "single",
   settlementFile: "",
@@ -864,7 +875,7 @@ calendarAddForm.addEventListener("submit", (event) => {
   let startDate = calendarAddDate.value;
   let endDate = calendarAddEndDate.value || startDate;
   const title = calendarAddTitle.value.trim();
-  const color = calendarAddColor.value || DEFAULT_EVENT_COLOR;
+  const color = selectedCalendarColor || DEFAULT_EVENT_COLOR;
   const memo = calendarAddMemo.value.trim();
 
   if (!startDate || !title) {
@@ -900,6 +911,41 @@ calendarDdayToggle.addEventListener("click", () => {
   const isCollapsed = calendarDday.classList.toggle("is-collapsed");
   calendarDdayToggle.setAttribute("aria-expanded", String(!isCollapsed));
 });
+
+renderCalendarColorSwatches();
+setSelectedCalendarColor(DEFAULT_EVENT_COLOR);
+
+calendarColorSwatches.addEventListener("click", (event) => {
+  const swatch = event.target.closest(".calendar-color-swatch");
+  if (!swatch) {
+    return;
+  }
+  setSelectedCalendarColor(swatch.dataset.color);
+});
+
+function formatDateInputValue(rawValue) {
+  const digits = rawValue.replace(/\D/g, "").slice(0, 8);
+  const year = digits.slice(0, 4);
+  const month = digits.slice(4, 6);
+  const day = digits.slice(6, 8);
+  return [year, month, day].filter(Boolean).join("-");
+}
+
+function attachDateAutoFormat(input) {
+  input.addEventListener("focus", () => {
+    input.select();
+  });
+  input.addEventListener("input", () => {
+    const wasAtEnd = input.selectionStart === input.value.length;
+    input.value = formatDateInputValue(input.value);
+    if (wasAtEnd) {
+      input.setSelectionRange(input.value.length, input.value.length);
+    }
+  });
+}
+
+attachDateAutoFormat(calendarAddDate);
+attachDateAutoFormat(calendarAddEndDate);
 
 calendarEventList.addEventListener("click", (event) => {
   const deleteButton = event.target.closest(".calendar-event-delete");
@@ -2007,12 +2053,25 @@ function deleteCalendarEvent(id) {
   }
 }
 
+function renderCalendarColorSwatches() {
+  calendarColorSwatches.innerHTML = EVENT_COLORS.map((color) => `
+    <button type="button" class="calendar-color-swatch" data-color="${color}" style="background:${color}" aria-label="색상 ${color}"></button>
+  `).join("");
+}
+
+function setSelectedCalendarColor(color) {
+  selectedCalendarColor = color;
+  calendarColorSwatches.querySelectorAll(".calendar-color-swatch").forEach((swatch) => {
+    swatch.classList.toggle("is-selected", swatch.dataset.color === color);
+  });
+}
+
 function resetCalendarAddForm() {
   editingCalendarEventId = null;
   calendarAddForm.reset();
   calendarAddDate.value = calendarSelectedDate;
   calendarAddEndDate.value = "";
-  calendarAddColor.value = DEFAULT_EVENT_COLOR;
+  setSelectedCalendarColor(DEFAULT_EVENT_COLOR);
   calendarAddMemo.value = "";
   calendarAddSubmit.textContent = "일정 추가";
   calendarAddCancelEdit.hidden = true;
@@ -2028,7 +2087,7 @@ function startEditingCalendarEvent(id) {
   calendarAddDate.value = event.date;
   calendarAddEndDate.value = getEventEndDate(event) !== event.date ? getEventEndDate(event) : "";
   calendarAddTitle.value = event.title;
-  calendarAddColor.value = event.color || DEFAULT_EVENT_COLOR;
+  setSelectedCalendarColor(event.color || DEFAULT_EVENT_COLOR);
   calendarAddMemo.value = event.memo || "";
   calendarAddSubmit.textContent = "일정 수정";
   calendarAddCancelEdit.hidden = false;
