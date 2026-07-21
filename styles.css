@@ -743,6 +743,18 @@ body.detail-open {
   display: none;
 }
 
+.workspace-grid .tool-box + .tool-box::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: -5px;
+  display: block;
+  height: 1px;
+  background: rgba(232, 235, 239, 0.92);
+  pointer-events: none;
+}
+
 .tool-category-list .tool-box {
   width: 100%;
   overflow: visible;
