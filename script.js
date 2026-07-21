@@ -4,8 +4,10 @@ const detailPanel = document.querySelector(".detail-panel");
 const closeButton = document.querySelector(".detail-close");
 const topBarVideo = document.querySelector(".top-bar-video");
 const marketIndexStrip = document.querySelector(".market-index-strip");
-const marketIndexKospi = document.querySelector(".market-index-kospi strong");
-const marketIndexKosdaq = document.querySelector(".market-index-kosdaq strong");
+const marketIndexKospiRate = document.querySelector(".market-index-kospi .market-index-rate");
+const marketIndexKosdaqRate = document.querySelector(".market-index-kosdaq .market-index-rate");
+const marketIndexKospiValue = document.querySelector(".market-index-kospi .market-index-value");
+const marketIndexKosdaqValue = document.querySelector(".market-index-kosdaq .market-index-value");
 const detailKicker = document.querySelector(".detail-kicker");
 const detailTitle = document.querySelector("#detail-title");
 const detailDescription = document.querySelector(".detail-description");
@@ -517,15 +519,32 @@ function formatMarketIndexRate(value) {
   return `${sign}${Math.abs(number).toFixed(2)}%`;
 }
 
-function setMarketIndexItem(element, item) {
-  if (!element) {
+function formatMarketIndexValue(value) {
+  const number = Number(value);
+
+  if (!Number.isFinite(number) || number <= 0) {
+    return "-";
+  }
+
+  return new Intl.NumberFormat("ko-KR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(number);
+}
+
+function setMarketIndexItem(rateElement, valueElement, item) {
+  if (!rateElement) {
     return;
   }
 
-  const wrapper = element.closest(".market-index-item");
+  const wrapper = rateElement.closest(".market-index-item");
   wrapper?.classList.remove("is-up", "is-down", "is-flat", "is-error");
   wrapper?.classList.add(item.direction === "up" ? "is-up" : item.direction === "down" ? "is-down" : "is-flat");
-  element.textContent = formatMarketIndexRate(item.changeRate);
+  rateElement.textContent = formatMarketIndexRate(item.changeRate);
+
+  if (valueElement) {
+    valueElement.textContent = formatMarketIndexValue(item.value);
+  }
 }
 
 function renderMarketIndexTrend(data) {
@@ -537,20 +556,27 @@ function renderMarketIndexTrend(data) {
   const kospi = items.find((item) => item.code === "KOSPI");
   const kosdaq = items.find((item) => item.code === "KOSDAQ");
 
-  setMarketIndexItem(marketIndexKospi, kospi || { changeRate: 0, direction: "flat" });
-  setMarketIndexItem(marketIndexKosdaq, kosdaq || { changeRate: 0, direction: "flat" });
+  setMarketIndexItem(marketIndexKospiRate, marketIndexKospiValue, kospi || { changeRate: 0, direction: "flat", value: 0 });
+  setMarketIndexItem(marketIndexKosdaqRate, marketIndexKosdaqValue, kosdaq || { changeRate: 0, direction: "flat", value: 0 });
 }
 
 function renderMarketIndexError() {
-  [marketIndexKospi, marketIndexKosdaq].forEach((element) => {
-    if (!element) {
+  [
+    [marketIndexKospiRate, marketIndexKospiValue],
+    [marketIndexKosdaqRate, marketIndexKosdaqValue]
+  ].forEach(([rateElement, valueElement]) => {
+    if (!rateElement) {
       return;
     }
 
-    const wrapper = element.closest(".market-index-item");
+    const wrapper = rateElement.closest(".market-index-item");
     wrapper?.classList.remove("is-up", "is-down", "is-flat");
     wrapper?.classList.add("is-error");
-    element.textContent = "-";
+    rateElement.textContent = "-";
+
+    if (valueElement) {
+      valueElement.textContent = "-";
+    }
   });
 }
 
