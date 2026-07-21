@@ -121,11 +121,6 @@ const calendarStockCard = document.querySelector(".calendar-stock-card");
 const calendarStockRefresh = document.querySelector(".calendar-stock-refresh");
 const calendarStockPrice = document.querySelector(".calendar-stock-price");
 const calendarStockChange = document.querySelector(".calendar-stock-change");
-const calendarStockOpen = document.querySelector(".calendar-stock-open");
-const calendarStockHigh = document.querySelector(".calendar-stock-high");
-const calendarStockLow = document.querySelector(".calendar-stock-low");
-const calendarStockVolume = document.querySelector(".calendar-stock-volume");
-const calendarStockUpdated = document.querySelector(".calendar-stock-updated");
 const localLauncherButtons = document.querySelectorAll(".local-launcher-start");
 const importCostPanel = document.querySelector(".import-cost-panel");
 const importPriceInput = document.querySelector("#import-price-input");
@@ -512,16 +507,6 @@ function formatKrwStockValue(value) {
   return `${Math.round(number).toLocaleString()}원`;
 }
 
-function formatStockCount(value) {
-  const number = Number(value);
-
-  if (!Number.isFinite(number) || number <= 0) {
-    return "-";
-  }
-
-  return Math.round(number).toLocaleString();
-}
-
 function formatSignedStockChange(value, rate) {
   const change = Number(value);
   const changeRate = Number(rate);
@@ -539,7 +524,7 @@ function formatSignedStockChange(value, rate) {
 }
 
 function renderRznomicsStockPrice(data) {
-  if (!calendarStockCard) {
+  if (!calendarStockCard || !calendarStockPrice || !calendarStockChange) {
     return;
   }
 
@@ -547,27 +532,17 @@ function renderRznomicsStockPrice(data) {
   calendarStockCard.classList.add(data.direction === "up" ? "is-up" : data.direction === "down" ? "is-down" : "is-flat");
   calendarStockPrice.textContent = formatKrwStockValue(data.price);
   calendarStockChange.textContent = formatSignedStockChange(data.change, data.changeRate);
-  calendarStockOpen.textContent = formatKrwStockValue(data.open);
-  calendarStockHigh.textContent = formatKrwStockValue(data.high);
-  calendarStockLow.textContent = formatKrwStockValue(data.low);
-  calendarStockVolume.textContent = formatStockCount(data.volume);
-  calendarStockUpdated.textContent = `${formatHanaRateTimestamp(data.standardAt || data.fetchedAt)} · 5분마다 갱신`;
 }
 
 function renderRznomicsStockError(message) {
-  if (!calendarStockCard) {
+  if (!calendarStockCard || !calendarStockPrice || !calendarStockChange) {
     return;
   }
 
   calendarStockCard.classList.add("is-error");
   calendarStockCard.classList.remove("is-up", "is-down", "is-flat");
   calendarStockPrice.textContent = "-";
-  calendarStockChange.textContent = "조회 실패";
-  calendarStockOpen.textContent = "-";
-  calendarStockHigh.textContent = "-";
-  calendarStockLow.textContent = "-";
-  calendarStockVolume.textContent = "-";
-  calendarStockUpdated.textContent = message || "주가 조회 실패";
+  calendarStockChange.textContent = message || "조회 실패";
 }
 
 async function fetchRznomicsStockPrice({ showLoading = false } = {}) {
@@ -578,7 +553,6 @@ async function fetchRznomicsStockPrice({ showLoading = false } = {}) {
   if (showLoading) {
     calendarStockCard.classList.remove("is-error");
     calendarStockChange.textContent = "조회 중";
-    calendarStockUpdated.textContent = "주가 조회 중";
   }
 
   if (!supabaseClient) {
