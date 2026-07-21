@@ -435,16 +435,19 @@ body.detail-open {
   margin-top: 29px;
   min-height: 132px;
   padding: 17px 18px 16px;
-  border: 0;
+  border: 1px solid rgba(232, 235, 239, 0.95);
   border-radius: 8px;
-  background: transparent;
-  box-shadow: none;
+  background: var(--surface);
+  box-shadow: var(--shadow);
   transform-style: preserve-3d;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
 
 .hana-rate-card:hover,
 .hana-rate-card:focus-within {
-  transform: none;
+  transform: translateY(-2px);
+  border-color: rgba(112, 121, 130, 0.28);
+  box-shadow: var(--shadow-deep);
 }
 
 .hana-rate-top {
@@ -492,7 +495,7 @@ body.detail-open {
   padding: 0;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(112, 121, 130, 0.22);
+  border: 0;
   border-radius: 8px;
   color: var(--accent);
   font-family: inherit;
@@ -514,7 +517,6 @@ body.detail-open {
 .hana-rate-refresh:focus-visible {
   transform: translateY(-1px);
   outline: none;
-  border-color: rgba(112, 121, 130, 0.42);
   background: transparent;
 }
 
@@ -1451,7 +1453,7 @@ body.tool-auth-open {
   height: 34px;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(232, 235, 239, 0.98);
+  border: 0;
   border-radius: 8px;
   color: var(--accent);
   font-family: inherit;
@@ -1467,7 +1469,6 @@ body.tool-auth-open {
 .calendar-stock-refresh:focus-visible {
   transform: translateY(-1px);
   outline: none;
-  border-color: rgba(112, 121, 130, 0.36);
 }
 
 .calendar-stock-refresh:disabled {
