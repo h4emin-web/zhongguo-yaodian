@@ -12,6 +12,8 @@ const {
 
 const payloadPath = process.argv[2];
 let currentStep = "init";
+const PURCHASE_TRANSACTION_TYPE_LABEL = "\uac70\ub798\uc720\ud615";
+const PURCHASE_TRANSACTION_TYPE_VALUE = "\ubd80\uac00\uc138\uc728 \ubbf8\uc801\uc6a9";
 
 function setStep(step) {
   currentStep = step;
@@ -99,7 +101,7 @@ async function collectVisibleInputs(page) {
   const inputs = [];
 
   for (const frame of page.frames()) {
-    const handles = await frame.locator("input").elementHandles().catch(() => []);
+    const handles = await frame.locator("input, select, textarea, [role='combobox']").elementHandles().catch(() => []);
 
     for (let index = 0; index < handles.length; index += 1) {
       const handle = handles[index];
@@ -110,9 +112,17 @@ async function collectVisibleInputs(page) {
       }
 
       const meta = await handle.evaluate((input) => ({
+        tagName: input.tagName || "",
         value: input.value || "",
+        selectedText: input.tagName === "SELECT"
+          ? (input.options?.[input.selectedIndex]?.textContent || "").trim()
+          : "",
+        text: (input.innerText || input.textContent || "").trim(),
         placeholder: input.getAttribute("placeholder") || "",
         title: input.getAttribute("title") || "",
+        name: input.getAttribute("name") || "",
+        id: input.id || "",
+        ariaLabel: input.getAttribute("aria-label") || "",
         type: input.getAttribute("type") || ""
       })).catch(() => null);
 
@@ -133,6 +143,172 @@ async function collectVisibleInputs(page) {
   }
 
   return inputs;
+}
+
+async function fillHandle(input, value) {
+  await input.handle.evaluate((element, nextValue) => {
+    const tagName = String(element.tagName || "").toUpperCase();
+    if (tagName === "SELECT") {
+      const desired = String(nextValue ?? "").trim();
+      const option = [...element.options].find((entry) => {
+        const optionValue = String(entry.value || "").trim();
+        const optionText = String(entry.textContent || "").trim();
+        return optionValue === desired || optionText === desired || optionText.includes(desired);
+      });
+      if (!option) {
+        throw new Error(`select option was not found: ${desired}`);
+      }
+      element.value = option.value;
+    } else {
+      element.focus?.();
+      element.value = String(nextValue ?? "");
+    }
+
+    element.dispatchEvent(new Event("input", { bubbles: true }));
+    element.dispatchEvent(new Event("change", { bubbles: true }));
+    element.blur?.();
+  }, value);
+  await input.frame.waitForTimeout(200).catch(() => {});
+}
+
+async function readHandleText(handle) {
+  return await handle.evaluate((element) => {
+    const tagName = String(element.tagName || "").toUpperCase();
+    if (tagName === "SELECT") {
+      return (element.options?.[element.selectedIndex]?.textContent || "").trim();
+    }
+
+    return String(element.value || element.innerText || element.textContent || "").trim();
+  }).catch(() => "");
+}
+
+async function findControlRightOfLabel(page, labelText) {
+  for (const frame of page.frames()) {
+    const handle = await frame.evaluateHandle((label) => {
+      const normalize = (value) => String(value || "").replace(/\s+/g, "");
+      const targetLabel = normalize(label);
+      const visible = (element) => {
+        const rect = element.getBoundingClientRect();
+        const style = window.getComputedStyle(element);
+        return rect.width > 0 && rect.height > 0 && style.visibility !== "hidden" && style.display !== "none";
+      };
+      const textOf = (element) => normalize(element.innerText || element.textContent || element.value || "");
+      const labelElements = [...document.querySelectorAll("label, span, div, td, th, p")]
+        .filter((element) => {
+          if (!visible(element)) {
+            return false;
+          }
+
+          const rect = element.getBoundingClientRect();
+          const text = textOf(element);
+          return text.includes(targetLabel) && rect.width <= 170 && rect.height <= 42;
+        })
+        .sort((a, b) => {
+          const aRect = a.getBoundingClientRect();
+          const bRect = b.getBoundingClientRect();
+          return aRect.top - bRect.top || aRect.left - bRect.left;
+        });
+
+      const controls = [...document.querySelectorAll("input, select, textarea, [role='combobox']")]
+        .filter((element) => {
+          if (!visible(element)) {
+            return false;
+          }
+
+          const rect = element.getBoundingClientRect();
+          const type = String(element.getAttribute("type") || "").toLowerCase();
+          return type !== "hidden" && rect.width >= 80 && rect.height >= 18;
+        });
+
+      for (const labelElement of labelElements) {
+        const labelRect = labelElement.getBoundingClientRect();
+        const labelCenterY = labelRect.top + labelRect.height / 2;
+        const candidates = controls
+          .map((element) => ({ element, rect: element.getBoundingClientRect() }))
+          .filter(({ rect }) => {
+            const centerY = rect.top + rect.height / 2;
+            return rect.left > labelRect.right - 4 && Math.abs(centerY - labelCenterY) <= 20;
+          })
+          .sort((a, b) => a.rect.left - b.rect.left);
+
+        if (candidates[0]) {
+          return candidates[0].element;
+        }
+      }
+
+      return null;
+    }, labelText).catch(() => null);
+
+    const element = handle?.asElement?.();
+    if (element) {
+      return { frame, handle: element };
+    }
+  }
+
+  return null;
+}
+
+async function clickOptionText(page, optionText) {
+  for (const frame of page.frames()) {
+    const option = frame.getByText(optionText, { exact: true }).last();
+    const clicked = await option.click({ timeout: 1200, force: true }).then(() => true).catch(() => false);
+    if (clicked) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+async function setPurchaseTransactionType(page, desiredType = PURCHASE_TRANSACTION_TYPE_VALUE) {
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const inputs = await collectVisibleInputs(page);
+    const alreadySelected = inputs.find((input) => {
+      const text = `${input.value} ${input.selectedText} ${input.text}`.replace(/\s+/g, " ").trim();
+      return text.includes(desiredType);
+    });
+
+    if (alreadySelected) {
+      return { applied: true, method: "already-selected", value: desiredType };
+    }
+
+    const labeledControl = await findControlRightOfLabel(page, PURCHASE_TRANSACTION_TYPE_LABEL);
+
+    if (labeledControl) {
+      const box = await labeledControl.handle.boundingBox().catch(() => null);
+      const tagName = await labeledControl.handle.evaluate((element) => String(element.tagName || "").toUpperCase()).catch(() => "");
+
+      if (tagName === "SELECT") {
+        await fillHandle(labeledControl, desiredType);
+        return { applied: true, method: "select", value: desiredType };
+      }
+
+      if (box) {
+        await page.mouse.click(box.x + box.width - 14, box.y + box.height / 2);
+        await page.waitForTimeout(500);
+        const clicked = await clickOptionText(page, desiredType);
+
+        if (clicked) {
+          await page.waitForTimeout(500);
+          const current = await readHandleText(labeledControl.handle);
+          if (current.includes(desiredType)) {
+            return { applied: true, method: "dropdown-option", value: desiredType };
+          }
+        }
+      }
+
+      await fillHandle(labeledControl, desiredType);
+      const current = await readHandleText(labeledControl.handle);
+      if (current.includes(desiredType)) {
+        return { applied: true, method: "direct-value", value: desiredType };
+      }
+    }
+
+    await page.waitForTimeout(750);
+  }
+
+  await writeFile("tmp/ecount-purchase-transaction-type-inputs.json", JSON.stringify(await collectVisibleInputs(page), null, 2), "utf8").catch(() => {});
+  throw new Error(`Could not set purchase transaction type to ${desiredType}.`);
 }
 
 async function getVisibleProductInput(page, productCode) {
@@ -198,6 +374,7 @@ async function fillTextAt(page, x, y, value) {
 }
 
 async function fillPurchaseForm(page, payload) {
+  const transactionTypeResult = await setPurchaseTransactionType(page, payload.transactionType || PURCHASE_TRANSACTION_TYPE_VALUE);
   const currencyPlaceholder = "\ud1b5\ud654";
   const exchangeInput = page.locator(`input[placeholder="${currencyPlaceholder}"]`).last();
   await exchangeInput.fill(String(payload.exchangeRate));
@@ -208,6 +385,8 @@ async function fillPurchaseForm(page, payload) {
   await fillTextAt(page, productInput.x + 615, rowY, normalizeAmount(payload.unitPrice));
   await fillTextAt(page, productInput.x + 685, rowY, normalizeAmount(payload.foreignAmount));
   await fillTextAt(page, productInput.x + 755, rowY, normalizeAmount(payload.krwAmount));
+
+  return { transactionTypeResult };
 }
 
 async function savePurchaseForm(page) {
@@ -300,8 +479,9 @@ async function main() {
     await page.waitForTimeout(7000);
 
     setStep("fill form");
+    let fillResult = null;
     try {
-      await fillPurchaseForm(page, payload);
+      fillResult = await fillPurchaseForm(page, payload);
     } catch (error) {
       await page.screenshot({ path: "tmp/ecount-purchase-fill-error.png", fullPage: true }).catch(() => {});
       throw error;
@@ -330,6 +510,8 @@ async function main() {
       erpUnitPrice: normalizeAmount(payload.unitPrice),
       erpForeignAmount: normalizeAmount(payload.foreignAmount),
       erpKrwAmount: normalizeAmount(payload.krwAmount),
+      transactionType: fillResult?.transactionTypeResult?.value || "",
+      transactionTypeMethod: fillResult?.transactionTypeResult?.method || "",
       dialogMessage: saveResult?.dialogMessage || "",
       note: autoSave
         ? "Values were entered and the purchase save button was clicked."
