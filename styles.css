@@ -268,6 +268,21 @@ body.detail-open {
   pointer-events: none;
 }
 
+.tools-item.ham-list-divider {
+  margin-top: 12px;
+}
+
+.tools-item.ham-list-divider::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: -7px;
+  height: 1px;
+  background: rgba(218, 223, 228, 0.98);
+  pointer-events: none;
+}
+
 .tools-item:hover,
 .tools-item:focus-visible {
   transform: translateX(3px);

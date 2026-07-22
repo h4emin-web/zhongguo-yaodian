@@ -954,6 +954,7 @@ function organizeWorkspaceCatalog() {
     infoList.insertBefore(worklogBox, stockCard || null);
 
     if (hamButton) {
+      hamButton.classList.add("ham-list-divider");
       infoList.insertBefore(hamButton, worklogBox.nextSibling);
     }
   }
