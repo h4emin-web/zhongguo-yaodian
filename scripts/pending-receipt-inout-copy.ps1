@@ -307,6 +307,80 @@ function Select-WorksheetCell {
   throw "$Label cell selection failed. $($errors -join ' / ')"
 }
 
+function Wait-CellText {
+  param($Sheet, [int]$Row, [int]$Column, [string]$Label, [int]$Attempts = 30, [int]$DelayMs = 500)
+
+  for ($attempt = 1; $attempt -le $Attempts; $attempt += 1) {
+    $text = Invoke-WithComRetry { ([string]$Sheet.Cells.Item($Row, $Column).Text).Trim() } "read $Label"
+    if ($text) { return $text }
+    Start-Sleep -Milliseconds $DelayMs
+  }
+
+  return ""
+}
+
+function Wait-CellColorIndex {
+  param($Sheet, [int]$Row, [int]$Column, [int]$ExpectedColorIndex, [string]$Label, [int]$Attempts = 20, [int]$DelayMs = 400)
+
+  $lastColor = ""
+  for ($attempt = 1; $attempt -le $Attempts; $attempt += 1) {
+    $lastColor = Invoke-WithComRetry { [string]$Sheet.Cells.Item($Row, $Column).Interior.ColorIndex } "read $Label color"
+    if ($lastColor -eq [string]$ExpectedColorIndex) { return $lastColor }
+    Start-Sleep -Milliseconds $DelayMs
+  }
+
+  throw "$Label was not marked as selected. Expected ColorIndex $ExpectedColorIndex, got $lastColor."
+}
+
+function Start-EnterKeyPusher {
+  param([int]$DelayMs = 1200, [int]$Count = 20, [int]$IntervalMs = 700)
+
+  $script = @"
+Add-Type -AssemblyName System.Windows.Forms
+Start-Sleep -Milliseconds $DelayMs
+for (`$i = 0; `$i -lt $Count; `$i += 1) {
+  [System.Windows.Forms.SendKeys]::SendWait("{ENTER}")
+  Start-Sleep -Milliseconds $IntervalMs
+}
+"@
+  $encoded = [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($script))
+  return Start-Process -FilePath "powershell" -ArgumentList @("-NoProfile", "-STA", "-WindowStyle", "Hidden", "-EncodedCommand", $encoded) -WindowStyle Hidden -PassThru
+}
+
+function Run-WorkbookMacroWithDialogOk {
+  param($Excel, $Workbook, [string]$MacroName, [string]$Label)
+
+  $pusher = $null
+  try {
+    $pusher = Start-EnterKeyPusher
+    Run-WorkbookMacro $Excel $Workbook $MacroName
+    return $MacroName
+  } finally {
+    if ($pusher) {
+      try {
+        if (-not $pusher.HasExited) { $pusher.Kill() }
+      } catch {}
+      try { $pusher.Dispose() } catch {}
+    }
+  }
+}
+
+function Invoke-FirstMacroWithDialogOk {
+  param($Excel, $Workbook, [string[]]$MacroNames, [string]$Label)
+
+  $errors = @()
+  foreach ($macroName in $MacroNames) {
+    if (-not $macroName) { continue }
+    try {
+      return Run-WorkbookMacroWithDialogOk $Excel $Workbook $macroName $Label
+    } catch {
+      $errors += ("{0}: {1}" -f $macroName, $_.Exception.Message)
+    }
+  }
+
+  throw "$Label macro failed. $($errors -join ' / ')"
+}
+
 function Invoke-TopButtonInColumn {
   param($Excel, $Sheet, [string]$ColumnLetter, [string[]]$Needles, [string]$Label)
 
@@ -465,15 +539,16 @@ function Find-InoutOrderRow {
   $normalizedPoNo = ([string]$PoNo).Trim()
 
   for ($row = 3; $row -le $lastRow; $row += 1) {
-    $rowOrderNo = ([string]$Sheet.Cells.Item($row, 1).Text).Trim()
-    $rowCode = Normalize-Code $Sheet.Cells.Item($row, 5).Text
+    $rowOrderNo = Invoke-WithComRetry { ([string]$Sheet.Cells.Item($row, 1).Text).Trim() } "verify order no row $row"
+    $rowCodeText = Invoke-WithComRetry { [string]$Sheet.Cells.Item($row, 5).Text } "verify product code row $row"
+    $rowCode = Normalize-Code $rowCodeText
 
     if ($normalizedOrderNo -and $rowOrderNo -eq $normalizedOrderNo) {
       return $row
     }
 
     if ($normalizedCode -and $rowCode -eq $normalizedCode -and $RemarkColumn -gt 0) {
-      $rowRemark = ([string]$Sheet.Cells.Item($row, $RemarkColumn).Text).Trim()
+      $rowRemark = Invoke-WithComRetry { ([string]$Sheet.Cells.Item($row, $RemarkColumn).Text).Trim() } "verify remark row $row"
       if ($normalizedPoNo -and $rowRemark -eq $normalizedPoNo) {
         return $row
       }
@@ -507,6 +582,10 @@ $ranAddMacro = ""
 $selectedOrderCell = ""
 $selectedOrderCellAfterSelect = ""
 $selectedAddCell = ""
+$selectedRowColor = ""
+$addButtonWarning = ""
+$orderSelectWarning = ""
+$orderNoWarning = ""
 $clearedDeliveryColumns = @()
 $remarkColumn = 0
 $savedOrderNo = ""
@@ -554,19 +633,24 @@ try {
   $matches = @()
 
   for ($row = 3; $row -le $lastRow; $row += 1) {
-    $rowCode = Normalize-Code $sheet.Cells.Item($row, 5).Text
+    $rowCodeText = Invoke-WithComRetry { [string]$sheet.Cells.Item($row, 5).Text } "read product code row $row"
+    $rowCode = Normalize-Code $rowCodeText
     if ($rowCode -ne $normalizedCode) { continue }
 
-    $rowDirection = ([string]$sheet.Cells.Item($row, 3).Text).Trim()
+    $rowDirection = Invoke-WithComRetry { ([string]$sheet.Cells.Item($row, 3).Text).Trim() } "read direction row $row"
     if ($rowDirection -ne $inText) { continue }
 
-    $rowQuantity = Convert-ToNumber $sheet.Cells.Item($row, 9).Text
-    $rowDate = Convert-ToDateValue $sheet.Cells.Item($row, 2).Value2
+    $rowQuantityText = Invoke-WithComRetry { [string]$sheet.Cells.Item($row, 9).Text } "read quantity row $row"
+    $rowDateRaw = Invoke-WithComRetry { $sheet.Cells.Item($row, 2).Value2 } "read date row $row"
+    $rowOrderNoText = Invoke-WithComRetry { [string]$sheet.Cells.Item($row, 1).Text } "read order no row $row"
+    $rowProductNameText = Invoke-WithComRetry { [string]$sheet.Cells.Item($row, 6).Text } "read product name row $row"
+    $rowQuantity = Convert-ToNumber $rowQuantityText
+    $rowDate = Convert-ToDateValue $rowDateRaw
 
     $matches += [pscustomobject]@{
       Row = $row
-      OrderNo = [string]$sheet.Cells.Item($row, 1).Text
-      ProductName = [string]$sheet.Cells.Item($row, 6).Text
+      OrderNo = $rowOrderNoText
+      ProductName = $rowProductNameText
       Quantity = $rowQuantity
       DateScore = if ($rowDate) { $rowDate.Ticks } else { 0 }
     }
@@ -619,13 +703,29 @@ try {
       $selectedOrderCell = Select-WorksheetCell $excel $sheet "A$newRow" "select new row"
       $ranOrderSelectMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($orderSelectMacroName, "출고수정선택", "OrderSelect", "SelectOrder") "A" "in/out order select"
       $selectedOrderCellAfterSelect = Select-WorksheetCell $excel $sheet "A$newRow" "select new row after order select"
-      $ranOrderNoMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($orderNoMacroName, "오더번호", "OrderNo", "OrderNoInsert", "InsertOrderNo") "B" "in/out order no"
-      $savedOrderNo = ([string]$sheet.Cells.Item($newRow, 1).Text).Trim()
+      try {
+        $selectedRowColor = Wait-CellColorIndex $sheet $newRow 1 14 "in/out selected row"
+      } catch {
+        $orderSelectWarning = $_.Exception.Message
+        $selectedOrderCellAfterSelect = Select-WorksheetCell $excel $sheet "A$newRow" "select new row after order select fallback"
+        $ranOrderSelectMacro = Invoke-FirstMacro $excel $workbook $sheet @($orderSelectMacroName, "출고수정선택", "OrderSelect", "SelectOrder") "in/out order select fallback"
+        $selectedOrderCellAfterSelect = Select-WorksheetCell $excel $sheet "A$newRow" "select new row after direct order select"
+        $selectedRowColor = Wait-CellColorIndex $sheet $newRow 1 14 "in/out selected row after fallback"
+      }
+      $ranOrderNoMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($orderNoMacroName, "오더번호", "오더번호넣기", "OrderNo", "OrderNoInsert", "InsertOrderNo") "A" "in/out order no"
+      $savedOrderNo = Wait-CellText $sheet $newRow 1 "in/out order no"
+      if (-not $savedOrderNo) {
+        $orderNoWarning = "in/out order no button did not create an order number in column A."
+        $selectedOrderCellAfterSelect = Select-WorksheetCell $excel $sheet "A$newRow" "select new row before direct order no"
+        $ranOrderNoMacro = Invoke-FirstMacro $excel $workbook $sheet @($orderNoMacroName, "오더번호", "오더번호넣기", "OrderNo", "OrderNoInsert", "InsertOrderNo") "in/out order no fallback"
+        $savedOrderNo = Wait-CellText $sheet $newRow 1 "in/out order no after fallback"
+      }
       if (-not $savedOrderNo) {
         throw "in/out order no button did not create an order number in column A."
       }
       $selectedAddCell = Select-WorksheetCell $excel $sheet "G$newRow" "select add cell"
-      $ranAddMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($addMacroName, "출고삽입", "추가선택", "Add", "Insert", "Append") "G" "in/out add"
+      $addButtonWarning = "using in/out add macro directly after selecting G$newRow"
+      $ranAddMacro = Invoke-FirstMacroWithDialogOk $excel $workbook @($addMacroName, "출고삽입", "입출삽입", "Add", "Insert", "Append") "in/out add"
     } catch {
       $macroWarning = "In/out order select/order no/add macro failed: $($_.Exception.Message)"
       throw $macroWarning
@@ -666,6 +766,10 @@ try {
     selectedOrderCell = $selectedOrderCell
     selectedOrderCellAfterSelect = $selectedOrderCellAfterSelect
     selectedAddCell = $selectedAddCell
+    selectedRowColor = $selectedRowColor
+    orderSelectWarning = $orderSelectWarning
+    orderNoWarning = $orderNoWarning
+    addButtonWarning = $addButtonWarning
     orderSelectMacro = $ranOrderSelectMacro
     orderNoMacro = $ranOrderNoMacro
     addMacro = $ranAddMacro
