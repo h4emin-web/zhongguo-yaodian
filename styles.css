@@ -2835,17 +2835,45 @@ body.tool-auth-open {
 }
 
 @media (max-width: 760px) {
+  .ham-fullscreen {
+    background: #ffffff;
+  }
+
   .ham-topbar {
     align-items: stretch;
+    padding: 12px 14px;
+    gap: 10px;
+    box-shadow: 0 4px 14px rgba(31, 36, 41, 0.04);
+  }
+
+  .ham-topbar-title h2 {
+    font-size: 21px;
+  }
+
+  .ham-topbar-title .wc-search-meta {
+    font-size: 12px;
   }
 
   .ham-topbar-actions {
     width: 100%;
     align-items: stretch;
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 8px;
   }
 
   .ham-topbar-actions input {
+    grid-column: 1 / -1;
     width: 100%;
+    height: 40px;
+    font-size: 14px;
+  }
+
+  .ham-close,
+  .ham-restore-button {
+    height: 38px;
+    padding: 0 14px;
+    font-size: 13px;
   }
 
   .ham-layout {
@@ -2853,12 +2881,110 @@ body.tool-auth-open {
   }
 
   .ham-sidebar {
+    padding: 8px 12px 10px;
     border-right: 0;
     border-bottom: 1px solid #eceff2;
+    overflow: hidden;
   }
 
   .ham-group-list {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .ham-group-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ham-group-button {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 74px;
+    min-height: 36px;
+    padding: 0 10px;
+    border-color: #edf0f3;
+    background: #ffffff;
+    font-size: 13px;
+  }
+
+  .ham-group-button strong {
+    font-size: 11px;
+  }
+
+  .ham-hidden-meta {
+    display: none;
+  }
+
+  .ham-results {
+    height: calc(100dvh - 168px);
+    padding: 12px 12px 18px;
+    gap: 12px;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    scroll-padding-top: 12px;
+  }
+
+  .ham-entry {
+    min-height: calc(100dvh - 198px);
+    padding: 15px 14px;
+    border-radius: 12px;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    box-shadow: 0 6px 18px rgba(31, 36, 41, 0.04);
+  }
+
+  .ham-entry-head {
+    margin-bottom: 10px;
+  }
+
+  .ham-entry-index,
+  .ham-entry-group {
+    height: 26px;
+    min-width: 30px;
+    font-size: 12px;
+  }
+
+  .ham-hide-button {
+    height: 32px;
+    padding: 0 11px;
+    font-size: 12px;
+  }
+
+  .ham-question {
+    margin-bottom: 12px;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .ham-entry-image {
+    max-width: 100%;
+  }
+
+  .ham-options {
+    gap: 7px;
+  }
+
+  .ham-options li {
+    padding: 9px 10px;
+    grid-template-columns: 24px 1fr;
+    font-size: 14px;
+  }
+
+  .ham-options p {
+    line-height: 1.45;
+  }
+
+  .ham-answer summary {
+    padding-top: 12px;
+  }
+
+  .ham-answer-line,
+  .ham-note {
+    font-size: 13.5px;
+    line-height: 1.6;
   }
 }
 

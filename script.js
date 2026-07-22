@@ -163,6 +163,8 @@ const RZNOMICS_STOCK_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const MARKET_INDEX_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const HAM_DATA_URL = "data/ham-library.json";
 const HAM_HIDDEN_STORAGE_KEY = "haemin-workspace-ham-hidden";
+const HAM_SYNC_MIGRATED_STORAGE_KEY = "haemin-workspace-ham-hidden-migrated";
+const HAM_SYNC_FUNCTION = "ham-progress-sync";
 const HAM_ALL_GROUP = { id: "", label: "전체" };
 const CALENDAR_STORAGE_KEY = "haemin-workspace-calendar-events";
 const EVENT_COLORS = [
@@ -295,6 +297,7 @@ let hamLoaded = false;
 let hamLoading = false;
 let hamActiveGroup = "";
 let hamHiddenIds = loadHamHiddenIds();
+let hamHiddenSyncing = false;
 let starBurstHue = 0;
 let hanaRateTimer = null;
 let rznomicsStockTimer = null;
@@ -4164,12 +4167,115 @@ function loadHamHiddenIds() {
   }
 }
 
-function saveHamHiddenIds() {
+function persistHamHiddenIdsLocally() {
   localStorage.setItem(HAM_HIDDEN_STORAGE_KEY, JSON.stringify(Array.from(hamHiddenIds)));
 }
 
+async function saveHamHiddenIds({ remote = true } = {}) {
+  persistHamHiddenIdsLocally();
+
+  if (remote) {
+    await saveHamHiddenIdsToStorage();
+  }
+}
+
+function normalizeHamHiddenIds(value) {
+  return new Set(Array.isArray(value) ? value.filter((item) => typeof item === "string" && item.trim()) : []);
+}
+
+function areHamHiddenIdsEqual(left, right) {
+  if (left.size !== right.size) {
+    return false;
+  }
+
+  return Array.from(left).every((item) => right.has(item));
+}
+
+async function saveHamHiddenIdsToStorage() {
+  if (!supabaseClient || hamHiddenSyncing) {
+    return;
+  }
+
+  hamHiddenSyncing = true;
+
+  try {
+    const { error } = await supabaseClient.functions.invoke(HAM_SYNC_FUNCTION, {
+      body: {
+        action: "save",
+        hiddenIds: Array.from(hamHiddenIds)
+      }
+    });
+
+    if (error) {
+      throw error;
+    }
+  } catch (error) {
+    console.error(error);
+  } finally {
+    hamHiddenSyncing = false;
+  }
+}
+
+async function loadHamHiddenIdsFromStorage() {
+  if (!supabaseClient) {
+    return;
+  }
+
+  try {
+    const { data, error } = await supabaseClient.functions.invoke(HAM_SYNC_FUNCTION, {
+      body: { action: "load" }
+    });
+
+    if (error || !data || !data.ok) {
+      return;
+    }
+
+    const localIds = new Set(hamHiddenIds);
+    const remoteIds = normalizeHamHiddenIds(data.hiddenIds);
+    const hasMigrated = localStorage.getItem(HAM_SYNC_MIGRATED_STORAGE_KEY) === "1";
+
+    if (!hasMigrated && localIds.size > 0) {
+      hamHiddenIds = new Set([...remoteIds, ...localIds]);
+      localStorage.setItem(HAM_SYNC_MIGRATED_STORAGE_KEY, "1");
+      persistHamHiddenIdsLocally();
+
+      if (!areHamHiddenIdsEqual(hamHiddenIds, remoteIds)) {
+        await saveHamHiddenIdsToStorage();
+      }
+
+      return;
+    }
+
+    hamHiddenIds = remoteIds;
+    localStorage.setItem(HAM_SYNC_MIGRATED_STORAGE_KEY, "1");
+    persistHamHiddenIdsLocally();
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function clearHamHiddenIdsFromStorage() {
+  if (!supabaseClient) {
+    return;
+  }
+
+  try {
+    await supabaseClient.functions.invoke(HAM_SYNC_FUNCTION, {
+      body: { action: "clear" }
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 async function loadHamLibrary() {
-  if (hamLoaded || hamLoading) {
+  if (hamLoaded) {
+    await loadHamHiddenIdsFromStorage();
+    renderHamEntries();
+    return;
+  }
+
+  if (hamLoading) {
     return;
   }
 
@@ -4187,6 +4293,7 @@ async function loadHamLibrary() {
     const data = await response.json();
     hamItems = Array.isArray(data.items) ? data.items : [];
     hamLoaded = true;
+    await loadHamHiddenIdsFromStorage();
     renderHamGroupButtons();
     renderHamEntries();
   } catch (error) {
@@ -4300,7 +4407,7 @@ function renderHamEntries() {
       </li>
     `).join("");
     const imageHtml = (item.images || []).map((src) => `
-      <img class="ham-entry-image" src="${escapeHtml(src)}" alt="">
+      <img class="ham-entry-image" src="${escapeHtml(src)}" alt="" loading="lazy">
     `).join("");
 
     return `
@@ -4328,7 +4435,11 @@ function renderHamEntries() {
 function openHamTool() {
   hamFullscreen.classList.add("is-open");
   hamFullscreen.setAttribute("aria-hidden", "false");
-  hamFilterInput.focus();
+
+  if (!window.matchMedia("(max-width: 760px)").matches) {
+    hamFilterInput.focus();
+  }
+
   loadHamLibrary();
 }
 
@@ -4642,9 +4753,11 @@ worklogFilterInput.addEventListener("input", renderWorklog);
 
 hamClose.addEventListener("click", closeHamTool);
 hamFilterInput.addEventListener("input", renderHamEntries);
-hamRestoreButton.addEventListener("click", () => {
+hamRestoreButton.addEventListener("click", async () => {
   hamHiddenIds.clear();
-  saveHamHiddenIds();
+  localStorage.setItem(HAM_SYNC_MIGRATED_STORAGE_KEY, "1");
+  await saveHamHiddenIds({ remote: false });
+  await clearHamHiddenIdsFromStorage();
   renderHamEntries();
 });
 hamGroupList.addEventListener("click", (event) => {
@@ -4657,7 +4770,7 @@ hamGroupList.addEventListener("click", (event) => {
   hamActiveGroup = button.dataset.hamGroup || "";
   renderHamEntries();
 });
-hamResults.addEventListener("click", (event) => {
+hamResults.addEventListener("click", async (event) => {
   const button = event.target.closest("[data-ham-hide]");
 
   if (!button) {
@@ -4665,7 +4778,8 @@ hamResults.addEventListener("click", (event) => {
   }
 
   hamHiddenIds.add(button.dataset.hamHide);
-  saveHamHiddenIds();
+  localStorage.setItem(HAM_SYNC_MIGRATED_STORAGE_KEY, "1");
+  await saveHamHiddenIds();
   renderHamEntries();
 });
 
