@@ -59,9 +59,9 @@ const hamItem = document.querySelector('.tools-item[data-tool="ham"]');
 const hamMeta = document.querySelector(".ham-meta");
 const hamClose = document.querySelector(".ham-close");
 const hamSidebarToggle = document.querySelector(".ham-sidebar-toggle");
-const hamRestoreButton = document.querySelector(".ham-restore-button");
+const hamNotesToggle = document.querySelector(".ham-notes-toggle");
 const hamGroupList = document.querySelector(".ham-group-list");
-const hamHiddenMeta = document.querySelector(".ham-hidden-meta");
+const hamNoteMeta = document.querySelector(".ham-note-meta");
 const hamResults = document.querySelector(".ham-results");
 const marginCostInput = document.querySelector("#margin-cost-input");
 const marginPriceInput = document.querySelector("#margin-price-input");
@@ -162,7 +162,7 @@ const HANA_RATE_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 const RZNOMICS_STOCK_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const MARKET_INDEX_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const HAM_DATA_URL = "data/ham-library.json";
-const HAM_HIDDEN_STORAGE_KEY = "haemin-workspace-ham-hidden";
+const HAM_PROGRESS_STORAGE_KEY = "haemin-workspace-ham-progress";
 const HAM_SYNC_FUNCTION = "ham-progress-sync";
 const HAM_ALL_GROUP_ID = "__all";
 const HAM_ALL_GROUP = { id: HAM_ALL_GROUP_ID, label: "전체" };
@@ -297,8 +297,10 @@ let hamLoaded = false;
 let hamLoading = false;
 let hamActiveGroup = "";
 let hamSidebarOpen = false;
-let hamHiddenIds = loadHamHiddenIds();
-let hamHiddenSyncing = false;
+let hamNotesOnly = false;
+let hamStarredIds = new Set();
+let hamHighlights = {};
+let hamProgressSyncing = false;
 let starBurstHue = 0;
 let hanaRateTimer = null;
 let rznomicsStockTimer = null;
@@ -4160,43 +4162,76 @@ function renderMultilineText(value) {
   return escapeHtml(value).replaceAll("\n", "<br>");
 }
 
-function loadHamHiddenIds() {
+function normalizeHamStringArray(value) {
+  return Array.from(new Set(
+    Array.isArray(value)
+      ? value.filter((item) => typeof item === "string").map((item) => item.trim()).filter(Boolean)
+      : []
+  ));
+}
+
+function normalizeHamHighlights(value) {
+  if (!value || typeof value !== "object") {
+    return {};
+  }
+
+  return Object.entries(value).reduce((acc, [itemId, fields]) => {
+    if (!fields || typeof fields !== "object") {
+      return acc;
+    }
+
+    const question = normalizeHamStringArray(fields.question);
+    const note = normalizeHamStringArray(fields.note);
+
+    if (question.length > 0 || note.length > 0) {
+      acc[itemId] = { question, note };
+    }
+
+    return acc;
+  }, {});
+}
+
+function loadHamProgressLocally() {
   try {
-    const saved = JSON.parse(localStorage.getItem(HAM_HIDDEN_STORAGE_KEY) || "[]");
-    return new Set(Array.isArray(saved) ? saved.filter(Boolean) : []);
+    localStorage.removeItem("haemin-workspace-ham-hidden");
+    const saved = JSON.parse(localStorage.getItem(HAM_PROGRESS_STORAGE_KEY) || "{}");
+
+    hamStarredIds = new Set(normalizeHamStringArray(saved.starredIds));
+    hamHighlights = normalizeHamHighlights(saved.highlights);
   } catch {
-    return new Set();
+    hamStarredIds = new Set();
+    hamHighlights = {};
   }
 }
 
-function persistHamHiddenIdsLocally() {
-  localStorage.setItem(HAM_HIDDEN_STORAGE_KEY, JSON.stringify(Array.from(hamHiddenIds)));
+function persistHamProgressLocally() {
+  localStorage.setItem(HAM_PROGRESS_STORAGE_KEY, JSON.stringify({
+    starredIds: Array.from(hamStarredIds),
+    highlights: hamHighlights
+  }));
 }
 
-async function saveHamHiddenIds({ remote = true } = {}) {
-  persistHamHiddenIdsLocally();
+async function saveHamProgress({ remote = true } = {}) {
+  persistHamProgressLocally();
 
   if (remote) {
-    await saveHamHiddenIdsToStorage();
+    await saveHamProgressToStorage();
   }
 }
 
-function normalizeHamHiddenIds(value) {
-  return new Set(Array.isArray(value) ? value.filter((item) => typeof item === "string" && item.trim()) : []);
-}
-
-async function saveHamHiddenIdsToStorage() {
-  if (!supabaseClient || hamHiddenSyncing) {
+async function saveHamProgressToStorage() {
+  if (!supabaseClient || hamProgressSyncing) {
     return;
   }
 
-  hamHiddenSyncing = true;
+  hamProgressSyncing = true;
 
   try {
     const { error } = await supabaseClient.functions.invoke(HAM_SYNC_FUNCTION, {
       body: {
         action: "save",
-        hiddenIds: Array.from(hamHiddenIds)
+        starredIds: Array.from(hamStarredIds),
+        highlights: hamHighlights
       }
     });
 
@@ -4206,11 +4241,13 @@ async function saveHamHiddenIdsToStorage() {
   } catch (error) {
     console.error(error);
   } finally {
-    hamHiddenSyncing = false;
+    hamProgressSyncing = false;
   }
 }
 
-async function loadHamHiddenIdsFromStorage() {
+async function loadHamProgressFromStorage() {
+  loadHamProgressLocally();
+
   if (!supabaseClient) {
     return;
   }
@@ -4224,25 +4261,9 @@ async function loadHamHiddenIdsFromStorage() {
       return;
     }
 
-    const remoteIds = normalizeHamHiddenIds(data.hiddenIds);
-
-    // Server state is the source of truth so stale browser caches cannot re-add old hidden items.
-    hamHiddenIds = remoteIds;
-    persistHamHiddenIdsLocally();
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-async function clearHamHiddenIdsFromStorage() {
-  if (!supabaseClient) {
-    return;
-  }
-
-  try {
-    await supabaseClient.functions.invoke(HAM_SYNC_FUNCTION, {
-      body: { action: "clear" }
-    });
+    hamStarredIds = new Set(normalizeHamStringArray(data.starredIds));
+    hamHighlights = normalizeHamHighlights(data.highlights);
+    persistHamProgressLocally();
   } catch (error) {
     console.error(error);
   }
@@ -4250,7 +4271,7 @@ async function clearHamHiddenIdsFromStorage() {
 
 async function loadHamLibrary() {
   if (hamLoaded) {
-    await loadHamHiddenIdsFromStorage();
+    await loadHamProgressFromStorage();
     setDefaultHamGroup();
     renderHamEntries();
     return;
@@ -4274,7 +4295,7 @@ async function loadHamLibrary() {
     const data = await response.json();
     hamItems = Array.isArray(data.items) ? data.items : [];
     hamLoaded = true;
-    await loadHamHiddenIdsFromStorage();
+    await loadHamProgressFromStorage();
     setDefaultHamGroup();
     renderHamGroupButtons();
     renderHamEntries();
@@ -4289,11 +4310,11 @@ async function loadHamLibrary() {
 
 function getFilteredHamItems() {
   return hamItems.filter((item) => {
-    if (hamHiddenIds.has(item.id)) {
+    if (hamNotesOnly && !hamStarredIds.has(item.id)) {
       return false;
     }
 
-    if (hamActiveGroup && hamActiveGroup !== HAM_ALL_GROUP_ID && item.group !== hamActiveGroup) {
+    if (!hamNotesOnly && hamActiveGroup && hamActiveGroup !== HAM_ALL_GROUP_ID && item.group !== hamActiveGroup) {
       return false;
     }
 
@@ -4302,15 +4323,16 @@ function getFilteredHamItems() {
 }
 
 function updateHamMeta(filteredCount = 0) {
-  const hiddenCount = hamHiddenIds.size;
-  hamMeta.textContent = `${hamItems.length}건 중 ${filteredCount}건 표시`;
-  hamHiddenMeta.textContent = `정리한 항목 ${hiddenCount}건`;
-  hamRestoreButton.disabled = hiddenCount === 0;
+  const starredCount = hamStarredIds.size;
+  hamMeta.textContent = hamNotesOnly
+    ? `오답노트 ${starredCount}건 중 ${filteredCount}건 표시`
+    : `${hamItems.length}건 중 ${filteredCount}건 표시`;
+  hamNoteMeta.textContent = `오답노트 ${starredCount}건`;
+  hamNotesToggle.setAttribute("aria-pressed", String(hamNotesOnly));
 }
 
 function getFirstHamGroupId() {
-  return hamItems.find((item) => item.group && !hamHiddenIds.has(item.id))?.group
-    || hamItems.find((item) => item.group)?.group
+  return hamItems.find((item) => item.group)?.group
     || HAM_ALL_GROUP_ID;
 }
 
@@ -4355,8 +4377,8 @@ function renderHamGroupButtons() {
   const groups = getHamGroups();
   const counts = groups.reduce((acc, group) => {
     acc[group.id] = group.id !== HAM_ALL_GROUP_ID
-      ? hamItems.filter((item) => item.group === group.id && !hamHiddenIds.has(item.id)).length
-      : hamItems.filter((item) => !hamHiddenIds.has(item.id)).length;
+      ? hamItems.filter((item) => item.group === group.id).length
+      : hamItems.length;
     return acc;
   }, {});
 
@@ -4366,6 +4388,89 @@ function renderHamGroupButtons() {
       <strong>${counts[group.id] || 0}</strong>
     </button>
   `).join("");
+}
+
+function getHamHighlightTerms(itemId, field) {
+  return normalizeHamStringArray(hamHighlights[itemId]?.[field]);
+}
+
+function renderHighlightedText(value, itemId, field) {
+  const text = String(value || "");
+  const terms = getHamHighlightTerms(itemId, field).sort((a, b) => b.length - a.length);
+
+  if (terms.length === 0) {
+    return renderMultilineText(text);
+  }
+
+  const ranges = [];
+
+  terms.forEach((term) => {
+    let index = text.indexOf(term);
+
+    while (index >= 0) {
+      ranges.push({ start: index, end: index + term.length });
+      index = text.indexOf(term, index + term.length);
+    }
+  });
+
+  ranges.sort((left, right) => left.start - right.start || right.end - left.end);
+
+  const merged = [];
+  ranges.forEach((range) => {
+    const last = merged[merged.length - 1];
+
+    if (!last || range.start >= last.end) {
+      merged.push({ ...range });
+    }
+  });
+
+  if (merged.length === 0) {
+    return renderMultilineText(text);
+  }
+
+  let cursor = 0;
+  let html = "";
+
+  merged.forEach((range) => {
+    html += renderMultilineText(text.slice(cursor, range.start));
+    html += `<mark class="ham-highlight">${renderMultilineText(text.slice(range.start, range.end))}</mark>`;
+    cursor = range.end;
+  });
+
+  html += renderMultilineText(text.slice(cursor));
+  return html;
+}
+
+function addHamHighlight(itemId, field, selectedText) {
+  const rawText = String(selectedText || "").trim();
+  const compactText = rawText.replace(/\s+/g, " ").trim();
+
+  if (!itemId || !field || compactText.length < 2) {
+    return false;
+  }
+
+  const item = hamItems.find((entry) => entry.id === itemId);
+  const sourceText = field === "note" ? item?.note : item?.question;
+  const text = sourceText?.includes(rawText) ? rawText : compactText;
+
+  if (!sourceText || !sourceText.includes(text)) {
+    return false;
+  }
+
+  const entry = hamHighlights[itemId] || { question: [], note: [] };
+  const terms = normalizeHamStringArray(entry[field]);
+
+  if (terms.includes(text)) {
+    return false;
+  }
+
+  entry[field] = [...terms, text];
+  hamHighlights[itemId] = {
+    question: normalizeHamStringArray(entry.question),
+    note: normalizeHamStringArray(entry.note)
+  };
+
+  return true;
 }
 
 function renderHamEntries() {
@@ -4395,18 +4500,18 @@ function renderHamEntries() {
     return `
       <article class="ham-entry" data-ham-id="${escapeHtml(item.id)}">
         <div class="ham-entry-head">
+          <button class="ham-star-button${hamStarredIds.has(item.id) ? " is-starred" : ""}" type="button" data-ham-star="${escapeHtml(item.id)}" aria-pressed="${hamStarredIds.has(item.id) ? "true" : "false"}" aria-label="오답노트 저장">${hamStarredIds.has(item.id) ? "★" : "☆"}</button>
           <span class="ham-entry-index">${escapeHtml(entryNumber)}</span>
           <span class="ham-entry-group">${escapeHtml(entryGroup)}</span>
-          <button class="ham-hide-button" type="button" data-ham-hide="${escapeHtml(item.id)}">정리</button>
         </div>
-        <p class="ham-question">${escapeHtml(item.question)}</p>
+        <p class="ham-question ham-highlightable" data-ham-highlight-field="question">${renderHighlightedText(item.question, item.id, "question")}</p>
         ${imageHtml ? `<div class="ham-entry-images">${imageHtml}</div>` : ""}
         <ol class="ham-options">${optionHtml}</ol>
         <details class="ham-answer">
           <summary>확인</summary>
           <div class="ham-answer-body">
             <p class="ham-answer-line">확인값 ${escapeHtml(item.answer)}${answerOption ? ` · ${escapeHtml(answerOption.text)}` : ""}</p>
-            <p class="ham-note">${renderMultilineText(item.note)}</p>
+            <p class="ham-note ham-highlightable" data-ham-highlight-field="note">${renderHighlightedText(item.note, item.id, "note")}</p>
           </div>
         </details>
       </article>
@@ -4734,10 +4839,11 @@ hamClose.addEventListener("click", closeHamTool);
 hamSidebarToggle.addEventListener("click", () => {
   setHamSidebarOpen(!hamSidebarOpen);
 });
-hamRestoreButton.addEventListener("click", async () => {
-  hamHiddenIds.clear();
-  await saveHamHiddenIds({ remote: false });
-  await clearHamHiddenIdsFromStorage();
+hamNotesToggle.addEventListener("click", () => {
+  hamNotesOnly = !hamNotesOnly;
+  hamActiveGroup = hamNotesOnly ? HAM_ALL_GROUP_ID : "";
+  setHamSidebarOpen(false);
+  setDefaultHamGroup();
   renderHamEntries();
 });
 hamGroupList.addEventListener("click", (event) => {
@@ -4752,15 +4858,64 @@ hamGroupList.addEventListener("click", (event) => {
   renderHamEntries();
 });
 hamResults.addEventListener("click", async (event) => {
-  const button = event.target.closest("[data-ham-hide]");
+  const button = event.target.closest("[data-ham-star]");
 
   if (!button) {
     return;
   }
 
-  hamHiddenIds.add(button.dataset.hamHide);
-  await saveHamHiddenIds();
+  const itemId = button.dataset.hamStar;
+
+  if (hamStarredIds.has(itemId)) {
+    hamStarredIds.delete(itemId);
+  } else {
+    hamStarredIds.add(itemId);
+  }
+
+  await saveHamProgress();
   renderHamEntries();
+});
+
+async function handleHamTextSelection() {
+  const selection = window.getSelection();
+
+  if (!selection || selection.isCollapsed) {
+    return;
+  }
+
+  const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+
+  if (!range) {
+    return;
+  }
+
+  const container = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
+    ? range.commonAncestorContainer
+    : range.commonAncestorContainer.parentElement;
+  const highlightable = container?.closest(".ham-highlightable");
+  const selectedText = selection.toString();
+
+  if (!highlightable || !highlightable.contains(range.startContainer) || !highlightable.contains(range.endContainer)) {
+    return;
+  }
+
+  const entry = highlightable.closest(".ham-entry");
+  const didAdd = addHamHighlight(entry?.dataset.hamId, highlightable.dataset.hamHighlightField, selectedText);
+
+  if (!didAdd) {
+    return;
+  }
+
+  selection.removeAllRanges();
+  await saveHamProgress();
+  renderHamEntries();
+}
+
+hamResults.addEventListener("mouseup", () => {
+  setTimeout(handleHamTextSelection, 0);
+});
+hamResults.addEventListener("touchend", () => {
+  setTimeout(handleHamTextSelection, 80);
 });
 
 let worklogDragDepth = 0;

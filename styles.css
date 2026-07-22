@@ -2607,7 +2607,7 @@ body.tool-auth-open {
 
 .ham-sidebar-toggle,
 .ham-close,
-.ham-restore-button {
+.ham-notes-toggle {
   padding: 0 18px;
   height: 46px;
   border: 1px solid #dfe3e8;
@@ -2627,21 +2627,20 @@ body.tool-auth-open {
   background: #f8f9fa;
 }
 
+.ham-notes-toggle[aria-pressed="true"] {
+  border-color: #f2d48b;
+  background: #fff8e4;
+}
+
 .ham-close:hover,
 .ham-close:focus-visible,
 .ham-sidebar-toggle:hover,
 .ham-sidebar-toggle:focus-visible,
-.ham-restore-button:hover,
-.ham-restore-button:focus-visible {
+.ham-notes-toggle:hover,
+.ham-notes-toggle:focus-visible {
   transform: translateY(-1px);
   outline: none;
   border-color: #b9c0c8;
-}
-
-.ham-restore-button:disabled {
-  opacity: 0.42;
-  cursor: default;
-  transform: none;
 }
 
 .ham-layout {
@@ -2704,7 +2703,7 @@ body.tool-auth-open {
   background: #f8f9fa;
 }
 
-.ham-hidden-meta {
+.ham-note-meta {
   margin: 16px 2px 0;
   color: #111111;
   font-size: 12.5px;
@@ -2755,22 +2754,29 @@ body.tool-auth-open {
   background: #ffffff;
 }
 
-.ham-hide-button {
-  margin-left: auto;
+.ham-star-button {
+  flex: 0 0 auto;
+  width: 36px;
   height: 34px;
-  padding: 0 12px;
+  padding: 0;
   border: 1px solid #dfe3e8;
-  border-radius: 8px;
+  border-radius: 999px;
   color: #111111;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 22px;
+  line-height: 1;
   font-weight: 800;
   background: #ffffff;
   cursor: pointer;
 }
 
-.ham-hide-button:hover,
-.ham-hide-button:focus-visible {
+.ham-star-button.is-starred {
+  border-color: #f2d48b;
+  background: #fff8e4;
+}
+
+.ham-star-button:hover,
+.ham-star-button:focus-visible {
   outline: none;
   border-color: #b9c0c8;
   background: #f8f9fa;
@@ -2782,6 +2788,17 @@ body.tool-auth-open {
   font-size: 16px;
   font-weight: 800;
   line-height: 1.65;
+}
+
+.ham-highlightable {
+  user-select: text;
+}
+
+.ham-highlight {
+  padding: 0 2px;
+  border-radius: 4px;
+  color: inherit;
+  background: rgba(255, 184, 92, 0.38);
 }
 
 .ham-entry-images {
@@ -2903,7 +2920,7 @@ body.tool-auth-open {
 
   .ham-close,
   .ham-sidebar-toggle,
-  .ham-restore-button {
+  .ham-notes-toggle {
     height: 38px;
     padding: 0 14px;
     font-size: 13px;
@@ -2955,7 +2972,7 @@ body.tool-auth-open {
     font-size: 11px;
   }
 
-  .ham-hidden-meta {
+  .ham-note-meta {
     display: none;
   }
 
@@ -2988,10 +3005,10 @@ body.tool-auth-open {
     font-size: 12px;
   }
 
-  .ham-hide-button {
+  .ham-star-button {
+    width: 34px;
     height: 32px;
-    padding: 0 11px;
-    font-size: 12px;
+    font-size: 20px;
   }
 
   .ham-question {

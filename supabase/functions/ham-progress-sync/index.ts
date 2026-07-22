@@ -12,8 +12,13 @@ const JSON_HEADERS = {
   "Cache-Control": "no-store"
 };
 const BUCKET = "haemin-ham-progress";
-const FILE_PATH = "hidden.json";
-const MAX_HIDDEN_IDS = 1500;
+const FILE_PATH = "progress.json";
+const LEGACY_HIDDEN_PATH = "hidden.json";
+const MAX_STARRED_IDS = 1500;
+const MAX_HIGHLIGHT_ITEMS = 1500;
+const MAX_HIGHLIGHTS_PER_FIELD = 40;
+
+type HamHighlights = Record<string, { question: string[]; note: string[] }>;
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -50,7 +55,7 @@ async function ensureBucket() {
   return supabase;
 }
 
-function normalizeHiddenIds(value: unknown) {
+function normalizeStringArray(value: unknown, max = MAX_STARRED_IDS) {
   if (!Array.isArray(value)) {
     return [];
   }
@@ -60,32 +65,72 @@ function normalizeHiddenIds(value: unknown) {
       .filter((item): item is string => typeof item === "string")
       .map((item) => item.trim())
       .filter(Boolean)
-  )).slice(0, MAX_HIDDEN_IDS);
+  )).slice(0, max);
 }
 
-async function loadHiddenIds() {
+function normalizeHighlights(value: unknown) {
+  if (!value || typeof value !== "object") {
+    return {};
+  }
+
+  return Object.entries(value as Record<string, unknown>)
+    .slice(0, MAX_HIGHLIGHT_ITEMS)
+    .reduce<HamHighlights>((acc, [itemId, fields]) => {
+      if (!fields || typeof fields !== "object") {
+        return acc;
+      }
+
+      const record = fields as Record<string, unknown>;
+      const question = normalizeStringArray(record.question, MAX_HIGHLIGHTS_PER_FIELD);
+      const note = normalizeStringArray(record.note, MAX_HIGHLIGHTS_PER_FIELD);
+
+      if (question.length > 0 || note.length > 0) {
+        acc[itemId] = { question, note };
+      }
+
+      return acc;
+    }, {});
+}
+
+async function clearLegacyHiddenFile(supabase: ReturnType<typeof getSupabaseAdmin>) {
+  try {
+    await supabase.storage.from(BUCKET).remove([LEGACY_HIDDEN_PATH]);
+  } catch {
+    // Legacy cleanup is best-effort only.
+  }
+}
+
+async function loadProgress() {
   const supabase = await ensureBucket();
+  await clearLegacyHiddenFile(supabase);
+
   const { data, error } = await supabase.storage.from(BUCKET).download(FILE_PATH);
 
   if (error) {
-    return json({ ok: true, hiddenIds: [], savedAt: null });
+    return json({ ok: true, starredIds: [], highlights: {}, savedAt: null });
   }
 
   const parsed = JSON.parse(await data.text());
   return json({
     ok: true,
-    hiddenIds: normalizeHiddenIds(parsed.hiddenIds),
+    starredIds: normalizeStringArray(parsed.starredIds),
+    highlights: normalizeHighlights(parsed.highlights),
     savedAt: parsed.savedAt ?? null
   });
 }
 
-async function saveHiddenIds(value: unknown) {
-  const hiddenIds = normalizeHiddenIds(value);
+async function saveProgress(starredIdsValue: unknown, highlightsValue: unknown) {
   const supabase = await ensureBucket();
+  await clearLegacyHiddenFile(supabase);
+
+  const starredIds = normalizeStringArray(starredIdsValue);
+  const highlights = normalizeHighlights(highlightsValue);
   const payload = JSON.stringify({
-    hiddenIds,
+    starredIds,
+    highlights,
     savedAt: new Date().toISOString()
   });
+
   const { error } = await supabase.storage
     .from(BUCKET)
     .upload(FILE_PATH, new Blob([payload], { type: "application/json" }), {
@@ -97,13 +142,13 @@ async function saveHiddenIds(value: unknown) {
     throw error;
   }
 
-  return json({ ok: true, hiddenIds });
+  return json({ ok: true, starredIds, highlights });
 }
 
-async function clearHiddenIds() {
+async function clearProgress() {
   const supabase = await ensureBucket();
-  await supabase.storage.from(BUCKET).remove([FILE_PATH]);
-  return json({ ok: true, hiddenIds: [] });
+  await supabase.storage.from(BUCKET).remove([FILE_PATH, LEGACY_HIDDEN_PATH]);
+  return json({ ok: true, starredIds: [], highlights: {} });
 }
 
 Deno.serve(async (req) => {
@@ -119,15 +164,15 @@ Deno.serve(async (req) => {
     const body = await req.json();
 
     if (body.action === "load") {
-      return await loadHiddenIds();
+      return await loadProgress();
     }
 
     if (body.action === "save") {
-      return await saveHiddenIds(body.hiddenIds);
+      return await saveProgress(body.starredIds, body.highlights);
     }
 
     if (body.action === "clear") {
-      return await clearHiddenIds();
+      return await clearProgress();
     }
 
     return json({ ok: false, error: "invalid action" }, 400);
