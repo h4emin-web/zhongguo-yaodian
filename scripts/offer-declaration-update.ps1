@@ -70,6 +70,11 @@ function Normalize-PoNo {
     ToUpperInvariant()
 }
 
+function U {
+  param([int[]]$Codes)
+  return -join ($Codes | ForEach-Object { [char]$_ })
+}
+
 function Resolve-WorkbookPath {
   param([string]$RequestedPath)
   if ($RequestedPath -and (Test-Path -LiteralPath $RequestedPath)) {
@@ -79,17 +84,34 @@ function Resolve-WorkbookPath {
     return (Resolve-Path -LiteralPath $env:OFFER_LIST_PATH).Path
   }
 
-  $desktopPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "오퍼발행내역C8-2(양식수정).xlsm"
+  $offerListText = U 0xC624,0xD37C,0xBC1C,0xD589,0xB0B4,0xC5ED
+  $formatText = U 0xC591,0xC2DD,0xC218,0xC815
+  $desktopName = "{0}C8-2({1}).xlsm" -f $offerListText, $formatText
+  $desktopPath = Join-Path ([Environment]::GetFolderPath("Desktop")) $desktopName
   if (Test-Path -LiteralPath $desktopPath) {
     return (Resolve-Path -LiteralPath $desktopPath).Path
   }
 
-  $defaultPath = "Z:\동진파마\공유문서(Main)\A60-오퍼리스트\오퍼발행내역C8-2(양식수정).xlsm"
+  $serverDir = "Z:\{0}\{1}(Main)\A60-{2}" -f `
+    (U 0xB3D9,0xC9C4,0xD30C,0xB9C8), `
+    (U 0xACF5,0xC720,0xBB38,0xC11C), `
+    (U 0xC624,0xD37C,0xB9AC,0xC2A4,0xD2B8)
+  $defaultPath = Join-Path $serverDir $desktopName
   if (Test-Path -LiteralPath $defaultPath) {
     return (Resolve-Path -LiteralPath $defaultPath).Path
   }
 
-  throw "오퍼발행내역 파일을 찾지 못했습니다. OFFER_LIST_PATH를 설정해주세요."
+  if (Test-Path -LiteralPath $serverDir) {
+    $candidate = Get-ChildItem -LiteralPath $serverDir -File -Filter "*C8-2*.xlsm" -ErrorAction SilentlyContinue |
+      Where-Object { $_.Name -like "*$offerListText*" } |
+      Sort-Object LastWriteTime -Descending |
+      Select-Object -First 1
+    if ($candidate) {
+      return $candidate.FullName
+    }
+  }
+
+  throw "Offer list workbook was not found. Set OFFER_LIST_PATH."
 }
 
 function Get-RunningExcel {
@@ -132,7 +154,19 @@ function Invoke-FirstMacro {
       if (-not $shapeText) {
         try { $shapeText = [string]$shape.TextFrame.Characters().Text } catch {}
       }
+      if (-not $shapeText) {
+        try { $shapeText = [string]$shape.AlternativeText } catch {}
+      }
+      if (-not $shapeText) {
+        try { $shapeText = [string]$shape.Title } catch {}
+      }
       try { $shapeAction = [string]$shape.OnAction } catch {}
+      if (-not $shapeAction) {
+        try { $shapeAction = [string]$shape.DrawingObject.OnAction } catch {}
+      }
+      if (-not $shapeAction) {
+        try { $shapeAction = [string]$shape.OLEFormat.Object.OnAction } catch {}
+      }
 
       $normalizedShapeText = $shapeText.Trim() -replace "\s+", ""
       $matchesText = @($MacroNames | Where-Object {
@@ -172,6 +206,30 @@ function Click-WorksheetCellCenter {
   return "clicked:$Address"
 }
 
+function Select-WorksheetCell {
+  param($Excel, $Sheet, [string]$Address, [string]$Label)
+
+  Invoke-WithComRetry { $Sheet.Parent.Activate() | Out-Null } "activate workbook for $Label"
+  Invoke-WithComRetry { $Sheet.Activate() | Out-Null } "activate sheet for $Label"
+  $range = Invoke-WithComRetry { $Sheet.Range($Address) } "range for $Label"
+
+  try {
+    $window = Invoke-WithComRetry { $Excel.ActiveWindow } "active window for $Label"
+    Invoke-WithComRetry { $window.ScrollRow = [Math]::Max(1, [int]$range.Row - 2) } "scroll target row for $Label"
+    Invoke-WithComRetry { $window.ScrollColumn = [Math]::Max(1, [int]$range.Column - 2) } "scroll target column for $Label"
+  } catch {}
+
+  try {
+    Invoke-WithComRetry { $Excel.Goto($range, $true) | Out-Null } "goto $Address for $Label"
+    Start-Sleep -Milliseconds 250
+    return "goto:$Address"
+  } catch {}
+
+  Invoke-WithComRetry { $range.Select() | Out-Null } "select $Address for $Label"
+  Start-Sleep -Milliseconds 250
+  return "select:$Address"
+}
+
 function Invoke-MacroOrColumnButton {
   param($Excel, $Workbook, $Sheet, [string[]]$MacroNames, [string]$ColumnLetter, [string]$Label)
   try {
@@ -189,7 +247,13 @@ function Invoke-MacroOrColumnButton {
 $resolvedPath = Resolve-WorkbookPath $WorkbookPath
 $normalizedPoNo = Normalize-PoNo $PoNo
 $declarationText = $DeclarationNo.Trim()
-if (-not $declarationText) { throw "수입신고번호가 비어 있습니다." }
+if (-not $declarationText) { throw "Declaration number is empty." }
+$sheetName = "PO{0}" -f (U 0xBA54,0xC778)
+$copyMacroName = "PO{0}" -f (U 0xBCF5,0xC0AC)
+$orderSelectMacroName = "{0}{1}" -f (U 0xC624,0xB354), (U 0xC120,0xD0DD)
+$poOrderSelectMacroName = "PO{0}{1}" -f (U 0xC218,0xC815), (U 0xC120,0xD0DD)
+$updateMacroName = U 0xC218,0xC815
+$poUpdateMacroName = "PO{0}" -f (U 0xC218,0xC815)
 
 $excel = Get-RunningExcel
 $createdExcel = $false
@@ -213,10 +277,10 @@ try {
     $openedWorkbook = $true
   }
 
-  $sheet = Invoke-WithComRetry { $workbook.Worksheets.Item("PO메인") } "open PO sheet"
+  $sheet = Invoke-WithComRetry { $workbook.Worksheets.Item($sheetName) } "open PO sheet"
   Invoke-WithComRetry { $sheet.Activate() | Out-Null } "activate PO sheet"
   Invoke-WithComRetry { $sheet.Range("B1").Value2 = $normalizedPoNo } "enter PO search"
-  try { Run-WorkbookMacro $excel $workbook "PO복사" } catch {}
+  try { Run-WorkbookMacro $excel $workbook $copyMacroName } catch {}
 
   $lastRow = Invoke-WithComRetry { $sheet.Range("A500000").End($xlUp).Row } "last row"
   $targetRow = 0
@@ -230,16 +294,16 @@ try {
     }
     if ($targetRow -gt 0) { break }
   }
-  if ($targetRow -le 0) { throw "오퍼발행내역에서 PO '$PoNo' 를 찾지 못했습니다." }
+  if ($targetRow -le 0) { throw "PO '$PoNo' was not found in offer list." }
 
   $beforeDeclarationNo = [string]$sheet.Cells.Item($targetRow, 34).Text
 
   if ($Commit) {
     Invoke-WithComRetry { $sheet.Cells.Item($targetRow, 34).Value2 = $declarationText } "set declaration no"
-    Invoke-WithComRetry { $sheet.Range("A$targetRow").Select() | Out-Null } "select offer row"
-    $ranOrderSelectMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @("오더선택", "OrderSelect", "SelectOrder") "A" "offer order select"
-    Invoke-WithComRetry { $sheet.Range("K$targetRow").Select() | Out-Null } "select offer update cell"
-    $ranUpdateMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @("수정", "Update", "Modify") "K" "offer update"
+    Select-WorksheetCell $excel $sheet "A$targetRow" "select offer row" | Out-Null
+    $ranOrderSelectMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($orderSelectMacroName, $poOrderSelectMacroName, "OrderSelect", "SelectOrder") "A" "offer order select"
+    Select-WorksheetCell $excel $sheet "K$targetRow" "select offer update cell" | Out-Null
+    $ranUpdateMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($updateMacroName, $poUpdateMacroName, "Update", "Modify") "K" "offer update"
     Invoke-WithComRetry { $workbook.Save() } "save offer workbook"
   }
 
@@ -247,7 +311,7 @@ try {
     ok = $true
     committed = [bool]$Commit
     workbookPath = $resolvedPath
-    sheetName = "PO메인"
+    sheetName = $sheetName
     row = $targetRow
     poNo = [string]$sheet.Cells.Item($targetRow, 1).Text
     declarationNo = $declarationText
@@ -257,7 +321,7 @@ try {
   } | ConvertTo-Json -Depth 5 -Compress
 } finally {
   if ($workbook -and $openedWorkbook) {
-    try { $workbook.Close($true) } catch {}
+    try { $workbook.Close([bool]$Commit) } catch {}
     try { [Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) | Out-Null } catch {}
   }
   if ($excel -and $createdExcel) {
