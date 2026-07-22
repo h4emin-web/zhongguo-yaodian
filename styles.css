@@ -2883,9 +2883,45 @@ body.tool-auth-open {
   font-weight: 800;
 }
 
+.ham-memo {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #edf0f3;
+  display: grid;
+  gap: 8px;
+}
+
+.ham-memo label {
+  color: #111111;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.ham-memo textarea {
+  width: 100%;
+  min-height: 86px;
+  padding: 12px 13px;
+  border: 1px solid #e4e8ec;
+  border-radius: 8px;
+  color: #111111;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.6;
+  background: #ffffff;
+  resize: vertical;
+}
+
+.ham-memo textarea:focus {
+  outline: none;
+  border-color: #b9c0c8;
+  box-shadow: 0 0 0 4px rgba(17, 17, 17, 0.06);
+}
+
 @media (max-width: 760px) {
   .ham-fullscreen {
     background: #ffffff;
+    overflow: hidden;
   }
 
   .ham-topbar {
@@ -2929,6 +2965,7 @@ body.tool-auth-open {
 
   .ham-layout {
     grid-template-columns: 1fr;
+    overflow: hidden;
   }
 
   .ham-fullscreen.is-sidebar-open .ham-layout {
@@ -2979,9 +3016,9 @@ body.tool-auth-open {
 
   .ham-results {
     min-height: 0;
-    height: auto;
+    height: 100%;
     padding: 12px 12px 18px;
-    gap: 12px;
+    display: block;
     overflow-y: auto;
     scroll-snap-type: none;
     scroll-padding-top: 0;
@@ -2989,8 +3026,11 @@ body.tool-auth-open {
 
   .ham-entry {
     min-height: 0;
+    width: 100%;
+    margin-bottom: 12px;
     padding: 15px 14px;
     border-radius: 12px;
+    overflow: visible;
     scroll-snap-align: none;
     scroll-snap-stop: normal;
     box-shadow: 0 6px 18px rgba(31, 36, 41, 0.04);
@@ -2998,6 +3038,7 @@ body.tool-auth-open {
 
   .ham-entry-head {
     margin-bottom: 10px;
+    flex-wrap: wrap;
   }
 
   .ham-entry-index,
@@ -3017,6 +3058,8 @@ body.tool-auth-open {
     margin-bottom: 12px;
     font-size: 15px;
     line-height: 1.55;
+    overflow-wrap: anywhere;
+    word-break: keep-all;
   }
 
   .ham-entry-image {
@@ -3029,12 +3072,16 @@ body.tool-auth-open {
 
   .ham-options li {
     padding: 9px 10px;
-    grid-template-columns: 24px 1fr;
+    grid-template-columns: 24px minmax(0, 1fr);
+    align-items: start;
     font-size: 14px;
   }
 
   .ham-options p {
     line-height: 1.45;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: keep-all;
   }
 
   .ham-answer summary {
@@ -3047,6 +3094,12 @@ body.tool-auth-open {
     line-height: 1.6;
     overflow-wrap: anywhere;
     word-break: keep-all;
+  }
+
+  .ham-memo textarea {
+    min-height: 96px;
+    font-size: 16px;
+    line-height: 1.55;
   }
 }
 

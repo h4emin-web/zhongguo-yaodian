@@ -18,8 +18,11 @@ const MAX_STARRED_IDS = 1500;
 const MAX_SEEN_IDS = 5000;
 const MAX_HIGHLIGHT_ITEMS = 1500;
 const MAX_HIGHLIGHTS_PER_FIELD = 40;
+const MAX_MEMO_ITEMS = 1500;
+const MAX_MEMO_LENGTH = 2000;
 
 type HamHighlights = Record<string, { question: string[]; note: string[] }>;
+type HamMemos = Record<string, string>;
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -93,6 +96,28 @@ function normalizeHighlights(value: unknown) {
     }, {});
 }
 
+function normalizeMemos(value: unknown) {
+  if (!value || typeof value !== "object") {
+    return {};
+  }
+
+  return Object.entries(value as Record<string, unknown>)
+    .slice(0, MAX_MEMO_ITEMS)
+    .reduce<HamMemos>((acc, [itemId, memo]) => {
+      if (typeof memo !== "string") {
+        return acc;
+      }
+
+      const text = memo.slice(0, MAX_MEMO_LENGTH);
+
+      if (text.trim()) {
+        acc[itemId] = text;
+      }
+
+      return acc;
+    }, {});
+}
+
 async function clearLegacyHiddenFile(supabase: ReturnType<typeof getSupabaseAdmin>) {
   try {
     await supabase.storage.from(BUCKET).remove([LEGACY_HIDDEN_PATH]);
@@ -108,7 +133,7 @@ async function loadProgress() {
   const { data, error } = await supabase.storage.from(BUCKET).download(FILE_PATH);
 
   if (error) {
-    return json({ ok: true, starredIds: [], seenIds: [], highlights: {}, savedAt: null });
+    return json({ ok: true, starredIds: [], seenIds: [], highlights: {}, memos: {}, savedAt: null });
   }
 
   const parsed = JSON.parse(await data.text());
@@ -117,21 +142,24 @@ async function loadProgress() {
     starredIds: normalizeStringArray(parsed.starredIds),
     seenIds: normalizeStringArray(parsed.seenIds, MAX_SEEN_IDS),
     highlights: normalizeHighlights(parsed.highlights),
+    memos: normalizeMemos(parsed.memos),
     savedAt: parsed.savedAt ?? null
   });
 }
 
-async function saveProgress(starredIdsValue: unknown, highlightsValue: unknown, seenIdsValue: unknown) {
+async function saveProgress(starredIdsValue: unknown, highlightsValue: unknown, seenIdsValue: unknown, memosValue: unknown) {
   const supabase = await ensureBucket();
   await clearLegacyHiddenFile(supabase);
 
   const starredIds = normalizeStringArray(starredIdsValue);
   const seenIds = normalizeStringArray(seenIdsValue, MAX_SEEN_IDS);
   const highlights = normalizeHighlights(highlightsValue);
+  const memos = normalizeMemos(memosValue);
   const payload = JSON.stringify({
     starredIds,
     seenIds,
     highlights,
+    memos,
     savedAt: new Date().toISOString()
   });
 
@@ -146,13 +174,13 @@ async function saveProgress(starredIdsValue: unknown, highlightsValue: unknown, 
     throw error;
   }
 
-  return json({ ok: true, starredIds, seenIds, highlights });
+  return json({ ok: true, starredIds, seenIds, highlights, memos });
 }
 
 async function clearProgress() {
   const supabase = await ensureBucket();
   await supabase.storage.from(BUCKET).remove([FILE_PATH, LEGACY_HIDDEN_PATH]);
-  return json({ ok: true, starredIds: [], seenIds: [], highlights: {} });
+  return json({ ok: true, starredIds: [], seenIds: [], highlights: {}, memos: {} });
 }
 
 Deno.serve(async (req) => {
@@ -172,7 +200,7 @@ Deno.serve(async (req) => {
     }
 
     if (body.action === "save") {
-      return await saveProgress(body.starredIds, body.highlights, body.seenIds);
+      return await saveProgress(body.starredIds, body.highlights, body.seenIds, body.memos);
     }
 
     if (body.action === "clear") {
