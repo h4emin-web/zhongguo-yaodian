@@ -946,7 +946,7 @@ function openDetail(card) {
   const title = card.querySelector("h2").textContent;
 
   if (title.includes("업무일지")) {
-    openWorklog(card);
+    requestProtectedToolAccess("업무일지", () => openWorklog(card));
     return;
   }
 
@@ -4463,6 +4463,6 @@ if (location.hash === "#worklog") {
   const worklogCard = Array.from(cards).find((card) => card.querySelector("h2").textContent.includes("업무일지"));
 
   if (worklogCard) {
-    openWorklog(worklogCard);
+    requestProtectedToolAccess("업무일지", () => openWorklog(worklogCard));
   }
 }
