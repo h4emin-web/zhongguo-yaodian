@@ -918,15 +918,16 @@ function organizeWorkspaceCatalog() {
   }
 
   const searchGrid = searchCategory.querySelector(".workspace-grid");
-  const automationList = automationCategory?.querySelector(".tool-category-list");
+  const infoList = infoCategory?.querySelector(".tool-category-list");
   const searchBoxes = Array.from(searchCategory.querySelectorAll(".tool-box"));
   const findBox = (title) => searchBoxes.find((box) => (
     box.querySelector("h2")?.textContent.trim().includes(title)
   ));
   const worklogBox = findBox("업무일지");
 
-  if (automationList && worklogBox) {
-    automationList.appendChild(worklogBox);
+  if (infoList && worklogBox) {
+    const stockCard = infoList.querySelector(".calendar-stock-card");
+    infoList.insertBefore(worklogBox, stockCard || null);
   }
 
   ["K-DMF 검색", "중국 약전", "중국 WC & COPP", "인도 WC", "미국 DMF"].forEach((title) => {

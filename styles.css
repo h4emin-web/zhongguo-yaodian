@@ -743,12 +743,16 @@ body.detail-open {
   display: none;
 }
 
-.workspace-grid .tool-box + .tool-box::before {
+.workspace-grid .tool-box {
+  overflow: visible;
+}
+
+.workspace-grid .tool-box:not(:last-child)::after {
   content: "";
   position: absolute;
   left: 2px;
   right: 2px;
-  top: -5px;
+  bottom: -5px;
   display: block;
   height: 1px;
   background: rgba(232, 235, 239, 0.92);
