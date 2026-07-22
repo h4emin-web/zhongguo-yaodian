@@ -1163,7 +1163,9 @@ calendarItem.addEventListener("click", () => {
   requestProtectedToolAccess("캘린더", openCalendarTool);
 });
 
-hamItem.addEventListener("click", openHamTool);
+hamItem.addEventListener("click", () => {
+  requestProtectedToolAccess("햄", openHamTool);
+});
 
 calendarPrevButton.addEventListener("click", () => {
   calendarViewMonth -= 1;
