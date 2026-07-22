@@ -299,7 +299,9 @@ let hamActiveGroup = "";
 let hamSidebarOpen = false;
 let hamNotesOnly = false;
 let hamStarredIds = new Set();
+let hamSeenIds = new Set();
 let hamHighlights = {};
+let hamCurrentIndex = 0;
 let hamProgressSyncing = false;
 let starBurstHue = 0;
 let hanaRateTimer = null;
@@ -4197,9 +4199,11 @@ function loadHamProgressLocally() {
     const saved = JSON.parse(localStorage.getItem(HAM_PROGRESS_STORAGE_KEY) || "{}");
 
     hamStarredIds = new Set(normalizeHamStringArray(saved.starredIds));
+    hamSeenIds = new Set(normalizeHamStringArray(saved.seenIds));
     hamHighlights = normalizeHamHighlights(saved.highlights);
   } catch {
     hamStarredIds = new Set();
+    hamSeenIds = new Set();
     hamHighlights = {};
   }
 }
@@ -4207,6 +4211,7 @@ function loadHamProgressLocally() {
 function persistHamProgressLocally() {
   localStorage.setItem(HAM_PROGRESS_STORAGE_KEY, JSON.stringify({
     starredIds: Array.from(hamStarredIds),
+    seenIds: Array.from(hamSeenIds),
     highlights: hamHighlights
   }));
 }
@@ -4231,6 +4236,7 @@ async function saveHamProgressToStorage() {
       body: {
         action: "save",
         starredIds: Array.from(hamStarredIds),
+        seenIds: Array.from(hamSeenIds),
         highlights: hamHighlights
       }
     });
@@ -4262,6 +4268,7 @@ async function loadHamProgressFromStorage() {
     }
 
     hamStarredIds = new Set(normalizeHamStringArray(data.starredIds));
+    hamSeenIds = new Set(normalizeHamStringArray(data.seenIds));
     hamHighlights = normalizeHamHighlights(data.highlights);
     persistHamProgressLocally();
   } catch (error) {
@@ -4310,11 +4317,16 @@ async function loadHamLibrary() {
 
 function getFilteredHamItems() {
   return hamItems.filter((item) => {
-    if (hamNotesOnly && !hamStarredIds.has(item.id)) {
+    if (hamNotesOnly) {
+      return hamStarredIds.has(item.id)
+        && (!hamActiveGroup || hamActiveGroup === HAM_ALL_GROUP_ID || item.group === hamActiveGroup);
+    }
+
+    if (hamSeenIds.has(item.id)) {
       return false;
     }
 
-    if (!hamNotesOnly && hamActiveGroup && hamActiveGroup !== HAM_ALL_GROUP_ID && item.group !== hamActiveGroup) {
+    if (hamActiveGroup && hamActiveGroup !== HAM_ALL_GROUP_ID && item.group !== hamActiveGroup) {
       return false;
     }
 
@@ -4324,15 +4336,17 @@ function getFilteredHamItems() {
 
 function updateHamMeta(filteredCount = 0) {
   const starredCount = hamStarredIds.size;
+  const seenCount = hamSeenIds.size;
   hamMeta.textContent = hamNotesOnly
-    ? `오답노트 ${starredCount}건 중 ${filteredCount}건 표시`
-    : `${hamItems.length}건 중 ${filteredCount}건 표시`;
-  hamNoteMeta.textContent = `오답노트 ${starredCount}건`;
+    ? `오답노트 ${filteredCount}건`
+    : `${filteredCount}건 남음 · 본 항목 ${seenCount}건`;
+  hamNoteMeta.textContent = `오답노트 ${starredCount}건 · 본 항목 ${seenCount}건`;
   hamNotesToggle.setAttribute("aria-pressed", String(hamNotesOnly));
 }
 
 function getFirstHamGroupId() {
-  return hamItems.find((item) => item.group)?.group
+  return hamItems.find((item) => item.group && !hamSeenIds.has(item.id))?.group
+    || hamItems.find((item) => item.group)?.group
     || HAM_ALL_GROUP_ID;
 }
 
@@ -4376,9 +4390,15 @@ function renderHamGroupButtons() {
 
   const groups = getHamGroups();
   const counts = groups.reduce((acc, group) => {
-    acc[group.id] = group.id !== HAM_ALL_GROUP_ID
-      ? hamItems.filter((item) => item.group === group.id).length
-      : hamItems.length;
+    acc[group.id] = hamItems.filter((item) => {
+      if (hamNotesOnly) {
+        return hamStarredIds.has(item.id)
+          && (group.id === HAM_ALL_GROUP_ID || item.group === group.id);
+      }
+
+      return !hamSeenIds.has(item.id)
+        && (group.id === HAM_ALL_GROUP_ID || item.group === group.id);
+    }).length;
     return acc;
   }, {});
 
@@ -4479,50 +4499,86 @@ function renderHamEntries() {
   renderHamGroupButtons();
 
   if (filtered.length === 0) {
-    hamResults.innerHTML = '<p class="empty-result">표시할 항목이 없습니다.</p>';
+    hamCurrentIndex = 0;
+    hamResults.innerHTML = hamNotesOnly
+      ? '<p class="empty-result">오답노트에 저장된 항목이 없습니다.</p>'
+      : '<p class="empty-result">볼 항목이 없습니다. 분류를 바꾸거나 오답노트를 확인하세요.</p>';
     return;
   }
 
-  hamResults.innerHTML = filtered.map((item) => {
-    const answerOption = (item.options || []).find((option) => option.number === item.answer);
-    const entryNumber = item.displayNumber || item.number;
-    const entryGroup = item.groupLabel || item.group;
-    const optionHtml = (item.options || []).map((option) => `
-      <li${option.number === item.answer ? ' class="is-answer"' : ""}>
-        <span>${escapeHtml(option.number)}</span>
-        <p>${escapeHtml(option.text)}</p>
-      </li>
-    `).join("");
-    const imageHtml = (item.images || []).map((src) => `
-      <img class="ham-entry-image" src="${escapeHtml(src)}" alt="" loading="lazy">
-    `).join("");
+  if (hamCurrentIndex >= filtered.length || hamCurrentIndex < 0) {
+    hamCurrentIndex = 0;
+  }
 
-    return `
-      <article class="ham-entry" data-ham-id="${escapeHtml(item.id)}">
-        <div class="ham-entry-head">
-          <button class="ham-star-button${hamStarredIds.has(item.id) ? " is-starred" : ""}" type="button" data-ham-star="${escapeHtml(item.id)}" aria-pressed="${hamStarredIds.has(item.id) ? "true" : "false"}" aria-label="오답노트 저장">${hamStarredIds.has(item.id) ? "★" : "☆"}</button>
-          <span class="ham-entry-index">${escapeHtml(entryNumber)}</span>
-          <span class="ham-entry-group">${escapeHtml(entryGroup)}</span>
+  const item = filtered[hamCurrentIndex];
+  const answerOption = (item.options || []).find((option) => option.number === item.answer);
+  const entryNumber = item.displayNumber || item.number;
+  const entryGroup = item.groupLabel || item.group;
+  const progressLabel = hamNotesOnly
+    ? `${hamCurrentIndex + 1} / ${filtered.length}`
+    : `${filtered.length}건 남음`;
+  const optionHtml = (item.options || []).map((option) => `
+    <li${option.number === item.answer ? ' class="is-answer"' : ""}>
+      <span>${escapeHtml(option.number)}</span>
+      <p>${escapeHtml(option.text)}</p>
+    </li>
+  `).join("");
+  const imageHtml = (item.images || []).map((src) => `
+    <img class="ham-entry-image" src="${escapeHtml(src)}" alt="" loading="lazy">
+  `).join("");
+
+  hamResults.innerHTML = `
+    <article class="ham-entry" data-ham-id="${escapeHtml(item.id)}">
+      <div class="ham-entry-head">
+        <button class="ham-star-button${hamStarredIds.has(item.id) ? " is-starred" : ""}" type="button" data-ham-star="${escapeHtml(item.id)}" aria-pressed="${hamStarredIds.has(item.id) ? "true" : "false"}" aria-label="오답노트 저장">${hamStarredIds.has(item.id) ? "★" : "☆"}</button>
+        <span class="ham-entry-index">${escapeHtml(entryNumber)}</span>
+        <span class="ham-entry-group">${escapeHtml(entryGroup)}</span>
+        <span class="ham-entry-progress">${escapeHtml(progressLabel)}</span>
+      </div>
+      <p class="ham-question ham-highlightable" data-ham-highlight-field="question">${renderHighlightedText(item.question, item.id, "question")}</p>
+      ${imageHtml ? `<div class="ham-entry-images">${imageHtml}</div>` : ""}
+      <ol class="ham-options">${optionHtml}</ol>
+      <details class="ham-answer">
+        <summary>확인</summary>
+        <div class="ham-answer-body">
+          <p class="ham-answer-line">확인값 ${escapeHtml(item.answer)}${answerOption ? ` · ${escapeHtml(answerOption.text)}` : ""}</p>
+          <p class="ham-note ham-highlightable" data-ham-highlight-field="note">${renderHighlightedText(item.note, item.id, "note")}</p>
         </div>
-        <p class="ham-question ham-highlightable" data-ham-highlight-field="question">${renderHighlightedText(item.question, item.id, "question")}</p>
-        ${imageHtml ? `<div class="ham-entry-images">${imageHtml}</div>` : ""}
-        <ol class="ham-options">${optionHtml}</ol>
-        <details class="ham-answer">
-          <summary>확인</summary>
-          <div class="ham-answer-body">
-            <p class="ham-answer-line">확인값 ${escapeHtml(item.answer)}${answerOption ? ` · ${escapeHtml(answerOption.text)}` : ""}</p>
-            <p class="ham-note ham-highlightable" data-ham-highlight-field="note">${renderHighlightedText(item.note, item.id, "note")}</p>
-          </div>
-        </details>
-      </article>
-    `;
-  }).join("");
+      </details>
+      <div class="ham-entry-actions">
+        <button class="ham-next-button" type="button" data-ham-next="${escapeHtml(item.id)}">${hamNotesOnly ? "다음 별표" : "다음"}</button>
+      </div>
+    </article>
+  `;
+}
+
+async function handleHamNext(itemId) {
+  const filtered = getFilteredHamItems();
+
+  if (filtered.length === 0) {
+    renderHamEntries();
+    return;
+  }
+
+  if (hamNotesOnly) {
+    hamCurrentIndex = (hamCurrentIndex + 1) % filtered.length;
+    renderHamEntries();
+    return;
+  }
+
+  if (itemId) {
+    hamSeenIds.add(itemId);
+    await saveHamProgress();
+  }
+
+  renderHamEntries();
 }
 
 function openHamTool() {
   hamFullscreen.classList.add("is-open");
   hamFullscreen.setAttribute("aria-hidden", "false");
   hamActiveGroup = "";
+  hamCurrentIndex = 0;
   setHamSidebarOpen(false);
   loadHamLibrary();
 }
@@ -4842,6 +4898,7 @@ hamSidebarToggle.addEventListener("click", () => {
 hamNotesToggle.addEventListener("click", () => {
   hamNotesOnly = !hamNotesOnly;
   hamActiveGroup = hamNotesOnly ? HAM_ALL_GROUP_ID : "";
+  hamCurrentIndex = 0;
   setHamSidebarOpen(false);
   setDefaultHamGroup();
   renderHamEntries();
@@ -4854,10 +4911,18 @@ hamGroupList.addEventListener("click", (event) => {
   }
 
   hamActiveGroup = button.dataset.hamGroup || "";
+  hamCurrentIndex = 0;
   setHamSidebarOpen(false);
   renderHamEntries();
 });
 hamResults.addEventListener("click", async (event) => {
+  const nextButton = event.target.closest("[data-ham-next]");
+
+  if (nextButton) {
+    await handleHamNext(nextButton.dataset.hamNext);
+    return;
+  }
+
   const button = event.target.closest("[data-ham-star]");
 
   if (!button) {

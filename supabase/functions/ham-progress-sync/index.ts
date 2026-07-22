@@ -15,6 +15,7 @@ const BUCKET = "haemin-ham-progress";
 const FILE_PATH = "progress.json";
 const LEGACY_HIDDEN_PATH = "hidden.json";
 const MAX_STARRED_IDS = 1500;
+const MAX_SEEN_IDS = 5000;
 const MAX_HIGHLIGHT_ITEMS = 1500;
 const MAX_HIGHLIGHTS_PER_FIELD = 40;
 
@@ -107,26 +108,29 @@ async function loadProgress() {
   const { data, error } = await supabase.storage.from(BUCKET).download(FILE_PATH);
 
   if (error) {
-    return json({ ok: true, starredIds: [], highlights: {}, savedAt: null });
+    return json({ ok: true, starredIds: [], seenIds: [], highlights: {}, savedAt: null });
   }
 
   const parsed = JSON.parse(await data.text());
   return json({
     ok: true,
     starredIds: normalizeStringArray(parsed.starredIds),
+    seenIds: normalizeStringArray(parsed.seenIds, MAX_SEEN_IDS),
     highlights: normalizeHighlights(parsed.highlights),
     savedAt: parsed.savedAt ?? null
   });
 }
 
-async function saveProgress(starredIdsValue: unknown, highlightsValue: unknown) {
+async function saveProgress(starredIdsValue: unknown, highlightsValue: unknown, seenIdsValue: unknown) {
   const supabase = await ensureBucket();
   await clearLegacyHiddenFile(supabase);
 
   const starredIds = normalizeStringArray(starredIdsValue);
+  const seenIds = normalizeStringArray(seenIdsValue, MAX_SEEN_IDS);
   const highlights = normalizeHighlights(highlightsValue);
   const payload = JSON.stringify({
     starredIds,
+    seenIds,
     highlights,
     savedAt: new Date().toISOString()
   });
@@ -142,13 +146,13 @@ async function saveProgress(starredIdsValue: unknown, highlightsValue: unknown) 
     throw error;
   }
 
-  return json({ ok: true, starredIds, highlights });
+  return json({ ok: true, starredIds, seenIds, highlights });
 }
 
 async function clearProgress() {
   const supabase = await ensureBucket();
   await supabase.storage.from(BUCKET).remove([FILE_PATH, LEGACY_HIDDEN_PATH]);
-  return json({ ok: true, starredIds: [], highlights: {} });
+  return json({ ok: true, starredIds: [], seenIds: [], highlights: {} });
 }
 
 Deno.serve(async (req) => {
@@ -168,7 +172,7 @@ Deno.serve(async (req) => {
     }
 
     if (body.action === "save") {
-      return await saveProgress(body.starredIds, body.highlights);
+      return await saveProgress(body.starredIds, body.highlights, body.seenIds);
     }
 
     if (body.action === "clear") {

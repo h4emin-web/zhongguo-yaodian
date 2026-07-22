@@ -2715,8 +2715,8 @@ body.tool-auth-open {
   overflow: auto;
   padding: clamp(20px, 3vw, 40px) clamp(20px, 4vw, 48px) 48px;
   display: grid;
-  gap: 14px;
-  align-content: start;
+  align-content: center;
+  justify-items: center;
 }
 
 .ham-entry {
@@ -2736,10 +2736,12 @@ body.tool-auth-open {
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
+  flex-wrap: wrap;
 }
 
 .ham-entry-index,
-.ham-entry-group {
+.ham-entry-group,
+.ham-entry-progress {
   min-width: 32px;
   height: 28px;
   padding: 0 8px;
@@ -2752,6 +2754,13 @@ body.tool-auth-open {
   font-size: 13px;
   font-weight: 800;
   background: #ffffff;
+}
+
+.ham-entry-progress {
+  margin-left: auto;
+  border-color: transparent;
+  color: #4f565d;
+  background: #f8f9fa;
 }
 
 .ham-star-button {
@@ -2883,6 +2892,36 @@ body.tool-auth-open {
   font-weight: 800;
 }
 
+.ham-entry-actions {
+  margin-top: 18px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.ham-next-button {
+  min-width: 118px;
+  height: 44px;
+  padding: 0 18px;
+  border: 1px solid #dfe3e8;
+  border-radius: 999px;
+  color: #111111;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  background: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(31, 36, 41, 0.045);
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.ham-next-button:hover,
+.ham-next-button:focus-visible {
+  transform: translateY(-1px);
+  outline: none;
+  border-color: #b9c0c8;
+  background: #f8f9fa;
+}
+
 @media (max-width: 760px) {
   .ham-fullscreen {
     background: #ffffff;
@@ -2979,18 +3018,14 @@ body.tool-auth-open {
   .ham-results {
     height: calc(100dvh - 168px);
     padding: 12px 12px 18px;
-    gap: 12px;
     overflow-y: auto;
-    scroll-snap-type: y mandatory;
-    scroll-padding-top: 12px;
+    align-content: start;
   }
 
   .ham-entry {
     min-height: calc(100dvh - 198px);
     padding: 15px 14px;
     border-radius: 12px;
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
     box-shadow: 0 6px 18px rgba(31, 36, 41, 0.04);
   }
 
@@ -2999,10 +3034,15 @@ body.tool-auth-open {
   }
 
   .ham-entry-index,
-  .ham-entry-group {
+  .ham-entry-group,
+  .ham-entry-progress {
     height: 26px;
     min-width: 30px;
     font-size: 12px;
+  }
+
+  .ham-entry-progress {
+    margin-left: 0;
   }
 
   .ham-star-button {
@@ -3043,6 +3083,14 @@ body.tool-auth-open {
   .ham-note {
     font-size: 13.5px;
     line-height: 1.6;
+  }
+
+  .ham-entry-actions {
+    justify-content: stretch;
+  }
+
+  .ham-next-button {
+    width: 100%;
   }
 }
 
