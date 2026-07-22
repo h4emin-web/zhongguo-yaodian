@@ -1679,6 +1679,47 @@ body.tool-auth-open {
   gap: 10px;
 }
 
+.calendar-weekday-filter {
+  gap: 8px;
+}
+
+.calendar-weekday-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.calendar-weekday-button {
+  width: 34px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e8ebef;
+  border-radius: 8px;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  background: var(--surface);
+  cursor: pointer;
+  box-shadow: 0 7px 14px rgba(32, 36, 40, 0.05);
+  transition: transform 150ms ease, border-color 150ms ease, color 150ms ease, background 150ms ease;
+}
+
+.calendar-weekday-button:hover,
+.calendar-weekday-button:focus-visible {
+  transform: translateY(-1px);
+  outline: none;
+  border-color: rgba(112, 121, 130, 0.42);
+  color: var(--text);
+}
+
+.calendar-weekday-button.is-selected {
+  border-color: rgba(58, 68, 78, 0.34);
+  color: var(--text);
+  background: #f4f7f4;
+}
+
 .calendar-color-swatch {
   width: 32px;
   height: 32px;

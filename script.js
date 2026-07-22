@@ -110,6 +110,7 @@ const calendarGrid = document.querySelector(".calendar-grid");
 const calendarAddForm = document.querySelector(".calendar-add-form");
 const calendarAddDate = document.querySelector("#calendar-add-date");
 const calendarAddEndDate = document.querySelector("#calendar-add-end-date");
+const calendarWeekdayButtons = document.querySelectorAll(".calendar-weekday-button");
 const calendarAddTitle = document.querySelector("#calendar-add-title");
 const calendarColorSwatches = document.querySelector(".calendar-color-swatches");
 const calendarAddMemo = document.querySelector("#calendar-add-memo");
@@ -1174,7 +1175,15 @@ calendarAddForm.addEventListener("submit", (event) => {
     [startDate, endDate] = [endDate, startDate];
   }
 
-  calendarSelectedDate = startDate;
+  const selectedWeekdays = endDate !== startDate ? getSelectedCalendarWeekdays() : [];
+  const previewEvent = { date: startDate, endDate, weekdays: selectedWeekdays };
+  const firstCoveredDate = findFirstCoveredDate(previewEvent, startDate);
+  if (!firstCoveredDate) {
+    alert("선택한 기간 안에 해당 요일이 없습니다.");
+    return;
+  }
+
+  calendarSelectedDate = firstCoveredDate;
 
   if (editingCalendarEventId) {
     updateCalendarEvent(editingCalendarEventId, {
@@ -1182,10 +1191,11 @@ calendarAddForm.addEventListener("submit", (event) => {
       endDate: endDate !== startDate ? endDate : "",
       title,
       color,
-      memo
+      memo,
+      weekdays: selectedWeekdays
     });
   } else {
-    addCalendarEvent(startDate, endDate, title, color, memo);
+    addCalendarEvent(startDate, endDate, title, color, memo, selectedWeekdays);
   }
 
   resetCalendarAddForm();
@@ -1211,6 +1221,14 @@ calendarColorSwatches.addEventListener("click", (event) => {
     return;
   }
   setSelectedCalendarColor(swatch.dataset.color);
+});
+
+calendarWeekdayButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const isSelected = !button.classList.contains("is-selected");
+    button.classList.toggle("is-selected", isSelected);
+    button.setAttribute("aria-pressed", String(isSelected));
+  });
 });
 
 function formatDateInputValue(rawValue) {
@@ -2153,8 +2171,62 @@ function getEventEndDate(event) {
   return event.endDate || event.date;
 }
 
+function normalizeWeekdays(weekdays) {
+  return Array.isArray(weekdays)
+    ? [...new Set(weekdays.map(Number).filter((day) => Number.isInteger(day) && day >= 0 && day <= 6))]
+      .sort((a, b) => a - b)
+    : [];
+}
+
+function getSelectedCalendarWeekdays() {
+  return normalizeWeekdays(Array.from(calendarWeekdayButtons)
+    .filter((button) => button.classList.contains("is-selected"))
+    .map((button) => button.dataset.weekday));
+}
+
+function setSelectedCalendarWeekdays(weekdays = []) {
+  const selected = new Set(normalizeWeekdays(weekdays).map(String));
+  calendarWeekdayButtons.forEach((button) => {
+    const isSelected = selected.has(button.dataset.weekday);
+    button.classList.toggle("is-selected", isSelected);
+    button.setAttribute("aria-pressed", String(isSelected));
+  });
+}
+
+function getEventWeekdays(event) {
+  return normalizeWeekdays(event.weekdays);
+}
+
+function getWeekdaySummary(weekdays) {
+  return normalizeWeekdays(weekdays).map((day) => WEEKDAY_LABELS[day]).join(", ");
+}
+
 function eventCoversDate(event, dateKey) {
-  return dateKey >= event.date && dateKey <= getEventEndDate(event);
+  if (dateKey < event.date || dateKey > getEventEndDate(event)) {
+    return false;
+  }
+
+  const weekdays = getEventWeekdays(event);
+  if (weekdays.length === 0) {
+    return true;
+  }
+
+  return weekdays.includes(parseDateKey(dateKey).getDay());
+}
+
+function findFirstCoveredDate(event, fromDateKey = event.date) {
+  const endDate = parseDateKey(getEventEndDate(event));
+  const cursor = parseDateKey(fromDateKey > event.date ? fromDateKey : event.date);
+
+  while (cursor <= endDate) {
+    const key = formatDateKey(cursor);
+    if (eventCoversDate(event, key)) {
+      return key;
+    }
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return "";
 }
 
 function formatDateLabel(dateKey) {
@@ -2175,10 +2247,12 @@ function renderCalendarGrid() {
 
     while (cursor <= endDate) {
       const key = formatDateKey(cursor);
-      if (!eventsByDate.has(key)) {
-        eventsByDate.set(key, []);
+      if (eventCoversDate(event, key)) {
+        if (!eventsByDate.has(key)) {
+          eventsByDate.set(key, []);
+        }
+        eventsByDate.get(key).push(event);
       }
-      eventsByDate.get(key).push(event);
       cursor.setDate(cursor.getDate() + 1);
     }
   });
@@ -2244,6 +2318,10 @@ function renderCalendarEventList() {
   calendarEventList.innerHTML = eventsForDay.map((event) => {
     const endDate = getEventEndDate(event);
     const isRange = endDate !== event.date;
+    const weekdaySummary = getWeekdaySummary(event.weekdays);
+    const rangeText = isRange
+      ? `${escapeHtml(formatDateLabel(event.date))} ~ ${escapeHtml(formatDateLabel(endDate))}${weekdaySummary ? ` · ${escapeHtml(weekdaySummary)}` : ""}`
+      : weekdaySummary ? escapeHtml(weekdaySummary) : "";
 
     return `
       <div class="calendar-event-item">
@@ -2251,7 +2329,7 @@ function renderCalendarEventList() {
           <p class="calendar-event-title">
             <span class="calendar-event-color-dot" style="background:${escapeHtml(event.color || DEFAULT_EVENT_COLOR)}"></span>${escapeHtml(event.title)}
           </p>
-          ${isRange ? `<p class="calendar-event-range">${escapeHtml(formatDateLabel(event.date))} ~ ${escapeHtml(formatDateLabel(endDate))}</p>` : ""}
+          ${rangeText ? `<p class="calendar-event-range">${rangeText}</p>` : ""}
           ${event.memo ? `<p class="calendar-event-memo">${escapeHtml(event.memo)}</p>` : ""}
         </div>
         <div class="calendar-event-item-actions">
@@ -2271,16 +2349,20 @@ function renderDdayWidget() {
   const todayKey = formatDateKey(new Date());
   const todayDate = parseDateKey(todayKey);
   const upcomingEvents = calendarEvents
-    .filter((event) => getEventEndDate(event) >= todayKey)
-    .sort((a, b) => a.date.localeCompare(b.date));
+    .map((event) => ({
+      event,
+      nextDate: findFirstCoveredDate(event, todayKey)
+    }))
+    .filter((item) => item.nextDate)
+    .sort((a, b) => a.nextDate.localeCompare(b.nextDate));
 
   if (upcomingEvents.length === 0) {
     ddayList.innerHTML = '<li class="dday-empty">등록된 일정이 없습니다.</li>';
     return;
   }
 
-  ddayList.innerHTML = upcomingEvents.map((event) => {
-    const eventStartDate = parseDateKey(event.date);
+  ddayList.innerHTML = upcomingEvents.map(({ event, nextDate }) => {
+    const eventStartDate = parseDateKey(nextDate);
     const diffDays = Math.round((eventStartDate - todayDate) / 86400000);
     let badgeLabel;
     let badgeClass = "dday-item-badge";
@@ -2304,14 +2386,15 @@ function renderDdayWidget() {
   }).join("");
 }
 
-function addCalendarEvent(dateKey, endDateKey, title, color, memo) {
+function addCalendarEvent(dateKey, endDateKey, title, color, memo, weekdays = []) {
   calendarEvents.push({
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     date: dateKey,
     endDate: endDateKey && endDateKey !== dateKey ? endDateKey : "",
     title,
     color: color || DEFAULT_EVENT_COLOR,
-    memo: memo || ""
+    memo: memo || "",
+    weekdays: endDateKey && endDateKey !== dateKey ? normalizeWeekdays(weekdays) : []
   });
   saveCalendarEvents();
   renderCalendarGrid();
@@ -2361,6 +2444,7 @@ function resetCalendarAddForm() {
   calendarAddForm.reset();
   calendarAddDate.value = calendarSelectedDate;
   calendarAddEndDate.value = "";
+  setSelectedCalendarWeekdays([]);
   setSelectedCalendarColor(DEFAULT_EVENT_COLOR);
   calendarAddMemo.value = "";
   calendarAddSubmit.textContent = "일정 추가";
@@ -2377,6 +2461,7 @@ function startEditingCalendarEvent(id) {
   calendarAddDate.value = event.date;
   calendarAddEndDate.value = getEventEndDate(event) !== event.date ? getEventEndDate(event) : "";
   calendarAddTitle.value = event.title;
+  setSelectedCalendarWeekdays(event.weekdays || []);
   setSelectedCalendarColor(event.color || DEFAULT_EVENT_COLOR);
   calendarAddMemo.value = event.memo || "";
   calendarAddSubmit.textContent = "일정 수정";

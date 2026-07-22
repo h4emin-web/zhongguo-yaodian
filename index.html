@@ -639,6 +639,18 @@
             <label for="calendar-add-end-date">종료일 (연속일정)</label>
             <input id="calendar-add-end-date" type="text" inputmode="numeric" placeholder="YYYY-MM-DD" maxlength="10" pattern="\d{4}-\d{2}-\d{2}" autocomplete="off">
           </div>
+          <div class="calendar-add-row calendar-add-row-full calendar-weekday-filter">
+            <label id="calendar-weekday-filter-label">요일 선택</label>
+            <div class="calendar-weekday-options" role="group" aria-labelledby="calendar-weekday-filter-label">
+              <button class="calendar-weekday-button" type="button" data-weekday="1" aria-pressed="false">월</button>
+              <button class="calendar-weekday-button" type="button" data-weekday="2" aria-pressed="false">화</button>
+              <button class="calendar-weekday-button" type="button" data-weekday="3" aria-pressed="false">수</button>
+              <button class="calendar-weekday-button" type="button" data-weekday="4" aria-pressed="false">목</button>
+              <button class="calendar-weekday-button" type="button" data-weekday="5" aria-pressed="false">금</button>
+              <button class="calendar-weekday-button" type="button" data-weekday="6" aria-pressed="false">토</button>
+              <button class="calendar-weekday-button" type="button" data-weekday="0" aria-pressed="false">일</button>
+            </div>
+          </div>
           <div class="calendar-add-row calendar-add-row-full">
             <label for="calendar-add-title">일정</label>
             <input id="calendar-add-title" type="text" placeholder="일정 내용" autocomplete="off" required>
