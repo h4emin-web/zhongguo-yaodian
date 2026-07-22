@@ -248,6 +248,63 @@ function Click-WorksheetCellCenter {
   return "clicked:$Address"
 }
 
+function Select-WorksheetCell {
+  param($Excel, $Sheet, [string]$Address, [string]$Label)
+
+  $errors = @()
+  Invoke-WithComRetry { $Sheet.Parent.Activate() | Out-Null } "activate workbook for $Label"
+  Invoke-WithComRetry { $Sheet.Activate() | Out-Null } "activate sheet for $Label"
+  $range = Invoke-WithComRetry { $Sheet.Range($Address) } "range for $Label"
+
+  try {
+    [MouseClicker]::ShowWindow([IntPtr]$Excel.Hwnd, [MouseClicker]::SW_RESTORE) | Out-Null
+    [MouseClicker]::SetForegroundWindow([IntPtr]$Excel.Hwnd) | Out-Null
+    Start-Sleep -Milliseconds 250
+  } catch {}
+
+  try {
+    $window = Invoke-WithComRetry { $Excel.ActiveWindow } "active window for $Label"
+    $scrollRow = [Math]::Max(1, [int]$range.Row - 2)
+    $scrollColumn = [Math]::Max(1, [int]$range.Column - 2)
+    Invoke-WithComRetry { $window.ScrollRow = $scrollRow } "scroll target row for $Label"
+    Invoke-WithComRetry { $window.ScrollColumn = $scrollColumn } "scroll target column for $Label"
+  } catch {
+    $errors += ("scroll: {0}" -f $_.Exception.Message)
+  }
+
+  try {
+    Invoke-WithComRetry { $Excel.Goto($range, $true) | Out-Null } "goto $Address for $Label"
+    Start-Sleep -Milliseconds 250
+    return "goto:$Address"
+  } catch {
+    $errors += ("goto: {0}" -f $_.Exception.Message)
+  }
+
+  try {
+    Invoke-WithComRetry { $range.Activate() | Out-Null } "activate $Address for $Label"
+    Start-Sleep -Milliseconds 250
+    return "activate:$Address"
+  } catch {
+    $errors += ("activate: {0}" -f $_.Exception.Message)
+  }
+
+  try {
+    Invoke-WithComRetry { $range.Select() | Out-Null } "select $Address for $Label"
+    Start-Sleep -Milliseconds 250
+    return "select:$Address"
+  } catch {
+    $errors += ("select: {0}" -f $_.Exception.Message)
+  }
+
+  try {
+    return Click-WorksheetCellCenter $Excel $Sheet $Address $Label
+  } catch {
+    $errors += ("click: {0}" -f $_.Exception.Message)
+  }
+
+  throw "$Label cell selection failed. $($errors -join ' / ')"
+}
+
 function Invoke-TopButtonInColumn {
   param($Excel, $Sheet, [string]$ColumnLetter, [string[]]$Needles, [string]$Label)
 
@@ -376,6 +433,8 @@ $updateMacroName = if ($env:PENDING_RECEIPT_OFFER_UPDATE_MACRO) { $env:PENDING_R
 $offerMacroWarning = ""
 $ranOrderSelectMacro = ""
 $ranUpdateMacro = ""
+$selectedOrderCell = ""
+$selectedUpdateCell = ""
 
 $excel = Get-RunningExcel
 $createdExcel = $false
@@ -421,9 +480,9 @@ try {
     Invoke-WithComRetry { $sheet.Cells.Item($targetRow, 25).NumberFormat = "yyyy-mm-dd" } "instock format"
 
     try {
-      Invoke-WithComRetry { $sheet.Range("A$targetRow").Select() | Out-Null } "select offer row"
+      $selectedOrderCell = Select-WorksheetCell $excel $sheet "A$targetRow" "select offer row"
       $ranOrderSelectMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($orderSelectMacroName, "PO수정선택", "OrderSelect", "SelectOrder") "A" "offer order select"
-      Invoke-WithComRetry { $sheet.Range("K$targetRow").Select() | Out-Null } "select offer update cell"
+      $selectedUpdateCell = Select-WorksheetCell $excel $sheet "K$targetRow" "select offer update cell"
       $ranUpdateMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($updateMacroName, "PO수정", "Update", "Modify") "K" "offer update"
     } catch {
       $offerMacroWarning = "Offer list server update macro failed: $($_.Exception.Message)"
@@ -468,6 +527,8 @@ try {
     unit = [string]$sheet.Cells.Item($targetRow, 12).Text
     instockDate = $instockDateValue.ToString("yyyy-MM-dd")
     scNo = [string]$sheet.Cells.Item($targetRow, 14).Text
+    selectedOrderCell = $selectedOrderCell
+    selectedUpdateCell = $selectedUpdateCell
     orderSelectMacro = $ranOrderSelectMacro
     updateMacro = $ranUpdateMacro
     verifiedRow = $verifiedRow
