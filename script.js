@@ -58,7 +58,7 @@ const hamFullscreen = document.querySelector(".ham-fullscreen");
 const hamItem = document.querySelector('.tools-item[data-tool="ham"]');
 const hamMeta = document.querySelector(".ham-meta");
 const hamClose = document.querySelector(".ham-close");
-const hamFilterInput = document.querySelector("#ham-filter-input");
+const hamSidebarToggle = document.querySelector(".ham-sidebar-toggle");
 const hamRestoreButton = document.querySelector(".ham-restore-button");
 const hamGroupList = document.querySelector(".ham-group-list");
 const hamHiddenMeta = document.querySelector(".ham-hidden-meta");
@@ -163,9 +163,9 @@ const RZNOMICS_STOCK_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const MARKET_INDEX_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const HAM_DATA_URL = "data/ham-library.json";
 const HAM_HIDDEN_STORAGE_KEY = "haemin-workspace-ham-hidden";
-const HAM_SYNC_MIGRATED_STORAGE_KEY = "haemin-workspace-ham-hidden-migrated";
 const HAM_SYNC_FUNCTION = "ham-progress-sync";
-const HAM_ALL_GROUP = { id: "", label: "전체" };
+const HAM_ALL_GROUP_ID = "__all";
+const HAM_ALL_GROUP = { id: HAM_ALL_GROUP_ID, label: "전체" };
 const CALENDAR_STORAGE_KEY = "haemin-workspace-calendar-events";
 const EVENT_COLORS = [
   "#FF9EEB",
@@ -296,6 +296,7 @@ let hamItems = [];
 let hamLoaded = false;
 let hamLoading = false;
 let hamActiveGroup = "";
+let hamSidebarOpen = false;
 let hamHiddenIds = loadHamHiddenIds();
 let hamHiddenSyncing = false;
 let starBurstHue = 0;
@@ -4184,14 +4185,6 @@ function normalizeHamHiddenIds(value) {
   return new Set(Array.isArray(value) ? value.filter((item) => typeof item === "string" && item.trim()) : []);
 }
 
-function areHamHiddenIdsEqual(left, right) {
-  if (left.size !== right.size) {
-    return false;
-  }
-
-  return Array.from(left).every((item) => right.has(item));
-}
-
 async function saveHamHiddenIdsToStorage() {
   if (!supabaseClient || hamHiddenSyncing) {
     return;
@@ -4231,24 +4224,10 @@ async function loadHamHiddenIdsFromStorage() {
       return;
     }
 
-    const localIds = new Set(hamHiddenIds);
     const remoteIds = normalizeHamHiddenIds(data.hiddenIds);
-    const hasMigrated = localStorage.getItem(HAM_SYNC_MIGRATED_STORAGE_KEY) === "1";
 
-    if (!hasMigrated && localIds.size > 0) {
-      hamHiddenIds = new Set([...remoteIds, ...localIds]);
-      localStorage.setItem(HAM_SYNC_MIGRATED_STORAGE_KEY, "1");
-      persistHamHiddenIdsLocally();
-
-      if (!areHamHiddenIdsEqual(hamHiddenIds, remoteIds)) {
-        await saveHamHiddenIdsToStorage();
-      }
-
-      return;
-    }
-
+    // Server state is the source of truth so stale browser caches cannot re-add old hidden items.
     hamHiddenIds = remoteIds;
-    localStorage.setItem(HAM_SYNC_MIGRATED_STORAGE_KEY, "1");
     persistHamHiddenIdsLocally();
   } catch (error) {
     console.error(error);
@@ -4272,6 +4251,7 @@ async function clearHamHiddenIdsFromStorage() {
 async function loadHamLibrary() {
   if (hamLoaded) {
     await loadHamHiddenIdsFromStorage();
+    setDefaultHamGroup();
     renderHamEntries();
     return;
   }
@@ -4295,6 +4275,7 @@ async function loadHamLibrary() {
     hamItems = Array.isArray(data.items) ? data.items : [];
     hamLoaded = true;
     await loadHamHiddenIdsFromStorage();
+    setDefaultHamGroup();
     renderHamGroupButtons();
     renderHamEntries();
   } catch (error) {
@@ -4307,34 +4288,16 @@ async function loadHamLibrary() {
 }
 
 function getFilteredHamItems() {
-  const keyword = hamFilterInput.value.trim().toLowerCase();
-
   return hamItems.filter((item) => {
     if (hamHiddenIds.has(item.id)) {
       return false;
     }
 
-    if (hamActiveGroup && item.group !== hamActiveGroup) {
+    if (hamActiveGroup && hamActiveGroup !== HAM_ALL_GROUP_ID && item.group !== hamActiveGroup) {
       return false;
     }
 
-    if (!keyword) {
-      return true;
-    }
-
-    const haystack = [
-      item.number,
-      item.group,
-      item.groupLabel,
-      item.displayNumber,
-      item.year,
-      item.question,
-      item.answer,
-      item.note,
-      ...(item.options || []).map((option) => option.text)
-    ].join(" ").toLowerCase();
-
-    return haystack.includes(keyword);
+    return true;
   });
 }
 
@@ -4343,6 +4306,24 @@ function updateHamMeta(filteredCount = 0) {
   hamMeta.textContent = `${hamItems.length}건 중 ${filteredCount}건 표시`;
   hamHiddenMeta.textContent = `정리한 항목 ${hiddenCount}건`;
   hamRestoreButton.disabled = hiddenCount === 0;
+}
+
+function getFirstHamGroupId() {
+  return hamItems.find((item) => item.group && !hamHiddenIds.has(item.id))?.group
+    || hamItems.find((item) => item.group)?.group
+    || HAM_ALL_GROUP_ID;
+}
+
+function setDefaultHamGroup() {
+  if (!hamActiveGroup) {
+    hamActiveGroup = getFirstHamGroupId();
+  }
+}
+
+function setHamSidebarOpen(isOpen) {
+  hamSidebarOpen = isOpen;
+  hamFullscreen.classList.toggle("is-sidebar-open", hamSidebarOpen);
+  hamSidebarToggle.setAttribute("aria-expanded", String(hamSidebarOpen));
 }
 
 function getHamGroups() {
@@ -4373,7 +4354,7 @@ function renderHamGroupButtons() {
 
   const groups = getHamGroups();
   const counts = groups.reduce((acc, group) => {
-    acc[group.id] = group.id
+    acc[group.id] = group.id !== HAM_ALL_GROUP_ID
       ? hamItems.filter((item) => item.group === group.id && !hamHiddenIds.has(item.id)).length
       : hamItems.filter((item) => !hamHiddenIds.has(item.id)).length;
     return acc;
@@ -4436,11 +4417,8 @@ function renderHamEntries() {
 function openHamTool() {
   hamFullscreen.classList.add("is-open");
   hamFullscreen.setAttribute("aria-hidden", "false");
-
-  if (!window.matchMedia("(max-width: 760px)").matches) {
-    hamFilterInput.focus();
-  }
-
+  hamActiveGroup = "";
+  setHamSidebarOpen(false);
   loadHamLibrary();
 }
 
@@ -4753,10 +4731,11 @@ worklogFileInput.addEventListener("change", () => {
 worklogFilterInput.addEventListener("input", renderWorklog);
 
 hamClose.addEventListener("click", closeHamTool);
-hamFilterInput.addEventListener("input", renderHamEntries);
+hamSidebarToggle.addEventListener("click", () => {
+  setHamSidebarOpen(!hamSidebarOpen);
+});
 hamRestoreButton.addEventListener("click", async () => {
   hamHiddenIds.clear();
-  localStorage.setItem(HAM_SYNC_MIGRATED_STORAGE_KEY, "1");
   await saveHamHiddenIds({ remote: false });
   await clearHamHiddenIdsFromStorage();
   renderHamEntries();
@@ -4769,6 +4748,7 @@ hamGroupList.addEventListener("click", (event) => {
   }
 
   hamActiveGroup = button.dataset.hamGroup || "";
+  setHamSidebarOpen(false);
   renderHamEntries();
 });
 hamResults.addEventListener("click", async (event) => {
@@ -4779,7 +4759,6 @@ hamResults.addEventListener("click", async (event) => {
   }
 
   hamHiddenIds.add(button.dataset.hamHide);
-  localStorage.setItem(HAM_SYNC_MIGRATED_STORAGE_KEY, "1");
   await saveHamHiddenIds();
   renderHamEntries();
 });
