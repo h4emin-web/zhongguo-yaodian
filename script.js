@@ -163,14 +163,7 @@ const RZNOMICS_STOCK_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const MARKET_INDEX_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const HAM_DATA_URL = "data/ham-library.json";
 const HAM_HIDDEN_STORAGE_KEY = "haemin-workspace-ham-hidden";
-const HAM_GROUPS = [
-  { id: "", label: "전체" },
-  { id: "A", label: "A" },
-  { id: "B", label: "B" },
-  { id: "C", label: "C" },
-  { id: "D", label: "D" },
-  { id: "E", label: "E" }
-];
+const HAM_ALL_GROUP = { id: "", label: "전체" };
 const CALENDAR_STORAGE_KEY = "haemin-workspace-calendar-events";
 const EVENT_COLORS = [
   "#FF9EEB",
@@ -4224,6 +4217,9 @@ function getFilteredHamItems() {
     const haystack = [
       item.number,
       item.group,
+      item.groupLabel,
+      item.displayNumber,
+      item.year,
       item.question,
       item.answer,
       item.note,
@@ -4241,19 +4237,41 @@ function updateHamMeta(filteredCount = 0) {
   hamRestoreButton.disabled = hiddenCount === 0;
 }
 
+function getHamGroups() {
+  const groups = [];
+  const seen = new Set();
+
+  hamItems.forEach((item) => {
+    const id = item.group || "";
+
+    if (!id || seen.has(id)) {
+      return;
+    }
+
+    seen.add(id);
+    groups.push({
+      id,
+      label: item.groupLabel || id
+    });
+  });
+
+  return [HAM_ALL_GROUP, ...groups];
+}
+
 function renderHamGroupButtons() {
   if (!hamGroupList) {
     return;
   }
 
-  const counts = HAM_GROUPS.reduce((acc, group) => {
+  const groups = getHamGroups();
+  const counts = groups.reduce((acc, group) => {
     acc[group.id] = group.id
       ? hamItems.filter((item) => item.group === group.id && !hamHiddenIds.has(item.id)).length
       : hamItems.filter((item) => !hamHiddenIds.has(item.id)).length;
     return acc;
   }, {});
 
-  hamGroupList.innerHTML = HAM_GROUPS.map((group) => `
+  hamGroupList.innerHTML = groups.map((group) => `
     <button class="ham-group-button${hamActiveGroup === group.id ? " is-active" : ""}" type="button" data-ham-group="${escapeHtml(group.id)}">
       <span>${escapeHtml(group.label)}</span>
       <strong>${counts[group.id] || 0}</strong>
@@ -4273,6 +4291,8 @@ function renderHamEntries() {
 
   hamResults.innerHTML = filtered.map((item) => {
     const answerOption = (item.options || []).find((option) => option.number === item.answer);
+    const entryNumber = item.displayNumber || item.number;
+    const entryGroup = item.groupLabel || item.group;
     const optionHtml = (item.options || []).map((option) => `
       <li${option.number === item.answer ? ' class="is-answer"' : ""}>
         <span>${escapeHtml(option.number)}</span>
@@ -4286,8 +4306,8 @@ function renderHamEntries() {
     return `
       <article class="ham-entry" data-ham-id="${escapeHtml(item.id)}">
         <div class="ham-entry-head">
-          <span class="ham-entry-index">${escapeHtml(item.number)}</span>
-          <span class="ham-entry-group">${escapeHtml(item.group)}</span>
+          <span class="ham-entry-index">${escapeHtml(entryNumber)}</span>
+          <span class="ham-entry-group">${escapeHtml(entryGroup)}</span>
           <button class="ham-hide-button" type="button" data-ham-hide="${escapeHtml(item.id)}">정리</button>
         </div>
         <p class="ham-question">${escapeHtml(item.question)}</p>
