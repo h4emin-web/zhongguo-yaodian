@@ -165,7 +165,19 @@ function Invoke-FirstMacro {
       if (-not $shapeText) {
         try { $shapeText = [string]$shape.TextFrame.Characters().Text } catch {}
       }
+      if (-not $shapeText) {
+        try { $shapeText = [string]$shape.AlternativeText } catch {}
+      }
+      if (-not $shapeText) {
+        try { $shapeText = [string]$shape.Title } catch {}
+      }
       try { $shapeAction = [string]$shape.OnAction } catch {}
+      if (-not $shapeAction) {
+        try { $shapeAction = [string]$shape.DrawingObject.OnAction } catch {}
+      }
+      if (-not $shapeAction) {
+        try { $shapeAction = [string]$shape.OLEFormat.Object.OnAction } catch {}
+      }
 
       $normalizedShapeText = $shapeText.Trim() -replace "\s+", ""
       $matchesText = @($MacroNames | Where-Object {
@@ -212,6 +224,89 @@ function Click-WorksheetCellCenter {
   return "clicked:$Address"
 }
 
+function Select-WorksheetCell {
+  param($Excel, $Sheet, [string]$Address, [string]$Label)
+
+  $errors = @()
+  Invoke-WithComRetry { $Sheet.Parent.Activate() | Out-Null } "activate workbook for $Label"
+  Invoke-WithComRetry { $Sheet.Activate() | Out-Null } "activate sheet for $Label"
+  $range = Invoke-WithComRetry { $Sheet.Range($Address) } "range for $Label"
+  $targetRow = Invoke-WithComRetry { [int]$range.Row } "target row for $Label"
+  $targetColumn = Invoke-WithComRetry { [int]$range.Column } "target column for $Label"
+  $getActiveCellState = {
+    try {
+      $active = Invoke-WithComRetry { $Excel.ActiveCell } "active cell for $Label"
+      if ($active) {
+        $activeRow = [int]$active.Row
+        $activeColumn = [int]$active.Column
+        return [pscustomobject]@{
+          Ok = ($activeRow -eq $targetRow -and $activeColumn -eq $targetColumn)
+          Address = [string]$active.Address($false, $false)
+        }
+      }
+    } catch {}
+
+    return [pscustomobject]@{ Ok = $false; Address = "" }
+  }
+
+  try {
+    [MouseClicker]::ShowWindow([IntPtr]$Excel.Hwnd, [MouseClicker]::SW_RESTORE) | Out-Null
+    [MouseClicker]::SetForegroundWindow([IntPtr]$Excel.Hwnd) | Out-Null
+    Start-Sleep -Milliseconds 250
+  } catch {}
+
+  try {
+    $window = Invoke-WithComRetry { $Excel.ActiveWindow } "active window for $Label"
+    $scrollRow = [Math]::Max(1, [int]$range.Row - 2)
+    $scrollColumn = [Math]::Max(1, [int]$range.Column - 2)
+    Invoke-WithComRetry { $window.ScrollRow = $scrollRow } "scroll target row for $Label"
+    Invoke-WithComRetry { $window.ScrollColumn = $scrollColumn } "scroll target column for $Label"
+  } catch {
+    $errors += ("scroll: {0}" -f $_.Exception.Message)
+  }
+
+  try {
+    Invoke-WithComRetry { $Excel.Goto($range, $true) | Out-Null } "goto $Address for $Label"
+    Start-Sleep -Milliseconds 250
+    $state = & $getActiveCellState
+    if ($state.Ok) { return "goto:$Address" }
+    $errors += ("goto selected {0}" -f $state.Address)
+  } catch {
+    $errors += ("goto: {0}" -f $_.Exception.Message)
+  }
+
+  try {
+    Invoke-WithComRetry { $range.Activate() | Out-Null } "activate $Address for $Label"
+    Start-Sleep -Milliseconds 250
+    $state = & $getActiveCellState
+    if ($state.Ok) { return "activate:$Address" }
+    $errors += ("activate selected {0}" -f $state.Address)
+  } catch {
+    $errors += ("activate: {0}" -f $_.Exception.Message)
+  }
+
+  try {
+    Invoke-WithComRetry { $range.Select() | Out-Null } "select $Address for $Label"
+    Start-Sleep -Milliseconds 250
+    $state = & $getActiveCellState
+    if ($state.Ok) { return "select:$Address" }
+    $errors += ("select selected {0}" -f $state.Address)
+  } catch {
+    $errors += ("select: {0}" -f $_.Exception.Message)
+  }
+
+  try {
+    $clicked = Click-WorksheetCellCenter $Excel $Sheet $Address $Label
+    $state = & $getActiveCellState
+    if ($state.Ok) { return $clicked }
+    $errors += ("click selected {0}" -f $state.Address)
+  } catch {
+    $errors += ("click: {0}" -f $_.Exception.Message)
+  }
+
+  throw "$Label cell selection failed. $($errors -join ' / ')"
+}
+
 function Invoke-TopButtonInColumn {
   param($Excel, $Sheet, [string]$ColumnLetter, [string[]]$Needles, [string]$Label)
 
@@ -226,13 +321,31 @@ function Invoke-TopButtonInColumn {
   Invoke-WithComRetry { $window.ScrollColumn = 1 } "scroll column for $Label"
 
   $targetColumn = Invoke-WithComRetry { $Sheet.Range(("{0}1" -f $ColumnLetter)).Column } "button column for $Label"
-  $candidates = @()
+  $targetColumnRange = Invoke-WithComRetry { $Sheet.Range(("{0}1" -f $ColumnLetter)) } "button column range for $Label"
+  $targetLeft = Invoke-WithComRetry { [double]$targetColumnRange.Left } "button column left for $Label"
+  $targetRight = Invoke-WithComRetry { [double]($targetColumnRange.Left + $targetColumnRange.Width) } "button column right for $Label"
+  $textCandidates = @()
+  $positionCandidates = @()
 
   foreach ($shape in @($Sheet.Shapes)) {
     $text = ""
     try { $text = [string]$shape.TextFrame2.TextRange.Text } catch {}
     if (-not $text) {
       try { $text = [string]$shape.TextFrame.Characters().Text } catch {}
+    }
+    if (-not $text) {
+      try { $text = [string]$shape.AlternativeText } catch {}
+    }
+    if (-not $text) {
+      try { $text = [string]$shape.Title } catch {}
+    }
+    $candidateAction = ""
+    try { $candidateAction = [string]$shape.OnAction } catch {}
+    if (-not $candidateAction) {
+      try { $candidateAction = [string]$shape.DrawingObject.OnAction } catch {}
+    }
+    if (-not $candidateAction) {
+      try { $candidateAction = [string]$shape.OLEFormat.Object.OnAction } catch {}
     }
 
     $normalizedText = $text.Trim() -replace "\s+", ""
@@ -249,19 +362,43 @@ function Invoke-TopButtonInColumn {
     $topRow = 0
     $leftColumn = 0
     $rightColumn = 0
+    $shapeTop = 0.0
+    $shapeLeft = 0.0
+    $shapeRight = 0.0
     try { $topRow = [int]$shape.TopLeftCell.Row } catch {}
     try { $leftColumn = [int]$shape.TopLeftCell.Column } catch {}
     try { $rightColumn = [int]$shape.BottomRightCell.Column } catch { $rightColumn = $leftColumn }
+    try { $shapeTop = [double]$shape.Top } catch {}
+    try {
+      $shapeLeft = [double]$shape.Left
+      $shapeRight = [double]($shape.Left + $shape.Width)
+    } catch {}
 
-    if (($matchesNeedle -or ($leftColumn -le $targetColumn -and $rightColumn -ge $targetColumn)) -and $topRow -le 3) {
-      $candidates += $shape
+    $isNearTop = ($topRow -gt 0 -and $topRow -le 3) -or ($topRow -eq 0 -and $shapeTop -le 90)
+    $overlapsTargetColumn = $leftColumn -le $targetColumn -and $rightColumn -ge $targetColumn
+
+    if (-not $overlapsTargetColumn -and $shapeRight -gt 0) {
+      $overlapsTargetColumn = $shapeLeft -lt $targetRight -and $shapeRight -gt $targetLeft
+    }
+
+    if ($matchesNeedle -and $isNearTop) {
+      $textCandidates += $shape
+    } elseif ($overlapsTargetColumn -and $isNearTop -and ($candidateAction -or $text)) {
+      $positionCandidates += $shape
     }
   }
 
+  $candidates = if ($textCandidates.Count -gt 0) { $textCandidates } else { $positionCandidates }
   $targetShape = $candidates | Sort-Object @{ Expression = { try { [double]$_.Top } catch { 999999 } } }, @{ Expression = { try { [double]$_.Left } catch { 999999 } } } | Select-Object -First 1
   if ($targetShape) {
     $shapeName = try { [string]$targetShape.Name } catch { "" }
     $shapeAction = try { [string]$targetShape.OnAction } catch { "" }
+    if (-not $shapeAction) {
+      try { $shapeAction = [string]$targetShape.DrawingObject.OnAction } catch {}
+    }
+    if (-not $shapeAction) {
+      try { $shapeAction = [string]$targetShape.OLEFormat.Object.OnAction } catch {}
+    }
 
     if ($shapeAction) {
       Invoke-WithComRetry { $Excel.Run($shapeAction) | Out-Null } "shape action for $Label"
@@ -360,13 +497,16 @@ $inText = U 0xC785
 $searchMacroName = "{0}_{1}" -f (U 0xC870,0xD68C), (U 0xBA54,0xC774,0xCEE4)
 $orderSelectMacroName = if ($env:PENDING_RECEIPT_INOUT_ORDER_SELECT_MACRO) { $env:PENDING_RECEIPT_INOUT_ORDER_SELECT_MACRO } else { "{0}{1}" -f (U 0xC624,0xB354), (U 0xC120,0xD0DD) }
 $orderNoMacroName = if ($env:PENDING_RECEIPT_INOUT_ORDERNO_MACRO) { $env:PENDING_RECEIPT_INOUT_ORDERNO_MACRO } else { "{0}{1}" -f (U 0xC624,0xB354,0xBC88,0xD638), (U 0xB123,0xAE30) }
-$addMacroName = if ($env:PENDING_RECEIPT_INOUT_ADD_MACRO) { $env:PENDING_RECEIPT_INOUT_ADD_MACRO } else { U 0xCD94,0xAC00 }
+$addMacroName = if ($env:PENDING_RECEIPT_INOUT_ADD_MACRO) { $env:PENDING_RECEIPT_INOUT_ADD_MACRO } else { "{0}{1}" -f (U 0xCD9C,0xACE0), (U 0xC0BD,0xC785) }
 $macroWarning = ""
 $quantityText = Format-NumberText $Quantity
 $remarkText = $PoNo.Trim()
 $ranOrderSelectMacro = ""
 $ranOrderNoMacro = ""
 $ranAddMacro = ""
+$selectedOrderCell = ""
+$selectedOrderCellAfterSelect = ""
+$selectedAddCell = ""
 $clearedDeliveryColumns = @()
 $remarkColumn = 0
 $savedOrderNo = ""
@@ -476,15 +616,15 @@ try {
     }
 
     try {
-      Invoke-WithComRetry { $sheet.Range("A$newRow").Select() | Out-Null } "select new row"
+      $selectedOrderCell = Select-WorksheetCell $excel $sheet "A$newRow" "select new row"
       $ranOrderSelectMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($orderSelectMacroName, "출고수정선택", "OrderSelect", "SelectOrder") "A" "in/out order select"
-      Invoke-WithComRetry { $sheet.Range("A$newRow").Select() | Out-Null } "select new row after order select"
+      $selectedOrderCellAfterSelect = Select-WorksheetCell $excel $sheet "A$newRow" "select new row after order select"
       $ranOrderNoMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($orderNoMacroName, "오더번호", "OrderNo", "OrderNoInsert", "InsertOrderNo") "B" "in/out order no"
       $savedOrderNo = ([string]$sheet.Cells.Item($newRow, 1).Text).Trim()
       if (-not $savedOrderNo) {
         throw "in/out order no button did not create an order number in column A."
       }
-      Invoke-WithComRetry { $sheet.Range("G$newRow").Select() | Out-Null } "select add cell"
+      $selectedAddCell = Select-WorksheetCell $excel $sheet "G$newRow" "select add cell"
       $ranAddMacro = Invoke-MacroOrColumnButton $excel $workbook $sheet @($addMacroName, "출고삽입", "추가선택", "Add", "Insert", "Append") "G" "in/out add"
     } catch {
       $macroWarning = "In/out order select/order no/add macro failed: $($_.Exception.Message)"
@@ -523,6 +663,9 @@ try {
     amountCleared = $true
     remarkColumn = $remarkColumn
     deliveryColumnsCleared = $clearedDeliveryColumns
+    selectedOrderCell = $selectedOrderCell
+    selectedOrderCellAfterSelect = $selectedOrderCellAfterSelect
+    selectedAddCell = $selectedAddCell
     orderSelectMacro = $ranOrderSelectMacro
     orderNoMacro = $ranOrderNoMacro
     addMacro = $ranAddMacro
