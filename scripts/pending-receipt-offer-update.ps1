@@ -193,7 +193,19 @@ function Invoke-FirstMacro {
       if (-not $shapeText) {
         try { $shapeText = [string]$shape.TextFrame.Characters().Text } catch {}
       }
+      if (-not $shapeText) {
+        try { $shapeText = [string]$shape.AlternativeText } catch {}
+      }
+      if (-not $shapeText) {
+        try { $shapeText = [string]$shape.Title } catch {}
+      }
       try { $shapeAction = [string]$shape.OnAction } catch {}
+      if (-not $shapeAction) {
+        try { $shapeAction = [string]$shape.DrawingObject.OnAction } catch {}
+      }
+      if (-not $shapeAction) {
+        try { $shapeAction = [string]$shape.OLEFormat.Object.OnAction } catch {}
+      }
 
       $normalizedShapeText = $shapeText.Trim()
       $matchesText = @($MacroNames | Where-Object { $_ -and ($normalizedShapeText -eq $_ -or $normalizedShapeText -like "*$_*") }).Count -gt 0
@@ -250,13 +262,23 @@ function Invoke-TopButtonInColumn {
   Invoke-WithComRetry { $window.ScrollColumn = 1 } "scroll column for $Label"
 
   $targetColumn = Invoke-WithComRetry { $Sheet.Range(("{0}1" -f $ColumnLetter)).Column } "button column for $Label"
-  $candidates = @()
+  $targetColumnRange = Invoke-WithComRetry { $Sheet.Range(("{0}1" -f $ColumnLetter)) } "button column range for $Label"
+  $targetLeft = Invoke-WithComRetry { [double]$targetColumnRange.Left } "button column left for $Label"
+  $targetRight = Invoke-WithComRetry { [double]($targetColumnRange.Left + $targetColumnRange.Width) } "button column right for $Label"
+  $textCandidates = @()
+  $positionCandidates = @()
 
   foreach ($shape in @($Sheet.Shapes)) {
     $text = ""
     try { $text = [string]$shape.TextFrame2.TextRange.Text } catch {}
     if (-not $text) {
       try { $text = [string]$shape.TextFrame.Characters().Text } catch {}
+    }
+    if (-not $text) {
+      try { $text = [string]$shape.AlternativeText } catch {}
+    }
+    if (-not $text) {
+      try { $text = [string]$shape.Title } catch {}
     }
 
     $normalizedText = $text.Trim() -replace "\s+", ""
@@ -273,15 +295,33 @@ function Invoke-TopButtonInColumn {
     $topRow = 0
     $leftColumn = 0
     $rightColumn = 0
+    $shapeTop = 0.0
+    $shapeLeft = 0.0
+    $shapeRight = 0.0
     try { $topRow = [int]$shape.TopLeftCell.Row } catch {}
     try { $leftColumn = [int]$shape.TopLeftCell.Column } catch {}
     try { $rightColumn = [int]$shape.BottomRightCell.Column } catch { $rightColumn = $leftColumn }
+    try { $shapeTop = [double]$shape.Top } catch {}
+    try {
+      $shapeLeft = [double]$shape.Left
+      $shapeRight = [double]($shape.Left + $shape.Width)
+    } catch {}
 
-    if (($matchesNeedle -or ($leftColumn -le $targetColumn -and $rightColumn -ge $targetColumn)) -and $topRow -le 3) {
-      $candidates += $shape
+    $isNearTop = ($topRow -gt 0 -and $topRow -le 3) -or ($topRow -eq 0 -and $shapeTop -le 80)
+    $overlapsTargetColumn = $leftColumn -le $targetColumn -and $rightColumn -ge $targetColumn
+
+    if (-not $overlapsTargetColumn -and $shapeRight -gt 0) {
+      $overlapsTargetColumn = $shapeLeft -lt $targetRight -and $shapeRight -gt $targetLeft
+    }
+
+    if ($matchesNeedle -and $isNearTop) {
+      $textCandidates += $shape
+    } elseif ($overlapsTargetColumn -and $isNearTop) {
+      $positionCandidates += $shape
     }
   }
 
+  $candidates = if ($textCandidates.Count -gt 0) { $textCandidates } else { $positionCandidates }
   $targetShape = $candidates | Sort-Object @{ Expression = { try { [double]$_.Top } catch { 999999 } } }, @{ Expression = { try { [double]$_.Left } catch { 999999 } } } | Select-Object -First 1
   if ($targetShape) {
     $shapeName = try { [string]$targetShape.Name } catch { "" }
