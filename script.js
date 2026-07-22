@@ -503,18 +503,20 @@ function initializeHanaExchangeRate() {
   }, HANA_RATE_REFRESH_INTERVAL_MS);
 }
 
-function formatMarketIndexRate(value) {
+function formatMarketIndexRate(value, direction = "flat") {
   const number = Number(value);
 
   if (!Number.isFinite(number)) {
     return "-";
   }
 
-  if (number === 0) {
+  const normalizedDirection = String(direction || "").toLowerCase();
+
+  if (number === 0 || normalizedDirection === "flat") {
     return "0.00%";
   }
 
-  const sign = number > 0 ? "+" : "-";
+  const sign = normalizedDirection === "down" ? "-" : normalizedDirection === "up" ? "+" : number > 0 ? "+" : "-";
   return `${sign}${Math.abs(number).toFixed(2)}%`;
 }
 
@@ -532,7 +534,7 @@ function formatMarketIndexValue(value) {
 }
 
 function formatMarketIndexLabel(item) {
-  return `${formatMarketIndexValue(item.value)} (${formatMarketIndexRate(item.changeRate)})`;
+  return `${formatMarketIndexValue(item.value)} (${formatMarketIndexRate(item.changeRate, item.direction)})`;
 }
 
 function setMarketIndexItem(element, item) {
