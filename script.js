@@ -54,6 +54,15 @@ const worklogLoadButton = document.querySelector(".worklog-load-button");
 const worklogFileInput = document.querySelector(".worklog-file-input");
 const worklogFilterInput = document.querySelector("#worklog-filter-input");
 const worklogClearButton = document.querySelector(".worklog-clear-button");
+const hamFullscreen = document.querySelector(".ham-fullscreen");
+const hamItem = document.querySelector('.tools-item[data-tool="ham"]');
+const hamMeta = document.querySelector(".ham-meta");
+const hamClose = document.querySelector(".ham-close");
+const hamFilterInput = document.querySelector("#ham-filter-input");
+const hamRestoreButton = document.querySelector(".ham-restore-button");
+const hamGroupList = document.querySelector(".ham-group-list");
+const hamHiddenMeta = document.querySelector(".ham-hidden-meta");
+const hamResults = document.querySelector(".ham-results");
 const marginCostInput = document.querySelector("#margin-cost-input");
 const marginPriceInput = document.querySelector("#margin-price-input");
 const marginResult = document.querySelector(".margin-calc-result");
@@ -152,6 +161,16 @@ const STAR_BURST_HUE_STEP = 47;
 const HANA_RATE_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 const RZNOMICS_STOCK_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const MARKET_INDEX_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+const HAM_DATA_URL = "data/ham-library.json";
+const HAM_HIDDEN_STORAGE_KEY = "haemin-workspace-ham-hidden";
+const HAM_GROUPS = [
+  { id: "", label: "전체" },
+  { id: "A", label: "A" },
+  { id: "B", label: "B" },
+  { id: "C", label: "C" },
+  { id: "D", label: "D" },
+  { id: "E", label: "E" }
+];
 const CALENDAR_STORAGE_KEY = "haemin-workspace-calendar-events";
 const EVENT_COLORS = [
   "#FF9EEB",
@@ -278,6 +297,11 @@ let currentGlobalKeyword = "";
 let currentGlobalMatches = { wc: [], mfds: [], cnph: [], usdmf: [], indiawc: [] };
 let worklogPeople = [];
 let worklogDateLabel = "";
+let hamItems = [];
+let hamLoaded = false;
+let hamLoading = false;
+let hamActiveGroup = "";
+let hamHiddenIds = loadHamHiddenIds();
 let starBurstHue = 0;
 let hanaRateTimer = null;
 let rznomicsStockTimer = null;
@@ -927,10 +951,15 @@ function organizeWorkspaceCatalog() {
     box.querySelector("h2")?.textContent.trim().includes(title)
   ));
   const worklogBox = findBox("업무일지");
+  const hamButton = infoList?.querySelector('.tools-item[data-tool="ham"]');
 
   if (infoList && worklogBox) {
     const stockCard = infoList.querySelector(".calendar-stock-card");
     infoList.insertBefore(worklogBox, stockCard || null);
+
+    if (hamButton) {
+      infoList.insertBefore(hamButton, worklogBox.nextSibling);
+    }
   }
 
   ["K-DMF 검색", "중국 약전", "중국 WC & COPP", "인도 WC", "미국 DMF"].forEach((title) => {
@@ -1096,6 +1125,10 @@ document.addEventListener("keydown", (event) => {
     closeWorklog();
   }
 
+  if (event.key === "Escape" && hamFullscreen.classList.contains("is-open")) {
+    closeHamTool();
+  }
+
 });
 
 marginCostInput.addEventListener("input", renderMarginResult);
@@ -1129,6 +1162,8 @@ dailyNewsRefresh.addEventListener("click", () => loadDailyNews({ force: true }))
 calendarItem.addEventListener("click", () => {
   requestProtectedToolAccess("캘린더", openCalendarTool);
 });
+
+hamItem.addEventListener("click", openHamTool);
 
 calendarPrevButton.addEventListener("click", () => {
   calendarViewMonth -= 1;
@@ -4121,6 +4156,165 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
+function renderMultilineText(value) {
+  return escapeHtml(value).replaceAll("\n", "<br>");
+}
+
+function loadHamHiddenIds() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(HAM_HIDDEN_STORAGE_KEY) || "[]");
+    return new Set(Array.isArray(saved) ? saved.filter(Boolean) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveHamHiddenIds() {
+  localStorage.setItem(HAM_HIDDEN_STORAGE_KEY, JSON.stringify(Array.from(hamHiddenIds)));
+}
+
+async function loadHamLibrary() {
+  if (hamLoaded || hamLoading) {
+    return;
+  }
+
+  hamLoading = true;
+  hamMeta.textContent = "자료를 불러오는 중입니다.";
+  hamResults.innerHTML = '<p class="empty-result">불러오는 중입니다.</p>';
+
+  try {
+    const response = await fetch(HAM_DATA_URL, { cache: "no-store" });
+
+    if (!response.ok) {
+      throw new Error("자료를 불러오지 못했습니다.");
+    }
+
+    const data = await response.json();
+    hamItems = Array.isArray(data.items) ? data.items : [];
+    hamLoaded = true;
+    renderHamGroupButtons();
+    renderHamEntries();
+  } catch (error) {
+    console.error(error);
+    hamResults.innerHTML = '<p class="empty-result">자료를 불러오지 못했습니다.</p>';
+    hamMeta.textContent = "자료 확인 필요";
+  } finally {
+    hamLoading = false;
+  }
+}
+
+function getFilteredHamItems() {
+  const keyword = hamFilterInput.value.trim().toLowerCase();
+
+  return hamItems.filter((item) => {
+    if (hamHiddenIds.has(item.id)) {
+      return false;
+    }
+
+    if (hamActiveGroup && item.group !== hamActiveGroup) {
+      return false;
+    }
+
+    if (!keyword) {
+      return true;
+    }
+
+    const haystack = [
+      item.number,
+      item.group,
+      item.question,
+      item.answer,
+      item.note,
+      ...(item.options || []).map((option) => option.text)
+    ].join(" ").toLowerCase();
+
+    return haystack.includes(keyword);
+  });
+}
+
+function updateHamMeta(filteredCount = 0) {
+  const hiddenCount = hamHiddenIds.size;
+  hamMeta.textContent = `${hamItems.length}건 중 ${filteredCount}건 표시`;
+  hamHiddenMeta.textContent = `정리한 항목 ${hiddenCount}건`;
+  hamRestoreButton.disabled = hiddenCount === 0;
+}
+
+function renderHamGroupButtons() {
+  if (!hamGroupList) {
+    return;
+  }
+
+  const counts = HAM_GROUPS.reduce((acc, group) => {
+    acc[group.id] = group.id
+      ? hamItems.filter((item) => item.group === group.id && !hamHiddenIds.has(item.id)).length
+      : hamItems.filter((item) => !hamHiddenIds.has(item.id)).length;
+    return acc;
+  }, {});
+
+  hamGroupList.innerHTML = HAM_GROUPS.map((group) => `
+    <button class="ham-group-button${hamActiveGroup === group.id ? " is-active" : ""}" type="button" data-ham-group="${escapeHtml(group.id)}">
+      <span>${escapeHtml(group.label)}</span>
+      <strong>${counts[group.id] || 0}</strong>
+    </button>
+  `).join("");
+}
+
+function renderHamEntries() {
+  const filtered = getFilteredHamItems();
+  updateHamMeta(filtered.length);
+  renderHamGroupButtons();
+
+  if (filtered.length === 0) {
+    hamResults.innerHTML = '<p class="empty-result">표시할 항목이 없습니다.</p>';
+    return;
+  }
+
+  hamResults.innerHTML = filtered.map((item) => {
+    const answerOption = (item.options || []).find((option) => option.number === item.answer);
+    const optionHtml = (item.options || []).map((option) => `
+      <li${option.number === item.answer ? ' class="is-answer"' : ""}>
+        <span>${escapeHtml(option.number)}</span>
+        <p>${escapeHtml(option.text)}</p>
+      </li>
+    `).join("");
+    const imageHtml = (item.images || []).map((src) => `
+      <img class="ham-entry-image" src="${escapeHtml(src)}" alt="">
+    `).join("");
+
+    return `
+      <article class="ham-entry" data-ham-id="${escapeHtml(item.id)}">
+        <div class="ham-entry-head">
+          <span class="ham-entry-index">${escapeHtml(item.number)}</span>
+          <span class="ham-entry-group">${escapeHtml(item.group)}</span>
+          <button class="ham-hide-button" type="button" data-ham-hide="${escapeHtml(item.id)}">정리</button>
+        </div>
+        <p class="ham-question">${escapeHtml(item.question)}</p>
+        ${imageHtml ? `<div class="ham-entry-images">${imageHtml}</div>` : ""}
+        <ol class="ham-options">${optionHtml}</ol>
+        <details class="ham-answer">
+          <summary>확인</summary>
+          <div class="ham-answer-body">
+            <p class="ham-answer-line">확인값 ${escapeHtml(item.answer)}${answerOption ? ` · ${escapeHtml(answerOption.text)}` : ""}</p>
+            <p class="ham-note">${renderMultilineText(item.note)}</p>
+          </div>
+        </details>
+      </article>
+    `;
+  }).join("");
+}
+
+function openHamTool() {
+  hamFullscreen.classList.add("is-open");
+  hamFullscreen.setAttribute("aria-hidden", "false");
+  hamFilterInput.focus();
+  loadHamLibrary();
+}
+
+function closeHamTool() {
+  hamFullscreen.classList.remove("is-open");
+  hamFullscreen.setAttribute("aria-hidden", "true");
+}
+
 function parseWorklogDateFromFilename(filename) {
   const match = String(filename || "").match(/(\d{2,4})[-_](\d{2})[-_](\d{2})/);
 
@@ -4423,6 +4617,35 @@ worklogFileInput.addEventListener("change", () => {
   }
 });
 worklogFilterInput.addEventListener("input", renderWorklog);
+
+hamClose.addEventListener("click", closeHamTool);
+hamFilterInput.addEventListener("input", renderHamEntries);
+hamRestoreButton.addEventListener("click", () => {
+  hamHiddenIds.clear();
+  saveHamHiddenIds();
+  renderHamEntries();
+});
+hamGroupList.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-ham-group]");
+
+  if (!button) {
+    return;
+  }
+
+  hamActiveGroup = button.dataset.hamGroup || "";
+  renderHamEntries();
+});
+hamResults.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-ham-hide]");
+
+  if (!button) {
+    return;
+  }
+
+  hamHiddenIds.add(button.dataset.hamHide);
+  saveHamHiddenIds();
+  renderHamEntries();
+});
 
 let worklogDragDepth = 0;
 

@@ -238,6 +238,7 @@
       <div class="side-tools tool-category-list" aria-label="정보">
         <button class="tools-item" type="button" data-tool="daily-news">오늘의 뉴스</button>
         <button class="tools-item" type="button" data-tool="calendar">캘린더</button>
+        <button class="tools-item" type="button" data-tool="ham">햄</button>
         <section class="calendar-stock-card" aria-label="알지노믹스 주식 가격" aria-live="polite">
           <div class="calendar-stock-top">
             <div class="calendar-stock-heading">
@@ -677,6 +678,27 @@
         </div>
         <div class="po-receive-result" aria-live="polite"></div>
       </div>
+    </div>
+  </div>
+
+  <div class="ham-fullscreen" aria-hidden="true">
+    <div class="ham-topbar">
+      <div class="ham-topbar-title">
+        <h2>햄</h2>
+        <p class="wc-search-meta ham-meta">자료를 불러오는 중입니다.</p>
+      </div>
+      <div class="ham-topbar-actions">
+        <input id="ham-filter-input" type="search" placeholder="내용 찾기" autocomplete="off">
+        <button class="ham-restore-button" type="button">복구</button>
+        <button class="ham-close" type="button" aria-label="close ham">Close</button>
+      </div>
+    </div>
+    <div class="ham-layout">
+      <aside class="ham-sidebar" aria-label="햄 분류">
+        <div class="ham-group-list" role="list"></div>
+        <p class="ham-hidden-meta">정리한 항목 0건</p>
+      </aside>
+      <div class="ham-results" aria-live="polite"></div>
     </div>
   </div>
 

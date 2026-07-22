@@ -1,0 +1,7145 @@
+{
+  "title": "ham",
+  "updated": "2026-07-23",
+  "count": 200,
+  "items": [
+    {
+      "id": "s1-1",
+      "number": 1,
+      "session": "A",
+      "localNumber": 1,
+      "group": "A",
+      "question": "역물류에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "사용이 완료된 일회용 소모성 자재는 회수물류의 대상이다."
+        },
+        {
+          "number": "2",
+          "text": "역물류에는 폐기물류, 반품물류, 회수물류 등이 포함된다."
+        },
+        {
+          "number": "3",
+          "text": "역물류는 순물류와 반대 방향으로 이동하는 물류흐름이다."
+        },
+        {
+          "number": "4",
+          "text": "온라인 쇼핑의 증가로 인하여 반품물류의 중요성이 증가하고 있다."
+        },
+        {
+          "number": "5",
+          "text": "회수물류에는 파렛트, 컨테이너 등 물류용기의 재활용을 위한 회수가 포함된다."
+        }
+      ],
+      "answer": "1",
+      "rate": "90%",
+      "note": "사용이 끝난 일회용 소모성 자재는 회수해서 다시 쓰는 대상이라기보다 폐기·처리 대상입니다. 그래서 “회수물류”가 아니라 폐기물류에 가깝습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-2",
+      "number": 2,
+      "session": "A",
+      "localNumber": 2,
+      "group": "A",
+      "question": "유통활동을 상적유통과 물적유통으로 구분할 때 물적유통에 해당하는 것을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄴ, ㄷ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ, ㄷ, ㅁ"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ, ㄹ, ㅁ"
+        },
+        {
+          "number": "4",
+          "text": "ㄴ, ㄷ, ㄹ"
+        },
+        {
+          "number": "5",
+          "text": "ㄷ, ㄹ, ㅁ"
+        }
+      ],
+      "answer": "3",
+      "rate": "89%",
+      "note": "물적유통 : 상품의 '실물 이동'과 관련된 모든 활동입니다.\n따라서 보관, 화물 수송, 유통가공활동 이 정답입니다.\n\n상적유통 : 상품의 '소유권 이전'과 관련된 모든 활동입니다.",
+      "images": [
+        "assets/ham-images/hh20250726m2.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-3",
+      "number": 3,
+      "session": "A",
+      "localNumber": 3,
+      "group": "A",
+      "question": "물류의 개념에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "시대의 흐름에 따라서 물류의 범위는 물적유통, 로지스틱스(Logistics), SCM으로 확대되었다."
+        },
+        {
+          "number": "2",
+          "text": "물적유통은 주로 수송, 보관, 하역, 포장 등의 부문별 효율화를 추구하였다."
+        },
+        {
+          "number": "3",
+          "text": "로지스틱스(Logistics)는 조달, 생산, 판매 등 기업 내 물류효율화를 목표로 한다."
+        },
+        {
+          "number": "4",
+          "text": "SCM은 공급자, 제조업자, 도소매점, 고객 등 공급사슬 전반의 효율화를 목적으로 한다."
+        },
+        {
+          "number": "5",
+          "text": "물류는 통합적 물류관리의 개념에서 출발하여 물류영역 전반의 최적화를 거쳐 최종적으로 개별 기업의 물류생산성 제고의 차원으로 발전하였다."
+        }
+      ],
+      "answer": "5",
+      "rate": "73%",
+      "note": "⑤번이 틀린 이유는 발전 방향이 거꾸로 되어 있기 때문입니다. 물류 개념은 보통 개별 기능 중심의 물적유통 → 기업 내부 통합 중심의 로지스틱스 → 공급사슬 전체 최적화인 SCM 방향으로 확대됩니다. 즉, 최종 단계가 “개별 기업의 물류생산성 제고”가 아니라 공급자·제조업자·유통업자·고객을 포함한 공급사슬 전체 최적화에 가깝습니다. 관련 자료에서도 물류산업이 물적유통, 로지스틱스, 공급사슬관리 단계로 발전할수록 조직 간 통합이 고도화된다고 설명합니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-4",
+      "number": 4,
+      "session": "A",
+      "localNumber": 4,
+      "group": "A",
+      "question": "물류환경 변화에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "온라인쇼핑의 확대로 택배시장이 확대되고 있다."
+        },
+        {
+          "number": "2",
+          "text": "소비자 니즈(needs)의 다양화ㆍ고도화로 유통의 소량ㆍ다빈도화가 초래되었다."
+        },
+        {
+          "number": "3",
+          "text": "하역의 로봇화, 화물의 단위적재 등을 도입하여 물류의 신속화 및 자동화를 추구하고 있다."
+        },
+        {
+          "number": "4",
+          "text": "물류서비스 향상, 비용절감을 위하여 물류 아웃소싱과 3PL이 활성화되고 있다."
+        },
+        {
+          "number": "5",
+          "text": "물류의 중요성이 증가하여 상물일치의 개념이 확대되고 있다."
+        }
+      ],
+      "answer": "5",
+      "rate": "77%",
+      "note": "상물일치가 아닌 상물분리",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-5",
+      "number": 5,
+      "session": "A",
+      "localNumber": 5,
+      "group": "A",
+      "question": "물류관리의 중요성에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "공급사슬 전체의 경쟁력 강화를 위하여 물류관리의 중요성이 대두되고 있다."
+        },
+        {
+          "number": "2",
+          "text": "생산부문 원가절감의 한계로 인하여 물류관리의 중요성이 부각되고 있다."
+        },
+        {
+          "number": "3",
+          "text": "소비자 니즈(needs)의 다양화로 소품종 대량생산이 증가하여 물류관리의 중요성이 증가하고 있다."
+        },
+        {
+          "number": "4",
+          "text": "온라인쇼핑의 증가로 배송의 중요성이 부각되어 물류관리의 중요성이 증가하였다."
+        },
+        {
+          "number": "5",
+          "text": "글로벌화로 인한 물동량의 증가로 물류관리의 중요성이 증가하였다."
+        }
+      ],
+      "answer": "3",
+      "rate": "85%",
+      "note": "소품종 대량생산이 아닌 다품종 소량생산임",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-6",
+      "number": 6,
+      "session": "A",
+      "localNumber": 6,
+      "group": "A",
+      "question": "물류관리에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "기업의 물류관리는 구매, 생산, 마케팅 등과 밀접한 관계가 있다."
+        },
+        {
+          "number": "2",
+          "text": "물류관리를 위한 계획은 전략계획, 전술계획, 운영계획으로 나누어 단계적으로 수립한다."
+        },
+        {
+          "number": "3",
+          "text": "원자재 및 부품의 조달, 구매상품의 보관, 완제품 유통도 물류관리의 대상이다."
+        },
+        {
+          "number": "4",
+          "text": "물류비용 절감을 통한 이익창출은 제3의 이익원으로 인식되고 있다."
+        },
+        {
+          "number": "5",
+          "text": "물류는 마케팅믹스의 4P 중 제품(product)과 가장 밀접한 관계가 있다."
+        }
+      ],
+      "answer": "5",
+      "rate": "80%",
+      "note": "마케팅믹스의 4P는 Product(제품), Price(가격), Place(유통경로), Promotion(촉진)으로 구성됩니다. 물류는 이 중에서 상품을 고객에게 전달하는 물리적 통로와 흐름을 담당하므로, 유통경로(Place)와 가장 밀접한 관계가 있습니다.\n\n물류는 마케팅 요소 4P중 제품(product)가 아닌 유통(place)와 가장 밀접한 관계가 있습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-7",
+      "number": 7,
+      "session": "A",
+      "localNumber": 7,
+      "group": "A",
+      "question": "주문정보를 창고나 발송부서에 전달한 후부터 주문받은 제품의 발송을 준비하는데 걸리는 시간은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "주문전달시간(Order Transmittal Time)"
+        },
+        {
+          "number": "2",
+          "text": "주문처리시간(Order Processing Time)"
+        },
+        {
+          "number": "3",
+          "text": "주문확정시간(Order Confirmation Time)"
+        },
+        {
+          "number": "4",
+          "text": "주문조립시간(Order Assembly Time)"
+        },
+        {
+          "number": "5",
+          "text": "재고가용성(Stock Availability)"
+        }
+      ],
+      "answer": "4",
+      "rate": "48%",
+      "note": "주문조립시간은 주문을 받아서 주문 정보를 창고나 발송관련 부서에 전달한 후부터 주문 받은 제품을 발송 준비하는데 걸리는 시간으로, 오더 어셈블리 타임이라고도 합니다.\n\n주문조립시간: 주문 받은 후 주문정보를 창고 또는 관련부서 전달, 제품발송 준비에 드는 시간",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-8",
+      "number": 8,
+      "session": "A",
+      "localNumber": 8,
+      "group": "A",
+      "question": "물류서비스에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "물류 EDI(Electronic Data Interchange)를 도입하면 주문처리, 물품추적, 반품 등의 영역에서 고객 만족도가 향상된다."
+        },
+        {
+          "number": "2",
+          "text": "물류 리드타임이 짧아지면 고객서비스 수준이 향상된다."
+        },
+        {
+          "number": "3",
+          "text": "재고수준이 높아지면 고객서비스 수준이 향상된다."
+        },
+        {
+          "number": "4",
+          "text": "물류거점의 수가 증가하면 고객서비스 수준이 향상된다."
+        },
+        {
+          "number": "5",
+          "text": "고객서비스 수준이 높아지면 물류비가 절감되고 매출액은 증가한다."
+        }
+      ],
+      "answer": "5",
+      "rate": "81%",
+      "note": "고객서비스 수준과 물류비용은 상충관계에 있습니다. 고객서비스 수준이 증가하면, 물류비용은 감소하고, 이는 곧 물류비의 증가를 뜻합니다. 대체로 고객서비스 수준이 높아지면 매출액이 증가하지만, 반드시 비례해서 증가하는 것은 아닙니다. 즉 고객서비스 수준이 높아지면 물류비도 증가하고 매출액도 증가하므로 기업은 이익이 최대가 되는 최적의 서비스 수준을 만족해야 합니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-9",
+      "number": 9,
+      "session": "A",
+      "localNumber": 9,
+      "group": "A",
+      "question": "다음의 물류전략이 필요한 제품수명주기는?",
+      "options": [
+        {
+          "number": "1",
+          "text": "도입기"
+        },
+        {
+          "number": "2",
+          "text": "성장기"
+        },
+        {
+          "number": "3",
+          "text": "성숙기"
+        },
+        {
+          "number": "4",
+          "text": "쇠퇴기"
+        },
+        {
+          "number": "5",
+          "text": "퇴출기"
+        }
+      ],
+      "answer": "2",
+      "rate": "66%",
+      "note": "본문에서 설명하는 제품수명주기 단계는 성장기입니다. 성장기에는 물류계획을 수립하고 물류비와 서비스 간 상충관계를 고려, 규모의 경제를 실현해야 합니다. 또한 매출액은 급격한 성장을 보이고 설득을 통해 다양한 소비자들에게 인지도를 강화해야 하는 시기입니다.\n\n보기의 설명은 성장기에 대한 설명.\n도입기: 인지도제고, 제품출시 후 조기사용 유도를 위해 촉진 강화\n성숙기: 시장점유율방어 및 이윤극대화, 제품의 전문성 및 브랜드 이미지 강화, 인지도 강화\n쇠퇴기: 회수 또는 회생, 위험 최소화 전략, 취약품목에 대한 가격인하 또는 최소한의 촉진",
+      "images": [
+        "assets/ham-images/hh20250726m9.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-10",
+      "number": 10,
+      "session": "A",
+      "localNumber": 10,
+      "group": "A",
+      "question": "다음 설명에 해당하는 물류조직의 유형은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "사업부형 물류조직"
+        },
+        {
+          "number": "2",
+          "text": "라인ㆍ스태프형 물류조직"
+        },
+        {
+          "number": "3",
+          "text": "직능형 물류조직"
+        },
+        {
+          "number": "4",
+          "text": "그리드형 물류조직"
+        },
+        {
+          "number": "5",
+          "text": "매트릭스형 물류조직"
+        }
+      ],
+      "answer": "1",
+      "rate": "70%",
+      "note": "독립된 경영을 하는 조직은 사업부제 조직입니다. 경영상의 독립성을 인정해 줌으로써 책임 소재를 명확히 할 수 있고, 독자적인 경영활동의 수행으로 인해 부문 이기주의 경향으로 전체적으로 손해를 미칠 수 있습니다.",
+      "images": [
+        "assets/ham-images/hh20250726m10.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-11",
+      "number": 11,
+      "session": "A",
+      "localNumber": 11,
+      "group": "A",
+      "question": "3자물류(3PL: Third Party Logistics)에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "화주와 물류업체 간의 전략적, 장기적 협력관계를 추구한다."
+        },
+        {
+          "number": "2",
+          "text": "3자물류 업체는 운송과 보관을 포함한 물류 프로세스의 대부분을 수행한다."
+        },
+        {
+          "number": "3",
+          "text": "자가물류 방식에 비해 화주의 정보 유출 우려가 적다."
+        },
+        {
+          "number": "4",
+          "text": "3자물류에 IT, 컨설팅 등이 결합된 통합서비스는 4자물류로 정의된다."
+        },
+        {
+          "number": "5",
+          "text": "화주 입장에서는 내부의 물류 전문가 육성 및 사내 전문지식 축적이 어려울 수 있다."
+        }
+      ],
+      "answer": "3",
+      "rate": "83%",
+      "note": "3자물류는 화주기업이 물류 기능을 전문 물류업체에 아웃소싱(외부 위탁)하는 것을 말합니다. 거래 정보, 고객 정보 등이 외부 업체에 공유되므로 정보의 유출 위험이 있습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-12",
+      "number": 12,
+      "session": "A",
+      "localNumber": 12,
+      "group": "A",
+      "question": "6시그마를 추진하는 DMAIC 각 단계에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "Do는 새로운 품질 개선 아이디어를 환류(Feedback)하는 단계이다."
+        },
+        {
+          "number": "2",
+          "text": "Measure는 프로세스의 현재 상태를 파악하는 단계이다."
+        },
+        {
+          "number": "3",
+          "text": "Analyze는 품질을 저하시키는 근본 원인을 발견하는 단계이다."
+        },
+        {
+          "number": "4",
+          "text": "Improve는 품질 개선 활동을 실행하고 그 결과를 수치화하는 단계이다."
+        },
+        {
+          "number": "5",
+          "text": "Control은 개선 결과를 문서화하고 개선된 프로세스가 지속적으로 유지되도록 통제하는 단계이다."
+        }
+      ],
+      "answer": "1",
+      "rate": "67%",
+      "note": "6시그마에서 추진하는 DMAIC에서 D는 Do가 아닌 Define(정의)입니다. 이 단계에서는 고객들의 요구사항과 품질의 중요 영향요인(CTQ), 즉 고객만족을 위해 개선해야 할 중요부분을 인지하고 이를 근거로 개선작업을 수행할 프로세스를 선정하는 단계입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-13",
+      "number": 13,
+      "session": "A",
+      "localNumber": 13,
+      "group": "A",
+      "question": "제약이론(TOC)에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "골드랫(E.M. Goldratt)이 제안하였다."
+        },
+        {
+          "number": "2",
+          "text": "제약을 찾아 집중적으로 개선하는 경영이론이다."
+        },
+        {
+          "number": "3",
+          "text": "개선 대상에는 자원, 부서, 인식, 환경 등 제약이 되는 모든 것이 포함된다."
+        },
+        {
+          "number": "4",
+          "text": "산출회계(Throughput Accounting)는 통계적 기법을 활용한 품질 개선 도구이다."
+        },
+        {
+          "number": "5",
+          "text": "재고는 판매를 위하여 재화에 투자된 자금으로 정의된다."
+        }
+      ],
+      "answer": "4",
+      "rate": "55%",
+      "note": "TOC에서의 산출회계는 관리회계 및 의사결정 기법입니다. 기업의 제약자원을 중심으로 이익을 극대화하는 목적으로 사용됩니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-14",
+      "number": 14,
+      "session": "A",
+      "localNumber": 14,
+      "group": "A",
+      "question": "제품 A의 개당 판매 가격은 10 만원이고, 당기 고정비가 2 억원, 변동비는 가격의 75 %이다. 당기 손익분기점에 해당하는 제품 A의 판매량(개)은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "6,000"
+        },
+        {
+          "number": "2",
+          "text": "7,000"
+        },
+        {
+          "number": "3",
+          "text": "8,000"
+        },
+        {
+          "number": "4",
+          "text": "9,000"
+        },
+        {
+          "number": "5",
+          "text": "10,000"
+        }
+      ],
+      "answer": "3",
+      "rate": "66%",
+      "note": "손익분기점 판매량=총고정비/단위당 판매가격-단위당 변동비\nA의 판매량=2억/10만원-10만원X75%=2억/25000원=8000",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-15",
+      "number": 15,
+      "session": "A",
+      "localNumber": 15,
+      "group": "A",
+      "question": "다음 표는 제품 A와 제품 B를 취급하는 물류업체의 연간 비목별 물류비와 기능별 물류지표에 관한 자료이다. 이에 관한 설명으로 옳은 것은? (단, 자료에서 제시한 것 외의 사항은 고려하지 않는다.)",
+      "options": [
+        {
+          "number": "1",
+          "text": "제품 A의 운송비로 3,000만원이 배부된다."
+        },
+        {
+          "number": "2",
+          "text": "제품 B의 물류비는 4,000만원이다."
+        },
+        {
+          "number": "3",
+          "text": "제품 B의 보관비로 1,000만원이 배부된다."
+        },
+        {
+          "number": "4",
+          "text": "제품 A에 배부된 포장비와 제품 B에 배부된 포장비는 같다."
+        },
+        {
+          "number": "5",
+          "text": "제품 A에 배부된 하역비는 제품 B에 배부된 하역비의 2배이다."
+        }
+      ],
+      "answer": "4",
+      "rate": "59%",
+      "note": "물류지표의 단위는 생략하겠습니다.\n\n제품 A]\n운송비 : 6000만원 X 8000/12000 = 4000만원\n보관비 : 2000만원 X 3000/5000 = 1200만원\n포장비 : 2000만원 X 600/1200 = 1000만원\n하역비 : 3000만원 X (900+600)/(1300+1200) = 1800만원 (하역비는 입출고물량이므로 입고물량+출고물량)\n\n-> 물류비 = 운송비+보관비+포장비+하역비 = 8000만원\n\n[제품 B] -> 금액에서 제품 A의 각 비용을 빼면 됨.\n운송비 : 2000만원\n보관비 : 800만원\n포장비 : 1000만원\n하역비 : 1200만원\n\n-> 물류비 = 5000만원",
+      "images": [
+        "assets/ham-images/hh20250726m15.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-16",
+      "number": 16,
+      "session": "A",
+      "localNumber": 16,
+      "group": "A",
+      "question": "물류비 분류체계에서 세목별 비목에 해당하는 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "노무비"
+        },
+        {
+          "number": "2",
+          "text": "포장비"
+        },
+        {
+          "number": "3",
+          "text": "하역비"
+        },
+        {
+          "number": "4",
+          "text": "보관비"
+        },
+        {
+          "number": "5",
+          "text": "물류정보ㆍ관리비"
+        }
+      ],
+      "answer": "1",
+      "rate": "75%",
+      "note": "물류비의 분류체계 중 세목별 비목은 재료비, 노무비, 경비, 이자비용 입니다.\n\n2.3,4,5는 간이기준의 기능별 분류",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-17",
+      "number": 17,
+      "session": "A",
+      "localNumber": 17,
+      "group": "A",
+      "question": "A기업의 작년 매출액은 400 억원, 물류비는 매출액의 20 %, 영업이익은 20 억원이었다. 올해 물류비를 매출액의 15 %로 절감한다면, 올해 매출액 대비 영업이익의 비율(%)은? (단, 매출액과 다른 비용 및 조건은 작년과 동일한 것으로 가정한다.)",
+      "options": [
+        {
+          "number": "1",
+          "text": "5"
+        },
+        {
+          "number": "2",
+          "text": "10"
+        },
+        {
+          "number": "3",
+          "text": "15"
+        },
+        {
+          "number": "4",
+          "text": "20"
+        },
+        {
+          "number": "5",
+          "text": "25"
+        }
+      ],
+      "answer": "2",
+      "rate": "48%",
+      "note": "[작년]\n매출액 = 400억원\n물류비 = 400억 X 20% = 80억원\n영업이익 = 20억원\n-> 총매출액이 400억원이고 물류비+영업이익이 100억원 이므로 다른 비용은 300억원이다.\n\n[올해]\n매출액 = 400억원 (문제의 조건에서 매출액이 작년과 동일하다고 했으므로)\n물류비 = 400억 X 15% = 60억원\n영업이익 = 400억원 - 물류비 60억원 - 다른비용 300억원(문제의 조건에서 다른 비용은 작년과 동일하다고 했으므로) = 40억원\n-> 올해 매출액 대비 영업이익의 비율은 40/400 X 100 = 10%",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-18",
+      "number": 18,
+      "session": "A",
+      "localNumber": 18,
+      "group": "A",
+      "question": "수직적 유통경로시스템(VMS: Vertical Marketing System)에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "유통경로상의 한 주체에서 계획된 프로그램에 의해 경로구성원들을 전문적으로 관리ㆍ통제하는 시스템이다."
+        },
+        {
+          "number": "2",
+          "text": "기업형 VMS는 한 경로구성원이 다른 경로구성원들을 법적으로 소유ㆍ관리하는 시스템이다."
+        },
+        {
+          "number": "3",
+          "text": "경로구성원에 대한 통제력은 관리형 VMS가 기업형 VMS보다 더 강하다."
+        },
+        {
+          "number": "4",
+          "text": "계약형 VMS의 대표적인 형태에는 프랜차이즈 시스템이 있다."
+        },
+        {
+          "number": "5",
+          "text": "계약형 VMS는 경로구성원들이 각자가 수행해야 할 유통기능들을 계약에 의해 합의함으로써 공식적 경로관계를 형성하는 시스템이다."
+        }
+      ],
+      "answer": "3",
+      "rate": "75%",
+      "note": "경로구성원에 대한 통제력의 강도: 기업형 VMS > 계약형 VMS > 관리형 VMS",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-19",
+      "number": 19,
+      "session": "A",
+      "localNumber": 19,
+      "group": "A",
+      "question": "구매관리에서 장기적 협력관계를 유지할 수 있는 공급업체의 특징이 아닌 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "건전한 재무상태"
+        },
+        {
+          "number": "2",
+          "text": "유연한 공급 능력"
+        },
+        {
+          "number": "3",
+          "text": "안정적인 노사관계"
+        },
+        {
+          "number": "4",
+          "text": "정보시스템의 높은 상호운용성"
+        },
+        {
+          "number": "5",
+          "text": "품질의 높은 변동성"
+        }
+      ],
+      "answer": "5",
+      "rate": "82%",
+      "note": "품질의 변동성이 높다는 것의 의미: 제품의 품질이 좋을 때도 있고 나쁠 때도 있어 품질이 불안정하다는 뜻입니다.\n\n장기적인 협력관계를 유지하려면 무엇보다 균일하고 안정적인 품질(낮은 변동성)이 보장되어야 합니다. 품질 변동성이 높으면 불량률이 예측 불가능해져 구매 기업의 생산 계획에 차질이 생기므로 장기 파트너로 적합하지 않습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-20",
+      "number": 20,
+      "session": "A",
+      "localNumber": 20,
+      "group": "A",
+      "question": "e-조달의 장점이 아닌 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "구매업무 처리시간이 절감된다."
+        },
+        {
+          "number": "2",
+          "text": "프로세스 자동화로 구매비용이 절감된다."
+        },
+        {
+          "number": "3",
+          "text": "문서처리 비용이 절감된다."
+        },
+        {
+          "number": "4",
+          "text": "신용정보 및 거래정보의 유출 위험이 없다."
+        },
+        {
+          "number": "5",
+          "text": "실시간 정보로 재고와 예산을 관리할 수 있다."
+        }
+      ],
+      "answer": "4",
+      "rate": "84%",
+      "note": "e-조달은 e-Procurement 전자구매조달입니다.\n구매자와 판매자 간 공식적인 관계 구축을 하는 대신에 신용정보 및 거래정보의 유출위험이 존재한다는 한계점을 가집니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-21",
+      "number": 21,
+      "session": "A",
+      "localNumber": 21,
+      "group": "A",
+      "question": "다음 설명에 해당하는 소매상 유형은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "카테고리 킬러(Category Killer)"
+        },
+        {
+          "number": "2",
+          "text": "팩토리 아웃렛(Factory Outlet)"
+        },
+        {
+          "number": "3",
+          "text": "백화점(Department Store)"
+        },
+        {
+          "number": "4",
+          "text": "수퍼센터(Super Center)"
+        },
+        {
+          "number": "5",
+          "text": "하이퍼마켓(Hypermarket)"
+        }
+      ],
+      "answer": "1",
+      "rate": "72%",
+      "note": "-아울렛 : 제조업자나 유통업체 등이 자사의 비인기상품, 재고상품, 하자상품, 이월상품 등을 할인된 가격으로 판매하는 상설할인점포. 통상 제조업자나 백화점이 소유한 오프프라이스 스토어가 대부분이며 팩토리 아울렛이라고 한다.\n\n-카테고리 킬러 : 한정된 제품계열에서 깊이 있는 상품구색으로 전문점과 유사하나 저렴한 가격으로 판매하는 소매점으로 대량판매, 다점포화, 셀프서비스 방식을 채택한다.",
+      "images": [
+        "assets/ham-images/hh20250726m21.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-22",
+      "number": 22,
+      "session": "A",
+      "localNumber": 22,
+      "group": "A",
+      "question": "다음 중 도매기관 유형에 해당하는 것을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄴ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ, ㄴ, ㄷ"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ, ㄹ, ㅁ"
+        },
+        {
+          "number": "4",
+          "text": "ㄴ, ㄷ, ㄹ"
+        },
+        {
+          "number": "5",
+          "text": "ㄷ, ㄹ, ㅁ"
+        }
+      ],
+      "answer": "2",
+      "rate": "65%",
+      "note": "확인값은 2번입니다. ㄱ, ㄴ, ㄷ",
+      "images": [
+        "assets/ham-images/hh20250726m22.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-23",
+      "number": 23,
+      "session": "A",
+      "localNumber": 23,
+      "group": "A",
+      "question": "2차원 바코드에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "1차원 바코드에 비해 대량의 데이터를 표현할 수 있다."
+        },
+        {
+          "number": "2",
+          "text": "1차원 바코드보다 훼손이나 오염 시 오류를 쉽게 정정할 수 있다."
+        },
+        {
+          "number": "3",
+          "text": "데이터를 구성하는 방법에 따라 다층형과 매트릭스형으로 나눌 수 있다."
+        },
+        {
+          "number": "4",
+          "text": "2차원 바코드의 하나인 QR 코드는 미국의 UPS사가 개발하였다."
+        },
+        {
+          "number": "5",
+          "text": "텍스트는 물론 그래픽, 사진 등 다양한 정보도 저장할 수 있다."
+        }
+      ],
+      "answer": "4",
+      "rate": "71%",
+      "note": "2차원 바코드 중 매트릭스형 코드에 해당하는 QR코드는 일본에서 개발되었습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-24",
+      "number": 24,
+      "session": "A",
+      "localNumber": 24,
+      "group": "A",
+      "question": "전사적 자원관리(ERP)에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "생산, 판매, 구매, 인사, 재무, 물류 등 기업업무 전반을 통합 관리하는 정보시스템이다."
+        },
+        {
+          "number": "2",
+          "text": "공급사슬 계획 및 실행 시스템을 위해 필요한 정보를 제공한다."
+        },
+        {
+          "number": "3",
+          "text": "기업 활동에 소요되는 인적, 물적 자원을 효율적으로 관리하는 역할을 수행한다."
+        },
+        {
+          "number": "4",
+          "text": "성공적인 도입을 위해서는 업무의 표준화가 중요하다."
+        },
+        {
+          "number": "5",
+          "text": "1970년대 생산현장 관리를 위해 개발된 MES(Manufacturing Execution System)에서 유래하였다."
+        }
+      ],
+      "answer": "5",
+      "rate": "66%",
+      "note": "ERP의 유래는 MRP(제조자원계획) 입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-25",
+      "number": 25,
+      "session": "A",
+      "localNumber": 25,
+      "group": "A",
+      "question": "물류정보기술에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "POS는 상품의 판매 시점에 발생하는 정보를 저장한다."
+        },
+        {
+          "number": "2",
+          "text": "EDI는 거래업체 간 상호 합의된 전자문서표준을 이용하여 컴퓨터 간 구조화된 데이터를 전송하는 기술이다."
+        },
+        {
+          "number": "3",
+          "text": "RFID는 데이터의 변경 및 추가가 가능하나 여러 개의 태그를 동시에 판독하는 것은 불가능하다."
+        },
+        {
+          "number": "4",
+          "text": "GPS는 인공위성과의 무선교신을 이용하여 차량, 선박 등의 위치를 파악하는 시스템이다."
+        },
+        {
+          "number": "5",
+          "text": "Block Chain은 공급사슬관리의 가시성과 투명성을 향상시킬 수 있다."
+        }
+      ],
+      "answer": "3",
+      "rate": "75%",
+      "note": "RFID는 바코드와는 달리 제품의 원산지 및 중간이동과정 등 다량의 데이터를 저장할 수 있습니다. 또한 일시에 다량의 복수정보를 빠르게 판독 가능합니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-26",
+      "number": 26,
+      "session": "A",
+      "localNumber": 26,
+      "group": "A",
+      "question": "다음에서 설명하는 공급사슬관리 전략은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "Postponement"
+        },
+        {
+          "number": "2",
+          "text": "Cross Docking"
+        },
+        {
+          "number": "3",
+          "text": "Quick Response"
+        },
+        {
+          "number": "4",
+          "text": "Collaborative Forecasting"
+        },
+        {
+          "number": "5",
+          "text": "Continuous Replenishment"
+        }
+      ],
+      "answer": "1",
+      "rate": "53%",
+      "note": "지연전략 (postponement strategy)는 생산 프로세스에서 제품들이 서로 차별화되는 시점을 가능한 한 판매시점에 가깝게 지연시키는 전략입니다. 제품에 대한 변동성이 큰 경우, 공장에서 제품을 완성하는 대신 시장 가까이로 제품의 완성을 최대한 지연시켜 소비자가 원하는 다양한 수요를 만족시키기 위한 전략입니다.\n\n2번은 크로스도킹입니다.\n3번은 신속대응(QR)입니다.\n4번은 협업적 계획, 예측 및 보충 (CPFR)입니다.\n5번은 지속적 제품 보충 (CRP)입니다.",
+      "images": [
+        "assets/ham-images/hh20250726m26.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-27",
+      "number": 27,
+      "session": "A",
+      "localNumber": 27,
+      "group": "A",
+      "question": "공급사슬을 혁신하기 위한 신기술인 3D 프린팅에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "레이저와 파우더를 이용하여 신속하게 형상을 제작하는 쾌속조형(Rapid Prototyping)에서 유래하였다."
+        },
+        {
+          "number": "2",
+          "text": "다품종 소량생산에 유리하다."
+        },
+        {
+          "number": "3",
+          "text": "재고수준을 낮출 수 있다."
+        },
+        {
+          "number": "4",
+          "text": "고가의 금형제작 비용이 발생한다."
+        },
+        {
+          "number": "5",
+          "text": "시제품 제작시간을 단축시킬 수 있다."
+        }
+      ],
+      "answer": "4",
+      "rate": "67%",
+      "note": "3D 프린팅의 가장 큰 장점은 금형 없이 제품을 제작할 수 있다는 것으로 금형 제작 비용이 들지 않습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-28",
+      "number": 28,
+      "session": "A",
+      "localNumber": 28,
+      "group": "A",
+      "question": "수요업체가 정보공유시스템을 활용하여 자신의 재고 보충 책임을 공급업체에 게 이전함으로써 재고관리의 효율성을 높이는 방식은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "Material Requirements Planning"
+        },
+        {
+          "number": "2",
+          "text": "Computer Aided Manufacturing"
+        },
+        {
+          "number": "3",
+          "text": "Distribution Resource Planning"
+        },
+        {
+          "number": "4",
+          "text": "Enterprise Resource Planning"
+        },
+        {
+          "number": "5",
+          "text": "Vendor Managed Inventory"
+        }
+      ],
+      "answer": "5",
+      "rate": "70%",
+      "note": "Vendor Managed Inventory(공급자 주도 재고관리)\n개념: 유통업체(수요업체)가 제조업체(공급업체)에 실시간 판매 데이터와 재고 정보를 공유하면, 공급업체가 스스로 수요를 예측하여 수요업체의 재고를 알아서 보충하고 관리해 주는 방식입니다.\n\n문제에서 \"재고 보충 책임을 공급업체(Vendor)에게 이전\"한다고 명시했으므로, 공급자가 주도하여 재고를 관리하는 Vendor Managed Inventory(VMI)가 정답입니다. 이를 통해 수요업체는 재고 관리 부담을 줄이고 효율성을 높일 수 있습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-29",
+      "number": 29,
+      "session": "A",
+      "localNumber": 29,
+      "group": "A",
+      "question": "효율적 공급사슬에 관한 설명으로 옳은 것을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄴ"
+        },
+        {
+          "number": "2",
+          "text": "ㄷ, ㄹ"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ, ㄴ, ㄷ"
+        },
+        {
+          "number": "4",
+          "text": "ㄴ, ㄷ, ㄹ"
+        },
+        {
+          "number": "5",
+          "text": "ㄱ, ㄴ, ㄷ, ㄹ"
+        }
+      ],
+      "answer": "1",
+      "rate": "51%",
+      "note": "효율적 공급사슬의 특징: 비용 절감(ㄱ), 재고 최소화(ㄴ), 가격 중심의 공급자 선정, 표준화된 제품 생산\n\n반응적 공급사슬의 특징: 리드타임 단축, 유연성 중심의 공급자 선정(ㄷ), 모듈화 및 제품 다양성(ㄹ)",
+      "images": [
+        "assets/ham-images/hh20250726m29.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-30",
+      "number": 30,
+      "session": "A",
+      "localNumber": 30,
+      "group": "A",
+      "question": "채찍효과(Bullwhip Effect)에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "공급사슬 하류의 수요변동이 상류로 갈수록 증폭되는 현상이다."
+        },
+        {
+          "number": "2",
+          "text": "구매자의 사전구매(Forward Buying)로 인해 발생할 수 있다."
+        },
+        {
+          "number": "3",
+          "text": "규모의 경제를 고려한 일괄(batch)주문으로 인해 발생할 수 있다."
+        },
+        {
+          "number": "4",
+          "text": "참여기업들의 개별적 수요 예측을 통해 완화할 수 있다."
+        },
+        {
+          "number": "5",
+          "text": "상시저가전략을 이용해 완화할 수 있다."
+        }
+      ],
+      "answer": "4",
+      "rate": "58%",
+      "note": "채찍효과가 일어나는 가장 큰 원인 중 하나가 바로 공급사슬 내의 기업들이 '소통 없이 각자 개별적으로 수요예측(Demand Forecasting)'을 하기 때문입니다. 소매상의 예측이 도매상으로 가면서 뻥튀기되고, 제조업체로 가면서 더 커지게 됩니다.\n\n채찍효과를 완화하려면 개별 예측을 하는 것이 아니라, 공급사슬 전체가 POS 데이터나 판매 정보를 실시간으로 공유(정보의 투명성 확보)하여 공동으로 예측해야 합니다. 따라서 개별 수요 예측을 통해 완화할 수 있다는 설명은 오답입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-31",
+      "number": 31,
+      "session": "A",
+      "localNumber": 31,
+      "group": "A",
+      "question": "물류 합리화에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "제조원가 절감을 통한 이익 증대가 어려워짐에 따라 물류 효율성 제고 필요성이 증가하였다."
+        },
+        {
+          "number": "2",
+          "text": "제조업체가 핵심역량인 제조에 집중하기 위해서는 자가물류의 확대가 필요하다."
+        },
+        {
+          "number": "3",
+          "text": "물류 합리화 추진 시 내부 기능 간 또는 기업 간 상충관계(trade-off)가 발생할 수 있다."
+        },
+        {
+          "number": "4",
+          "text": "물류 합리화는 환경 분석, 목표 설정, 전략 수립의 단계로 추진한다."
+        },
+        {
+          "number": "5",
+          "text": "지능형 자동화 기계를 물류 업무에 도입하는 것은 생지능형(省知能形) 합리화이다."
+        }
+      ],
+      "answer": "2",
+      "rate": "71%",
+      "note": "제조업체가 핵심역량인 제조에 집중하려면 물류업무는 직접 수행하기보다 전문 물류 기업에 맡기는 아웃소싱(3PL)을 활용해야함.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-32",
+      "number": 32,
+      "session": "A",
+      "localNumber": 32,
+      "group": "A",
+      "question": "단위적재시스템(ULS: Unit Load System)에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "화물을 일정하게 단위화하고 하역, 수송, 보관 등을 기계화, 합리화하는 시스템이다."
+        },
+        {
+          "number": "2",
+          "text": "ULS 도입을 위해서는 물류 거래단위가 표준화되어야 한다."
+        },
+        {
+          "number": "3",
+          "text": "서비스 수준을 높이기 위해 고객이 지정한 규격의 파렛트를 구비하여 활용한다."
+        },
+        {
+          "number": "4",
+          "text": "ULS 도입에 의해 포장비용을 절감하고 적재 효율을 높일 수 있다."
+        },
+        {
+          "number": "5",
+          "text": "단위 화물(Unit Load)이 생성된 후 해당 상품의 운반과 하역을 실시한다."
+        }
+      ],
+      "answer": "3",
+      "rate": "77%",
+      "note": "확인값은 3번입니다. 서비스 수준을 높이기 위해 고객이 지정한 규격의 파렛트를 구비하여 활용한다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-33",
+      "number": 33,
+      "session": "A",
+      "localNumber": 33,
+      "group": "A",
+      "question": "물류 모듈에 관한 설명으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "Unit Load의 최대허용치수(Maximum Plan View Size)는 1,100 mm × 1,100 mm이다."
+        },
+        {
+          "number": "2",
+          "text": "상품성을 높이기 위해서 상품의 포장 치수를 물류 모듈과 독립적으로 결정하는 것이 바람직하다."
+        },
+        {
+          "number": "3",
+          "text": "적재함 폭이 2,340 mm인 8 톤 트럭에는 일관수송용 T-1 표준파렛트 16 매가 적재된다."
+        },
+        {
+          "number": "4",
+          "text": "물류 모듈은 물류 시설이나 장비의 규격에 관한 기준척도와 대칭계열로서, 배수나 분할관계로 정의한다."
+        },
+        {
+          "number": "5",
+          "text": "한국산업표준(KS)으로 제정된 수송포장계열치수는 1,140 mm를 정수로 나눈 배수모듈 시스템이다."
+        }
+      ],
+      "answer": "4",
+      "rate": "44%",
+      "note": "1. 최대 허용 치수는 돌출부분을 고려한 1,140mm*1,140mm 이다\n2. 독립적으로 결정 시 적재효율 저하. 물류모듈에 맞춰 정합성을 갖추도록 해야함\n3. 12매가 적재됨\n5. 1,100mm",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-34",
+      "number": 34,
+      "session": "A",
+      "localNumber": 34,
+      "group": "A",
+      "question": "물류공동화의 장점으로 옳은 것을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄴ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ, ㄷ"
+        },
+        {
+          "number": "3",
+          "text": "ㄴ, ㄷ"
+        },
+        {
+          "number": "4",
+          "text": "ㄱ, ㄷ, ㄹ"
+        },
+        {
+          "number": "5",
+          "text": "ㄱ, ㄴ, ㄷ, ㄹ"
+        }
+      ],
+      "answer": "2",
+      "rate": "47%",
+      "note": "확인값은 2번입니다. ㄱ, ㄷ",
+      "images": [
+        "assets/ham-images/hh20250726m34.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-35",
+      "number": 35,
+      "session": "A",
+      "localNumber": 35,
+      "group": "A",
+      "question": "불특정 다수의 화주를 대상으로 복수의 운송사업자가 지역을 분담하여 집화 및 배송을 수행하는 공동수배송 시스템 유형은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "특정 화주 공동형"
+        },
+        {
+          "number": "2",
+          "text": "운송사업자 공동형"
+        },
+        {
+          "number": "3",
+          "text": "개별입고 공동배송"
+        },
+        {
+          "number": "4",
+          "text": "공동집하 개별배송"
+        },
+        {
+          "number": "5",
+          "text": "개별입고 개별수송"
+        }
+      ],
+      "answer": "2",
+      "rate": "56%",
+      "note": "확인값은 2번입니다. 운송사업자 공동형",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-36",
+      "number": 36,
+      "session": "A",
+      "localNumber": 36,
+      "group": "A",
+      "question": "공동수배송에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "차별화된 배송 서비스를 경쟁전략으로 설정한 기업은 공동수배송 참여를 기피할 수 있다."
+        },
+        {
+          "number": "2",
+          "text": "전자상거래 확대에 따른 다빈도ㆍ소량 수배송 증가로 공동수배송의 필요성이 커졌다."
+        },
+        {
+          "number": "3",
+          "text": "공동수배송은 교통혼잡을 완화하고 물가 상승을 억제하는데 기여한다."
+        },
+        {
+          "number": "4",
+          "text": "긴급 수요에 대한 대응 능력이 저하되어 공동수배송 참여를 기피하는 경우도 있다."
+        },
+        {
+          "number": "5",
+          "text": "동일 지역 내에 공동물류센터가 없으면 공동수배송을 실시할 수 없다."
+        }
+      ],
+      "answer": "5",
+      "rate": "56%",
+      "note": "확인값은 5번입니다. 동일 지역 내에 공동물류센터가 없으면 공동수배송을 실시할 수 없다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-37",
+      "number": 37,
+      "session": "A",
+      "localNumber": 37,
+      "group": "A",
+      "question": "다음 설명에 해당하는 물류보안 제도는?",
+      "options": [
+        {
+          "number": "1",
+          "text": "AEO(Authorized Economic Operator)"
+        },
+        {
+          "number": "2",
+          "text": "CIP(Container Inspection Program)"
+        },
+        {
+          "number": "3",
+          "text": "CSI(Container Security Initiative)"
+        },
+        {
+          "number": "4",
+          "text": "ISPS(International Ship & Port Facility Security)"
+        },
+        {
+          "number": "5",
+          "text": "ISO 9000"
+        }
+      ],
+      "answer": "2",
+      "rate": "36%",
+      "note": "확인값은 2번입니다. CIP(Container Inspection Program)",
+      "images": [
+        "assets/ham-images/hh20250726m37.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-38",
+      "number": 38,
+      "session": "A",
+      "localNumber": 38,
+      "group": "A",
+      "question": "물류 활동과 환경의 관계에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "기후변화의 영향으로 물류 분야에서는 자원재생형 녹색물류가 중요해지고 있다."
+        },
+        {
+          "number": "2",
+          "text": "수배송 공동화 등 공동 물류활동의 확산은 환경오염을 촉진한다."
+        },
+        {
+          "number": "3",
+          "text": "운송에 의한 온실가스 저감대책 수립 및 실행은 녹색물류활동에 해당한다."
+        },
+        {
+          "number": "4",
+          "text": "녹색물류는 순물류(Forward Logistics)와 역물류(Reverse Logistics)를 포괄한다."
+        },
+        {
+          "number": "5",
+          "text": "녹색물류인증은 기업의 환경부하 저감사업 실적을 평가하여 인증하는 제도이다."
+        }
+      ],
+      "answer": "2",
+      "rate": "81%",
+      "note": "확인값은 2번입니다. 수배송 공동화 등 공동 물류활동의 확산은 환경오염을 촉진한다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-39",
+      "number": 39,
+      "session": "A",
+      "localNumber": 39,
+      "group": "A",
+      "question": "창고관리 시스템에서 고객의 발주 내역에 따라 출고할 품목의 종류와 수량을 표시함으로써 창고 작업자가 신속, 정확하게 집품하여 납품을 준비하도록 지원하는 반자동화 시스템은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "AGV(Automatic Guided Vehicle)"
+        },
+        {
+          "number": "2",
+          "text": "ASRS(Automated Storage & Retrieval System)"
+        },
+        {
+          "number": "3",
+          "text": "DAS(Digital Assorting System)"
+        },
+        {
+          "number": "4",
+          "text": "DPS(Digital Picking System)"
+        },
+        {
+          "number": "5",
+          "text": "ERP(Enterprise Resource Planning)"
+        }
+      ],
+      "answer": "4",
+      "rate": "67%",
+      "note": "확인값은 4번입니다. DPS(Digital Picking System)",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-40",
+      "number": 40,
+      "session": "A",
+      "localNumber": 40,
+      "group": "A",
+      "question": "A국가는 이산화탄소 배출량(kg)에 비례해서 환경부담금을 부과하고 있다. K사는 환경부담금을 절감하기 위해 기존 차량 매각 후 친환경 차량 도입을 검토하고 있다. 연비법에 의한 이산화탄소 배출량 및 환경부담금 산출 관련 자료가 다음과 같을 때, 친환경 차량 도입이 경제적으로 불리하지 않다는 판단을 내리기 위한 최소 주행거리(km)는? (단, 제시된 조건 이외의 사항은 고려하지 않음)",
+      "options": [
+        {
+          "number": "1",
+          "text": "50,000"
+        },
+        {
+          "number": "2",
+          "text": "100,000"
+        },
+        {
+          "number": "3",
+          "text": "150,000"
+        },
+        {
+          "number": "4",
+          "text": "200,000"
+        },
+        {
+          "number": "5",
+          "text": "250,000"
+        }
+      ],
+      "answer": "3",
+      "rate": "53%",
+      "note": "기존 차량\n주행거리 / 연비 x 0.002 x 50만원\n1/5 × 0.002 × 50 = 0.02x\n\n친환경 차량\n1/10 x 0.002 x 50 = 0.01×\n\n1500(만원)+0.01x < 0.02x\n1500 < 0.01×\n1500/0.01 < x\nX=150000",
+      "images": [
+        "assets/ham-images/hh20250726m40.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-41",
+      "number": 41,
+      "session": "A",
+      "localNumber": 41,
+      "group": "B",
+      "question": "화물자동차 운수사업법상 화물자동차 운수사업에 관한 내용으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "화물자동차 운수사업은 화물자동차 운송사업, 화물자동차 운송주선사업, 화물자동차 운송가맹사업으로 구분된다."
+        },
+        {
+          "number": "2",
+          "text": "화물자동차 운송사업을 경영하려는 자는 국토교통부장관의 허가를 받아야 한다."
+        },
+        {
+          "number": "3",
+          "text": "화물자동차 운송사업은 일반화물자동차 운송사업과 개인화물자동차 운송사업으로 구분한다."
+        },
+        {
+          "number": "4",
+          "text": "개인화물자동차 운송사업은 화물자동차 1대를 사용하여 화물을 운송하는 사업으로서 대통령령으로 정하는 사업이다."
+        },
+        {
+          "number": "5",
+          "text": "제3자 물류 활성화를 위해 운송주선사업자는 자기 명의로 다른 사람에게 화물자동차 운송주선사업을 경영하게 할 수 있다."
+        }
+      ],
+      "answer": "5",
+      "rate": "70%",
+      "note": "확인값은 5번입니다. 제3자 물류 활성화를 위해 운송주선사업자는 자기 명의로 다른 사람에게 화물자동차 운송주선사업을 경영하게 할 수 있다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-42",
+      "number": 42,
+      "session": "A",
+      "localNumber": 42,
+      "group": "B",
+      "question": "지붕구조의 덮개가 있는 화물 자동차에 해당하는 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "리치 스태커"
+        },
+        {
+          "number": "2",
+          "text": "스트래들 캐리어"
+        },
+        {
+          "number": "3",
+          "text": "하이로더"
+        },
+        {
+          "number": "4",
+          "text": "밴형 화물자동차"
+        },
+        {
+          "number": "5",
+          "text": "포크리프트"
+        }
+      ],
+      "answer": "4",
+      "rate": "72%",
+      "note": "밴형 화물자동차는 탑차라고 불리는 차량으로, 화물적재대에 지붕구조의 덮개가 있는 화물자동차입니다.\n1번, 2번은 컨테이너터미널 하역기기 입니다.\n3번은 공항에서 사용하는 항공화물 하역장비입니다.\n5번은 화물 적재장치(포크,램)와 승강장치를 구비하고 있습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-43",
+      "number": 43,
+      "session": "A",
+      "localNumber": 43,
+      "group": "B",
+      "question": "화물운송의 효율화 방안으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "공동수배송 체계를 구축한다."
+        },
+        {
+          "number": "2",
+          "text": "컨테이너 및 파렛트를 이용한 운송을 확대한다."
+        },
+        {
+          "number": "3",
+          "text": "교통정보시스템과 화물추적시스템의 연계를 도모한다."
+        },
+        {
+          "number": "4",
+          "text": "철도 및 연안운송 연계를 통해 화물운송시스템을 구축한다."
+        },
+        {
+          "number": "5",
+          "text": "적재율 증대와 비용감소를 위해 영업용 보다는 자가용 화물차량을 사용한다."
+        }
+      ],
+      "answer": "5",
+      "rate": "75%",
+      "note": "근거리 운송의 경우에는 자가용 차량을 이용하는 것이 상대적으로 유리합니다. 그러나 자가용 차량을 운영하더라도 영업용 차량과 적절하게 혼합하여 최적의 운송비가 지출될 수 있도록 해야합니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-44",
+      "number": 44,
+      "session": "A",
+      "localNumber": 44,
+      "group": "B",
+      "question": "화물차량의 중량에 관한 설명으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "최대적재량이 3톤 이상이거나 총 중량이 10톤 이상인 화물자동차는 적재물배상보험에 가입하여야 한다."
+        },
+        {
+          "number": "2",
+          "text": "차량 총중량은 차량중량과 화물적재량의 합에서 승차중량을 제외한 것이다."
+        },
+        {
+          "number": "3",
+          "text": "도로법령에 따르면 화물자동차의 총중량이 40톤을 초과할 경우에는 운행이 제한될 수 있다."
+        },
+        {
+          "number": "4",
+          "text": "2차축 차량의 축 화물중량은 공차 시 전축 중량과 영차 시 화중을 합산한 중량이다."
+        },
+        {
+          "number": "5",
+          "text": "공차 중량은 화물을 적재하지 않고 연료, 냉각수, 윤활유 등을 채우지 않은 상태의 화물차량 중량을 말한다."
+        }
+      ],
+      "answer": "3",
+      "rate": "55%",
+      "note": "확인값은 3번입니다. 도로법령에 따르면 화물자동차의 총중량이 40톤을 초과할 경우에는 운행이 제한될 수 있다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-45",
+      "number": 45,
+      "session": "A",
+      "localNumber": 45,
+      "group": "B",
+      "question": "화물운송서비스 수요의 운임탄력성에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "대체 운송수단이 다양하게 존재하면 특정 운송수단의 수요에 대한 운임탄력성이 크다."
+        },
+        {
+          "number": "2",
+          "text": "운임탄력성이 낮은 경우 운임이 변화하면 운송수요가 크게 변화한다."
+        },
+        {
+          "number": "3",
+          "text": "판매단가가 높은 상품은 운임부담력이 높기 때문에 운임이 상승하더라도 운송수요가 크게 감소하지 않는다."
+        },
+        {
+          "number": "4",
+          "text": "화물운송서비스의 수요에 대한 운임탄력성은 운임 외에도 운송에 소요되는 원가에도 영향을 받는다."
+        },
+        {
+          "number": "5",
+          "text": "대체되는 화물이 다양하게 존재하면 해당 화물에 대한 운송수요는 운임에 대해 탄력적이다."
+        }
+      ],
+      "answer": "2",
+      "rate": "46%",
+      "note": "운송수요의 운임탄력성은 운임이 변화하는 경우 운송수요의 변화정도를 측정하는 것입니다. 운임탄력성이 1보다 작다면 비탄력적이라고 하는데, 운임이 크게 상승해도 운송수요는 조금 감소합니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-46",
+      "number": 46,
+      "session": "A",
+      "localNumber": 46,
+      "group": "B",
+      "question": "화물운송시스템의 3대 구성요소에서 운송경로에 관한 설명으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "운송수단의 운행에 이용되는 통로로서 공로, 철도, 해상항로, 항공로 등이 있다."
+        },
+        {
+          "number": "2",
+          "text": "Mode라고 하며 복합운송의 역할이 중요시되고 있다."
+        },
+        {
+          "number": "3",
+          "text": "철도역, 배송센터, 물류터미널 등이 이에 해당된다."
+        },
+        {
+          "number": "4",
+          "text": "운송을 직접 담당하는 수단으로 자동차, 선박, 항공기, 철도 차량 등이 있다."
+        },
+        {
+          "number": "5",
+          "text": "운송을 위한 상품을 처리 및 보관하는 장소 또는 시설을 의미한다."
+        }
+      ],
+      "answer": "1",
+      "rate": "59%",
+      "note": "운송의 3요소에는 운송수단(Mode), 운송연결점(Node), 운송경로(Link)가 있습니다.\n운송수단은 화물자동차, 철도화차, 항공기, 선박 등으로 운송방식이라고도 합니다.\n운송연결점(거점)은 보관, 하역, 환적 등의 작업이 이루어지는 장소 또는 시설입니다. 물류터미널, 철도역, 항만, 공항 등이 있습니다.\n운송경로는 운송수단의 운행에 이용되는 통로로, 운송거점을 연결하는 도로, 철로, 항공로, 해상항로 등과 같은 경로입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-47",
+      "number": 47,
+      "session": "A",
+      "localNumber": 47,
+      "group": "B",
+      "question": "다음과 같은 조건에서 운송수요의 운임탄력성 값은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "0.25"
+        },
+        {
+          "number": "2",
+          "text": "0.5"
+        },
+        {
+          "number": "3",
+          "text": "1.25"
+        },
+        {
+          "number": "4",
+          "text": "2"
+        },
+        {
+          "number": "5",
+          "text": "4"
+        }
+      ],
+      "answer": "4",
+      "rate": "40%",
+      "note": "운송수요의 운임탄력성= 운송수요의 변화율%/운임의 변화율%\n= 운송수요 변화폭÷원래 운송수요 수준/운임 변화폭÷원래 운임 수준\n= 5÷10/1÷4 = 2",
+      "images": [
+        "assets/ham-images/hh20250726m47.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-48",
+      "number": 48,
+      "session": "A",
+      "localNumber": 48,
+      "group": "B",
+      "question": "운송서비스의 특징에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "상품이 생산된 장소와 소비되는 장소의 불일치를 조정하는 장소적 효용을 제공한다."
+        },
+        {
+          "number": "2",
+          "text": "운송서비스는 상품의 일시적인 보관 기능을 제공하여 시간적 효용을 창출한다."
+        },
+        {
+          "number": "3",
+          "text": "운송서비스 수요는 상품 수요와 독립적으로 결정되는 특성을 가지고 있다."
+        },
+        {
+          "number": "4",
+          "text": "운송영역의 범위에 따라 국내운송과 국제운송으로 구분된다."
+        },
+        {
+          "number": "5",
+          "text": "운송의 발달로 인해 상품의 지역 간 이동을 유발하여 지역 간 상품 가격의 차이를 감소시키는 역할을 한다."
+        }
+      ],
+      "answer": "3",
+      "rate": "57%",
+      "note": "확인값은 3번입니다. 운송서비스 수요는 상품 수요와 독립적으로 결정되는 특성을 가지고 있다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-49",
+      "number": 49,
+      "session": "A",
+      "localNumber": 49,
+      "group": "B",
+      "question": "운송수단의 특징에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "철도운송은 공로운송보다 대량화물 운송에 유리하다."
+        },
+        {
+          "number": "2",
+          "text": "공로운송은 타 운송수단에 비해 단거리 운송에 유리하다."
+        },
+        {
+          "number": "3",
+          "text": "항공운송은 장거리 및 대용량ㆍ고중량 운송에 유리하다."
+        },
+        {
+          "number": "4",
+          "text": "해상화물은 화물의 크기나 무게에 대한 영향을 적게 받아 대용량 화물운송에 유리하다."
+        },
+        {
+          "number": "5",
+          "text": "파이프라인 운송은 초기 시설비가 많이 들지만 유지비용은 저렴하다."
+        }
+      ],
+      "answer": "3",
+      "rate": "68%",
+      "note": "항공운송은 다른 운송수단에 비해 운송기간이 짧아 신속,정시성의 특징을 갖고 있습니다. 항공운송의 이용 품목은 긴급 수요가 발생한 것, 물품의 성질상 단기간의 운송을 필요로 하는 것, 중량에 비해 고액이고 중요한 품목으로 운임 부담력이 있는 것, 안정성과 확실성이 요구되는 것 등입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-50",
+      "number": 50,
+      "session": "A",
+      "localNumber": 50,
+      "group": "B",
+      "question": "화물자동차의 구조에 의한 분류에서 전용특장차에 해당하는 차량을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄴ, ㄷ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ, ㄴ, ㅁ"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ, ㄷ, ㄹ"
+        },
+        {
+          "number": "4",
+          "text": "ㄴ, ㄹ, ㅁ"
+        },
+        {
+          "number": "5",
+          "text": "ㄷ, ㄹ, ㅁ"
+        }
+      ],
+      "answer": "2",
+      "rate": "66%",
+      "note": "전용특장차의 종류에는 덤프 트럭, 레미콘 믹서 트럭, 액체 운송차(탱크 로리), 냉동차, 벌크 트럭(분립체 운송차량), 중량물 운송 트럭(모듈 트럭)이 있습니다.",
+      "images": [
+        "assets/ham-images/hh20250726m50.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-51",
+      "number": 51,
+      "session": "A",
+      "localNumber": 51,
+      "group": "B",
+      "question": "철도운송에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "철도화물운송형태에는 화차취급운송과 컨테이너취급운송 등이 있다."
+        },
+        {
+          "number": "2",
+          "text": "철도운송은 타교통수단과 비교할 때 기후에 크게 영향을 받지 않는다."
+        },
+        {
+          "number": "3",
+          "text": "전세열차란 고객이 특정 열차를 전용으로 사용하는 열차를 말한다."
+        },
+        {
+          "number": "4",
+          "text": "철도운송은 교통체증에 따른 영향이 적고 계획적으로 운행할 수 있다."
+        },
+        {
+          "number": "5",
+          "text": "국내의 수송수단별 화물수송 분담률에서 tonㆍkm기준으로 철도운송이 공로운송보다 분담률이 높다."
+        }
+      ],
+      "answer": "5",
+      "rate": "67%",
+      "note": "우리나라의 화물수송 분담률에서는 일반적으로 공로운송(도로운송)이 철도운송보다 높은 비중을 차지합니다. 공로운송은 가장 높은 화물수송 분담률을 가집니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-52",
+      "number": 52,
+      "session": "A",
+      "localNumber": 52,
+      "group": "B",
+      "question": "다음과 같은 화물자동차 운송과 철도 운송 조건에서 채트반(Chatban) 공식을 이용한 두 수송수단간 경제효용거리 분기점은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "150 km"
+        },
+        {
+          "number": "2",
+          "text": "200 km"
+        },
+        {
+          "number": "3",
+          "text": "225 km"
+        },
+        {
+          "number": "4",
+          "text": "250 km"
+        },
+        {
+          "number": "5",
+          "text": "275 km"
+        }
+      ],
+      "answer": "4",
+      "rate": "64%",
+      "note": "채트반 공식 : L=D/(T-R)\nL=화물자동차의 경제효용거리 분기점(한계)\nD=ton당 추가되는 비용\nT=화물자동차 운송의 ton.km 운송비\nR=철도운송의 ton.km 운송비\n\nL=500,000/(4000-2000) = 250",
+      "images": [
+        "assets/ham-images/hh20250726m52.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-53",
+      "number": 53,
+      "session": "A",
+      "localNumber": 53,
+      "group": "B",
+      "question": "화물자동차운송시스템 전략으로 사용되는 원칙이 아닌 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "운송과 재고의 Trade-off 원칙"
+        },
+        {
+          "number": "2",
+          "text": "단일 원거리 운송의 원칙"
+        },
+        {
+          "number": "3",
+          "text": "회전수 감소의 원칙"
+        },
+        {
+          "number": "4",
+          "text": "수배송 일원화의 원칙"
+        },
+        {
+          "number": "5",
+          "text": "상하차 신속의 원칙"
+        }
+      ],
+      "answer": "3",
+      "rate": "54%",
+      "note": "회전수 감소의 원칙이 아닌 회전수 향상의 원칙입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-54",
+      "number": 54,
+      "session": "A",
+      "localNumber": 54,
+      "group": "B",
+      "question": "화물자동차 운송운임의 항목별 원가에서 고정비에 해당하는 것을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄴ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ, ㅁ"
+        },
+        {
+          "number": "3",
+          "text": "ㄴ, ㄷ"
+        },
+        {
+          "number": "4",
+          "text": "ㄷ, ㄹ"
+        },
+        {
+          "number": "5",
+          "text": "ㄹ, ㅁ"
+        }
+      ],
+      "answer": "1",
+      "rate": "62%",
+      "note": "화물자동차 운송의 원가항목에서 고정비는 운송거리나 운송량과는 관계없이 일정하게 지출되는 비용입니다.\n고정비에는 운전기사 인건비, 통신비, 복리후생비, 차량의 감가상각비, 차량보험료, 세금과 공과금(통신비) 등이 있습니다.\n변동비에는 연료비, 윤활유비, 차량수리비, 타이어 교환비용, 도로통행료, 주차비 등이 포함됩니다.",
+      "images": [
+        "assets/ham-images/hh20250726m54.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-55",
+      "number": 55,
+      "session": "A",
+      "localNumber": 55,
+      "group": "B",
+      "question": "다음은 A기업의 1년간 화물자동차 운행실적이다. 운행실적을 통해 얻을 수 있는 운영지표의 값에 관한 설명으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "가동률은 80 %이다."
+        },
+        {
+          "number": "2",
+          "text": "영차율은 90 %이다."
+        },
+        {
+          "number": "3",
+          "text": "적재율은 85 %이다."
+        },
+        {
+          "number": "4",
+          "text": "복화율은 75 %이다."
+        },
+        {
+          "number": "5",
+          "text": "공차거리율은 20 %이다."
+        }
+      ],
+      "answer": "2",
+      "rate": "60%",
+      "note": "영차율=영차 운행거리/총 운행거리\n공차율=공차 운행거리/총 운행거리\n회전율=총 운송량/평균 적재량\n가동률=실제 가동일수/목표 가동일수= 실제 가동차량수/누적 차량수\n적재율=실제 적재량/차량의 적재적량\n복화율=귀로 시 영차운행횟수/편도운행횟수\n\n-> 공식을 적용하게 되면\n영차율 = 90%\n공차율 = 10%\n가동률 = 83.3%\n적재율 = 82%\n복화거리가 주어지지 않았으므로 복화율은 구할 수 없습니다.",
+      "images": [
+        "assets/ham-images/hh20250726m55.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-56",
+      "number": 56,
+      "session": "A",
+      "localNumber": 56,
+      "group": "B",
+      "question": "철도화물운송용 화물차량에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "호퍼화차는 포대화물, 종이류 등을 수송하기 위한 차량으로 양측에 슬라이딩도어를 구비하여 화물의 적하가 용이하도록 되어 있다."
+        },
+        {
+          "number": "2",
+          "text": "곡물화차는 양곡, 사료 등 비포장 분말화물을 상부 해치를 통하여 적재하고 하부 호퍼를 통하여 하역할 수 있도록 되어 있다."
+        },
+        {
+          "number": "3",
+          "text": "무개화차는 지붕이 없는 화차로 석탄, 자갈 등 손상 염려가 없는 화물 수송에 이용된다."
+        },
+        {
+          "number": "4",
+          "text": "컨테이너 화차는 상면 위에 컨테이너를 적재할 수 있으며 고정 장치가 부착되어 있다."
+        },
+        {
+          "number": "5",
+          "text": "곡형평면화차는 특대형 화물 수송용 차량으로 중앙부 저상구조로 대형 변압기, 군장비 등을 적재한다."
+        }
+      ],
+      "answer": "1",
+      "rate": "68%",
+      "note": "호퍼화차는 시멘트, 사료, 석탄, 모래, 자갈 등을 운송하는 상하차 작업의 합리화가 가능한 구조로 된 화차입니다. 밑바닥에는 화물을 적하할 때 쏟아붓는 깔때기 모양의 출구가 달려있습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-57",
+      "number": 57,
+      "session": "A",
+      "localNumber": 57,
+      "group": "B",
+      "question": "철도화물 운임체계에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "철도화물의 운임체계는 일반화물과 컨테이너 화물로 구분된다."
+        },
+        {
+          "number": "2",
+          "text": "화물운임의 할인종류에는 왕복수송 할인, 탄력할인 등이 있다."
+        },
+        {
+          "number": "3",
+          "text": "컨테이너화물의 최저기본운임은 규격별, 영ㆍ공별 컨테이너의 100 km에 해당하는 운임이다."
+        },
+        {
+          "number": "4",
+          "text": "사유화차 할인은 고객이 화차를 제작하여 철도운송에 사용할 경우 투자비 보전을 위해 시행하는 할인으로 할인율은 화차제작 조건에 관계없이 동일하게 적용된다."
+        },
+        {
+          "number": "5",
+          "text": "화물운임의 할증종류에는 철도공사 직원이 감시인으로 승차하는 화물 할증, 열차 및 경로 지정화물 할증 등이 있다."
+        }
+      ],
+      "answer": "4",
+      "rate": "58%",
+      "note": "사유화차 할인은 할인율은 화차의 제작조건에 따라 다르게 적용됩니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-58",
+      "number": 58,
+      "session": "A",
+      "localNumber": 58,
+      "group": "B",
+      "question": "다음에서 설명하고 있는 철도운송 서비스 형태는?",
+      "options": [
+        {
+          "number": "1",
+          "text": "Shuttle Train"
+        },
+        {
+          "number": "2",
+          "text": "Block Train"
+        },
+        {
+          "number": "3",
+          "text": "Single Wagon Train"
+        },
+        {
+          "number": "4",
+          "text": "Liner Train"
+        },
+        {
+          "number": "5",
+          "text": "Coupling & Sharing Train"
+        }
+      ],
+      "answer": "1",
+      "rate": "61%",
+      "note": "확인값은 1번입니다. Shuttle Train",
+      "images": [
+        "assets/ham-images/hh20250726m58.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-59",
+      "number": 59,
+      "session": "A",
+      "localNumber": 59,
+      "group": "B",
+      "question": "화물자동차 운수사업법령상 화물자동차 운송가맹사업의 허가기준에 관한 내용으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "화물자동차의 종류는 화물자동차 운수사업법 시행규칙 제3조에 따른 화물자동차(화물자동차를 직접 소유하는 경우만 해당한다)를 말한다."
+        },
+        {
+          "number": "2",
+          "text": "그 밖의 운송시설로 화물정보망을 갖추어야 한다."
+        },
+        {
+          "number": "3",
+          "text": "사무실 및 영업소는 영업에 필요한 면적을 보유하여야 한다."
+        },
+        {
+          "number": "4",
+          "text": "최저보유차고면적은 화물자동차 1대당 그 화물자동차의 길이와 너비를 곱한 면적(화물자동차를 직접 소유하는 경우만 해당한다)이다."
+        },
+        {
+          "number": "5",
+          "text": "허가기준 대수는 50대 이상이며 운송사업자가 화물자동차 운송가맹사업 허가를 신청하는 경우 운송사업자의 지위에서 보유하고 있던 화물자동차 운송사업용화물자동차는 화물자동차 운송가맹사업의 허가기준 대수로 겸용할 수 있다."
+        }
+      ],
+      "answer": "5",
+      "rate": "65%",
+      "note": "5. 마지막 겸용할 수 없다",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-60",
+      "number": 60,
+      "session": "A",
+      "localNumber": 60,
+      "group": "B",
+      "question": "다음 수송표에서 최소비용법과 보겔추정법을 적용하여 총 운송비용을 구할 때 각각의 방식에 따라 산출된 총 운송비용의 차이는? (단, 공급지에서 수요지까지의 톤당 운송비는 각 셀의 우측상단에 표시되어 있음)",
+      "options": [
+        {
+          "number": "1",
+          "text": "30,000원"
+        },
+        {
+          "number": "2",
+          "text": "60,000원"
+        },
+        {
+          "number": "3",
+          "text": "120,000원"
+        },
+        {
+          "number": "4",
+          "text": "180,000원"
+        },
+        {
+          "number": "5",
+          "text": "240,000원"
+        }
+      ],
+      "answer": "3",
+      "rate": "42%",
+      "note": "확인값은 3번입니다. 120,000원",
+      "images": [
+        "assets/ham-images/hh20250726m60.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-61",
+      "number": 61,
+      "session": "A",
+      "localNumber": 61,
+      "group": "B",
+      "question": "3개의 공급지와 4개의 수요지에 대한 수송모형에서 공급지에서 수요지 간의 1단위 수송비용이 다음과 같을 때 총 운송비용의 최소값을 구하기 위한 제약조건식으로 옳은 것은? (단, Xij에서 X는 물량, i는 공급지, j는 수요지를 나타냄)",
+      "options": [
+        {
+          "number": "1",
+          "text": "X12 + X22 + X32 = 150"
+        },
+        {
+          "number": "2",
+          "text": "X13 + X23 + X33 = 300"
+        },
+        {
+          "number": "3",
+          "text": "X11 + X22 + X33 = 600"
+        },
+        {
+          "number": "4",
+          "text": "X21 + X22 + X23 + X24 = 200"
+        },
+        {
+          "number": "5",
+          "text": "X11 + X22 + X33 + X44 = 900"
+        }
+      ],
+      "answer": "4",
+      "rate": "48%",
+      "note": "확인값은 4번입니다. X21 + X22 + X23 + X24 = 200",
+      "images": [
+        "assets/ham-images/hh20250726m61.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-62",
+      "number": 62,
+      "session": "A",
+      "localNumber": 62,
+      "group": "B",
+      "question": "국제물류주선업의 기능에 해당하는 것으로 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄴ, ㄷ, ㄹ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ, ㄴ, ㄹ, ㅂ"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ, ㄷ, ㅁ, ㅂ"
+        },
+        {
+          "number": "4",
+          "text": "ㄴ, ㄷ, ㄹ, ㅁ"
+        },
+        {
+          "number": "5",
+          "text": "ㄷ, ㄹ, ㅁ, ㅂ"
+        }
+      ],
+      "answer": "1",
+      "rate": "64%",
+      "note": "확인값은 1번입니다. ㄱ, ㄴ, ㄷ, ㄹ",
+      "images": [
+        "assets/ham-images/hh20250726m62.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-63",
+      "number": 63,
+      "session": "A",
+      "localNumber": 63,
+      "group": "B",
+      "question": "운송주선인에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "화물의 집화ㆍ분배 서비스 등을 제공한다."
+        },
+        {
+          "number": "2",
+          "text": "수출입화물의 통관절차를 대행한다."
+        },
+        {
+          "number": "3",
+          "text": "화주를 대신하여 운송인과 운송계약을 체결한다."
+        },
+        {
+          "number": "4",
+          "text": "복합운송에서 전체 운송 구간의 운송책임을 부담한다."
+        },
+        {
+          "number": "5",
+          "text": "혼재운송을 하지 않고 단일 화주의 FCL 화물만을 취급하기 때문에 LCL 화물은 취급하지 않는다."
+        }
+      ],
+      "answer": "5",
+      "rate": "68%",
+      "note": "운송주선인(프레이트 포워더)은 혼재업자로서 LCL 화물을 FCL화물로 만드는 역할을 합니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-64",
+      "number": 64,
+      "session": "A",
+      "localNumber": 64,
+      "group": "B",
+      "question": "다음 ( )에 들어갈 Consolidation Service를 바르게 나열한 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ: Buyer's Consolidation, ㄴ: Shipper's Consolidation"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ: Shipper's Consolidation, ㄴ: Forwarder's Consolidation"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ: Forwarder's Consolidation, ㄴ: Shipper's Consolidation"
+        },
+        {
+          "number": "4",
+          "text": "ㄱ: Buyer's Consolidation, ㄴ: Forwarder's Consolidation"
+        },
+        {
+          "number": "5",
+          "text": "ㄱ: Shipper's Consolidation, ㄴ: Buyer's Consolidation"
+        }
+      ],
+      "answer": "4",
+      "rate": "51%",
+      "note": "Forwarder's Consolidation : 여러화주(송하인)의 화물을 다수의 수입자들에게 인도\nBuyer's Consolidation : 한 포워더가 수입업자에게 위탁을 받아 다수의 수출업자로부터 화물을 집화하여 혼재 후 운송\nShipper's Consolidation : 수출업자는 한 사람이고 수입업자가 다수인 경우 운송되는 방식",
+      "images": [
+        "assets/ham-images/hh20250726m64.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-65",
+      "number": 65,
+      "session": "A",
+      "localNumber": 65,
+      "group": "B",
+      "question": "다음 S에서 출발하여 F에 도착하는 운송네트워크의 최단경로 거리(km)는? (단, 경로별 숫자는 km임)",
+      "options": [
+        {
+          "number": "1",
+          "text": "11"
+        },
+        {
+          "number": "2",
+          "text": "12"
+        },
+        {
+          "number": "3",
+          "text": "13"
+        },
+        {
+          "number": "4",
+          "text": "14"
+        },
+        {
+          "number": "5",
+          "text": "15"
+        }
+      ],
+      "answer": "2",
+      "rate": "54%",
+      "note": "확인값은 2번입니다. 12",
+      "images": [
+        "assets/ham-images/hh20250726m65.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-66",
+      "number": 66,
+      "session": "A",
+      "localNumber": 66,
+      "group": "B",
+      "question": "각 지점 간 거리를 나타내는 거리행렬이 다음과 같을 때, 물류센터에서 3개의 수요처까지 개별 왕복운송하는 방법에서 순회운송하는 방법으로 변경할 경우 감소되는 운송거리(km)는?",
+      "options": [
+        {
+          "number": "1",
+          "text": "3"
+        },
+        {
+          "number": "2",
+          "text": "8"
+        },
+        {
+          "number": "3",
+          "text": "14"
+        },
+        {
+          "number": "4",
+          "text": "19"
+        },
+        {
+          "number": "5",
+          "text": "23"
+        }
+      ],
+      "answer": "5",
+      "rate": "58%",
+      "note": "확인값은 5번입니다. 23",
+      "images": [
+        "assets/ham-images/hh20250726m66.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-67",
+      "number": 67,
+      "session": "A",
+      "localNumber": 67,
+      "group": "B",
+      "question": "수배송시스템을 설계할 때 고려할 사항으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "화물차의 적재율을 높일 수 있도록 설계한다."
+        },
+        {
+          "number": "2",
+          "text": "중복수송, 편도수송이 많이 일어나도록 설계하여 수송비용을 최소화한다."
+        },
+        {
+          "number": "3",
+          "text": "동일지역에서 집화와 배송을 동시에 수행할 수 있게 설계하여 효율성을 높인다."
+        },
+        {
+          "number": "4",
+          "text": "배송경로는 가능한 상호 교차되지 않도록 설계한다."
+        },
+        {
+          "number": "5",
+          "text": "차량 운행대수, 수배송비용 등을 고려하여 설계한다."
+        }
+      ],
+      "answer": "2",
+      "rate": "68%",
+      "note": "편도수송이나 중복수송을 피할 수 있도록 설계해야 합니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-68",
+      "number": 68,
+      "session": "A",
+      "localNumber": 68,
+      "group": "B",
+      "question": "출발지에서 도착지까지 유류를 운송하는 파이프라인에서 c → b 구간의 폐쇄를 고려하고 있다. 각각의 파이프라인 (ㄱ), (ㄴ)에서 운송 가능한 최대 유량은? (단, 링크의 숫자는 인접한 노드 간의 용량을 나타내며, 화살표 방향으로만 이동 가능함)",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ: 28, ㄴ: 27"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ: 28, ㄴ: 28"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ: 30, ㄴ: 24"
+        },
+        {
+          "number": "4",
+          "text": "ㄱ: 30, ㄴ: 27"
+        },
+        {
+          "number": "5",
+          "text": "ㄱ: 30, ㄴ: 28"
+        }
+      ],
+      "answer": "5",
+      "rate": "29%",
+      "note": "확인값은 5번입니다. ㄱ: 30, ㄴ: 28",
+      "images": [
+        "assets/ham-images/hh20250726m68.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-69",
+      "number": 69,
+      "session": "A",
+      "localNumber": 69,
+      "group": "B",
+      "question": "허브 앤 스포크(Hub & Spoke) 시스템에 관한 내용으로 옳은 것을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄴ, ㄹ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ, ㄴ, ㅁ"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ, ㄷ, ㄹ"
+        },
+        {
+          "number": "4",
+          "text": "ㄴ, ㄷ, ㅁ"
+        },
+        {
+          "number": "5",
+          "text": "ㄷ, ㄹ, ㅁ"
+        }
+      ],
+      "answer": "1",
+      "rate": "66%",
+      "note": "허브 앤 스포크 시스템은 기본적으로 Shuttle운송이 없습니다. 집배센터와 허브터미널 간의 간선운송을 하므로 운송 노선이 단순합니다. 노선의 수가 적으므로 운송의 효율성이 높아집니다.",
+      "images": [
+        "assets/ham-images/hh20250726m69.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-70",
+      "number": 70,
+      "session": "A",
+      "localNumber": 70,
+      "group": "B",
+      "question": "수송수요모형에 관한 설명으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "성장인자모형은 확률이론을 기반으로 단기적 효과를 확인하기에 용이한 수단분담모형이다."
+        },
+        {
+          "number": "2",
+          "text": "회귀모형은 일정구역에서 화물의 공간적 분산정도가 극대화한다는 가정에 기초한 비집계자료활용모형이다."
+        },
+        {
+          "number": "3",
+          "text": "통행교차모형은 화물 발생량 및 도착량에 영향을 주는 다양한 변수 간의 상관관계에 대한 식을 도출하여 교차하는 화물량을 예측하는 화물분포모형이다."
+        },
+        {
+          "number": "4",
+          "text": "중력모형은 지역 간의 운송량이 경제규모에 비례하고 거리에 반비례한다는 가정에 의한 모형이다."
+        },
+        {
+          "number": "5",
+          "text": "스위프(Sweep)모형은 물동량 배분패턴이 장래에도 일정하게 유지된다는 가정하에 지역 간의 물동량을 예측하는 화물분포모형이다."
+        }
+      ],
+      "answer": "4",
+      "rate": "43%",
+      "note": "확인값은 4번입니다. 중력모형은 지역 간의 운송량이 경제규모에 비례하고 거리에 반비례한다는 가정에 의한 모형이다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-71",
+      "number": 71,
+      "session": "A",
+      "localNumber": 71,
+      "group": "B",
+      "question": "선박의 톤수에 관한 설명으로 옳은 것을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄴ, ㄷ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ, ㄴ, ㅁ"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ, ㄹ, ㅁ"
+        },
+        {
+          "number": "4",
+          "text": "ㄴ, ㄷ, ㄹ"
+        },
+        {
+          "number": "5",
+          "text": "ㄷ, ㄹ, ㅁ"
+        }
+      ],
+      "answer": "1",
+      "rate": "59%",
+      "note": "ㄹ. 배수톤수는 선박의 전 중량을 뜻합니다. 배의 무게는 선체의 수면하의 부분인 배수용적에 상당하는 물의 중량과 같으며, 이 물의 중량을 배수량 또는 배수톤수라고 합니다. 주로 군함의 크기를 나타낼 때 사용됩니다.\nㅁ. 재화중량톤수는 선박에 적재할 수 있는 화물의 최대 적재능력을 가리키는 단위로 영업상 가장 중요시되는 톤수입니다. 만재배수량과 경하배수량의 차이로써 산출됩니다. 주로 화물선, 탱커 등의 선복량을 나타내는 데 사용합니다.",
+      "images": [
+        "assets/ham-images/hh20250726m71.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-72",
+      "number": 72,
+      "session": "A",
+      "localNumber": 72,
+      "group": "B",
+      "question": "연안해상운송에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "해수면을 통해 화물을 선박으로 수송하는 것이다."
+        },
+        {
+          "number": "2",
+          "text": "소량 다빈도 운송으로 문전수송(Door-to-Door)에 적합하다."
+        },
+        {
+          "number": "3",
+          "text": "도서지역 생필품의 안정적 공급 수단이 된다."
+        },
+        {
+          "number": "4",
+          "text": "철도 및 도로 운송의 대체수단으로 국내 항만을 오가는 운송이다."
+        },
+        {
+          "number": "5",
+          "text": "도로운송의 혼잡을 경감할 수 있는 친환경 운송수단의 특성이 있다."
+        }
+      ],
+      "answer": "2",
+      "rate": "71%",
+      "note": "연안운송은 문전운송이 곤란하고, 소량 다빈도 운송에 부적합하다는 단점을 가지고 있습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-73",
+      "number": 73,
+      "session": "A",
+      "localNumber": 73,
+      "group": "B",
+      "question": "항공화물 운임산출의 일반적인 기준에 관한 내용으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "항공운임은 ICAO의 기준에 따르며 요금, 요율 및 그와 관련된 규정은 운송장 발행이후 일주일의 기한을 두어 소급 적용한다."
+        },
+        {
+          "number": "2",
+          "text": "화물요율의 설정은 공항에서 공항까지이며 부수적인 서비스 요금은 별도로 계산하지 않는다."
+        },
+        {
+          "number": "3",
+          "text": "화물의 요율은 출발지 국가의 현지 통화로 설정하며, 출발지로부터 목적지까지 한 방향으로 적용한다."
+        },
+        {
+          "number": "4",
+          "text": "모든 화물의 요율은 출발지 국가와 상관없이 kg당 요율로 설정한다."
+        },
+        {
+          "number": "5",
+          "text": "운임 산출 시 근거가 되었던 경로는 화물의 실제 운송경로와 반드시 일치하여야 한다."
+        }
+      ],
+      "answer": "3",
+      "rate": "40%",
+      "note": "1. 항공운임은 IATA가 규정한 요율규정을 기초로 합니다.\n2. 화물요율의 설정은 공항에서 공항까지이며 부수적으로 발생하는 요금은 별도로 계산합니다.\n4. 운송수단에 따라 운임 산정 기준이 다릅니다. kg당 요율->항공운송의 대표적인 운임 산정 방식\n5. 항공기의 실제 운항경로는 운임산출 시 적용한 경로와 반드시 일치할 필요는 없습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-74",
+      "number": 74,
+      "session": "A",
+      "localNumber": 74,
+      "group": "B",
+      "question": "다음에서 설명하고 있는 해운동맹의 운영방법에 해당하는 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "공동계산협정(Pooling Agreement)"
+        },
+        {
+          "number": "2",
+          "text": "대항선(Fighting Ship) 운영"
+        },
+        {
+          "number": "3",
+          "text": "계약운임제(Contract Rate System)"
+        },
+        {
+          "number": "4",
+          "text": "성실환급제(Fidelity Rebate System)"
+        },
+        {
+          "number": "5",
+          "text": "이연환급제(Deferred Rebate System)"
+        }
+      ],
+      "answer": "1",
+      "rate": "62%",
+      "note": "확인값은 1번입니다. 공동계산협정(Pooling Agreement)",
+      "images": [
+        "assets/ham-images/hh20250726m74.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-75",
+      "number": 75,
+      "session": "A",
+      "localNumber": 75,
+      "group": "B",
+      "question": "화물의 가치가 높은 화물의 경우, 중량이나 용적이 아닌 가격을 기준으로 산정하는 항공화물 운임에 해당하는 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "단위탑재용기운임"
+        },
+        {
+          "number": "2",
+          "text": "종가운임"
+        },
+        {
+          "number": "3",
+          "text": "무차별운임"
+        },
+        {
+          "number": "4",
+          "text": "중량운임"
+        },
+        {
+          "number": "5",
+          "text": "추가운임"
+        }
+      ],
+      "answer": "2",
+      "rate": "68%",
+      "note": "종가운임 : 항공화물운송 시 사고가 발생하면 배상을 해야 하는데 고가의 화물인 경우 20달러를 초과하는 금액에 대하여 배상받고자 할 경우에는 항공사에 가격을 신고하고 일정율의 추가운임을 지불하게 되는 운임",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-76",
+      "number": 76,
+      "session": "A",
+      "localNumber": 76,
+      "group": "B",
+      "question": "택배 표준약관(공정거래위원회 표준약관 제10026호)에서 운임의 청구와 유치권에 관한 내용으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "사업자는 고객(송화인)과의 합의에 따라 운송물을 인도할 때 운송물을 받는 자(수화인)에게 운임을 청구할 수 있다."
+        },
+        {
+          "number": "2",
+          "text": "고객(송화인, 수화인)의 사유로 운송물을 돌려보내거나 도착지 주소지가 변경되는 경우에 사업자는 따로 추가 요금을 청구할 수 없다."
+        },
+        {
+          "number": "3",
+          "text": "사업자가 고객(송화인)과의 합의에 따라 운송물을 인도할 때, 운송물을 받는 자(수화인)가 운임을 지급하지 않는 경우에 사업자는 운송물을 유치할 수 있다."
+        },
+        {
+          "number": "4",
+          "text": "운송물이 포장 당 50만원을 초과하거나 운송 상 특별한 주의를 요하는 것일 때에는 사업자는 따로 할증요금을 청구할 수 있다."
+        },
+        {
+          "number": "5",
+          "text": "사업자는 운송물을 수탁할 때, 고객(송화인)에게 운임을 청구할 수 있다."
+        }
+      ],
+      "answer": "2",
+      "rate": "68%",
+      "note": "고객(송하인, 수하인)의 사유로 운송물을 돌려보내거나, 도착지 주소지가 변경되는 경우, 사업자는 따로 추가 요금을 청구할 수 있습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-77",
+      "number": 77,
+      "session": "A",
+      "localNumber": 77,
+      "group": "B",
+      "question": "다음은 택배 표준약관(공정거래위원회 표준약관 제10026호)에서 인도할 수 없는 운송물의 처분에 관한 내용이다. ( )에 들어갈 내용으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ: 1주일, ㄴ: 1주일"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ: 1주일, ㄴ: 2주일"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ: 2주일, ㄴ: 3주일"
+        },
+        {
+          "number": "4",
+          "text": "ㄱ: 3주일, ㄴ: 1주일"
+        },
+        {
+          "number": "5",
+          "text": "ㄱ: 1개월, ㄴ: 1주일"
+        }
+      ],
+      "answer": "5",
+      "rate": "40%",
+      "note": "확인값은 5번입니다. ㄱ: 1개월, ㄴ: 1주일",
+      "images": [
+        "assets/ham-images/hh20250726m77.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-78",
+      "number": 78,
+      "session": "A",
+      "localNumber": 78,
+      "group": "B",
+      "question": "다음에서 설명하고 있는 용선운송계약의 형태는?",
+      "options": [
+        {
+          "number": "1",
+          "text": "항해용선계약(Voyage Charter)"
+        },
+        {
+          "number": "2",
+          "text": "선복용선계약(Lump-sum Charter)"
+        },
+        {
+          "number": "3",
+          "text": "나용선계약(Bareboat Charter)"
+        },
+        {
+          "number": "4",
+          "text": "정기용선계약(Time Charter)"
+        },
+        {
+          "number": "5",
+          "text": "일대용선계약(Daily Charter)"
+        }
+      ],
+      "answer": "3",
+      "rate": "68%",
+      "note": "나용선계약은 용선자가 선박만을 임차하여 장비나 선원 등 인적,물적 요소, 그리고 운항에 필요한 모든 비용을 부담하며 선박에 대한 실질적인 지배권을 획득하는 계약입니다. 임차인이 선장 임명 및 지휘감독을 합니다.",
+      "images": [
+        "assets/ham-images/hh20250726m78.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-79",
+      "number": 79,
+      "session": "A",
+      "localNumber": 79,
+      "group": "B",
+      "question": "택배 표준약관(공정거래위원회 표준약관 제10026호)에서 정하고 있는 운송물의 수탁거절에 해당하는 것을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㅁ"
+        },
+        {
+          "number": "2",
+          "text": "ㄴ, ㄹ"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ, ㄷ, ㅁ"
+        },
+        {
+          "number": "4",
+          "text": "ㄱ, ㄴ, ㄷ, ㄹ"
+        },
+        {
+          "number": "5",
+          "text": "ㄱ, ㄴ, ㄷ, ㄹ, ㅁ"
+        }
+      ],
+      "answer": "5",
+      "rate": "68%",
+      "note": "확인값은 5번입니다. ㄱ, ㄴ, ㄷ, ㄹ, ㅁ",
+      "images": [
+        "assets/ham-images/hh20250726m79.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-80",
+      "number": 80,
+      "session": "A",
+      "localNumber": 80,
+      "group": "B",
+      "question": "생활물류서비스산업발전법상 택배서비스 운송 위탁계약의 해지에 관한 내용이다. ( )에 들어갈 내용으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ: 30, ㄴ: 1"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ: 30, ㄴ: 2"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ: 60, ㄴ: 1"
+        },
+        {
+          "number": "4",
+          "text": "ㄱ: 60, ㄴ: 2"
+        },
+        {
+          "number": "5",
+          "text": "ㄱ: 90, ㄴ: 1"
+        }
+      ],
+      "answer": "4",
+      "rate": "43%",
+      "note": "확인값은 4번입니다. ㄱ: 60, ㄴ: 2",
+      "images": [
+        "assets/ham-images/hh20250726m80.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-81",
+      "number": 81,
+      "session": "A",
+      "localNumber": 81,
+      "group": "C",
+      "question": "최근 국제물류환경의 변화에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "녹색물류의 중요성 증대"
+        },
+        {
+          "number": "2",
+          "text": "물류기업 간의 전략적 제휴 및 인수합병 증가"
+        },
+        {
+          "number": "3",
+          "text": "물류기업에 대한 시장진입 규제강화"
+        },
+        {
+          "number": "4",
+          "text": "글로벌 공급망 관리와 통합물류서비스 강화"
+        },
+        {
+          "number": "5",
+          "text": "물류 위험관리와 물류보안 강화"
+        }
+      ],
+      "answer": "3",
+      "rate": "67%",
+      "note": "확인값은 3번입니다. 물류기업에 대한 시장진입 규제강화",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-82",
+      "number": 82,
+      "session": "A",
+      "localNumber": 82,
+      "group": "C",
+      "question": "국내물류와 비교한 국제물류의 특징으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "선화증권, 항공화물운송장, 상업송장, 수출신고서 등 다양한 서류가 존재한다."
+        },
+        {
+          "number": "2",
+          "text": "화물운송주선인, 통관업자 등 여러 중개인이 존재한다."
+        },
+        {
+          "number": "3",
+          "text": "주문절차와 주문처리가 복잡하다."
+        },
+        {
+          "number": "4",
+          "text": "화물운송 과정에 수출입 통관을 거치게 된다."
+        },
+        {
+          "number": "5",
+          "text": "해상 또는 항공운송으로 이루어지므로 운송관리가 비교적 용이하다."
+        }
+      ],
+      "answer": "5",
+      "rate": "71%",
+      "note": "국제물류는 운송영역이 넓고 대량화물을 운송하기 때문에 환경적인 제약을 많이 받고, 운송방법의 다양화로 인하여 국내물류보다 훨씬 복잡합니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-83",
+      "number": 83,
+      "session": "A",
+      "localNumber": 83,
+      "group": "C",
+      "question": "다음 국제물류시스템의 유형 중 다국행 창고시스템(multi-country warehouse system)에 관한 설명으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "해외 자회사 창고는 보관기능 보다는 유통기능 및 통과센터로서의 기능이 강하다."
+        },
+        {
+          "number": "2",
+          "text": "상품이 생산국에서 해외 거점창고로 운송된 후 각국의 자회사 창고나 고객에게 수송된다."
+        },
+        {
+          "number": "3",
+          "text": "생산국의 창고에서 재고를 집중시켜 운영하므로 해외 자회사에서 보관비가 절감된다."
+        },
+        {
+          "number": "4",
+          "text": "해외 자회사는 상거래 유통에는 관여하지만 물류에는 직접적으로 관여하지 않는다."
+        },
+        {
+          "number": "5",
+          "text": "다빈도 출하가 이루어져 출하비, 운송비, 통관비 등이 증가할 수 있다."
+        }
+      ],
+      "answer": "2",
+      "rate": "49%",
+      "note": "1. 창고형 뿐만 아니라 통과형으로도 사용 가능합니다.\n3. 생산국의 창고에서 재고를 집중시키는 것이 아닌 생산국 창고에서 중앙창고까지 대량의 상품을 저빈도 출하합니다.\n4. 직송 시스템에 대한 설명입니다.\n5. 저빈도 출하가 이루어지기 때문에 수송비가 낮습니다.\n\n1,5-통과시스템\n3,4-직송시스템",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-84",
+      "number": 84,
+      "session": "A",
+      "localNumber": 84,
+      "group": "C",
+      "question": "국제물류서비스의 단계별 발전과정을 옳게 나열한 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ → ㄴ → ㄷ → ㄹ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ → ㄹ → ㄷ → ㄴ"
+        },
+        {
+          "number": "3",
+          "text": "ㄴ → ㄱ → ㄹ → ㄷ"
+        },
+        {
+          "number": "4",
+          "text": "ㄴ → ㄷ → ㄱ → ㄹ"
+        },
+        {
+          "number": "5",
+          "text": "ㄹ → ㄱ → ㄴ → ㄷ"
+        }
+      ],
+      "answer": "3",
+      "rate": "47%",
+      "note": "확인값은 3번입니다. ㄴ → ㄱ → ㄹ → ㄷ",
+      "images": [
+        "assets/ham-images/hh20250726m84.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-85",
+      "number": 85,
+      "session": "A",
+      "localNumber": 85,
+      "group": "C",
+      "question": "항공화물의 사고 유형에 관한 내용 중 옳은 것을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄴ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ, ㄷ"
+        },
+        {
+          "number": "3",
+          "text": "ㄴ, ㄹ"
+        },
+        {
+          "number": "4",
+          "text": "ㄱ, ㄴ, ㄹ"
+        },
+        {
+          "number": "5",
+          "text": "ㄴ, ㄷ, ㄹ"
+        }
+      ],
+      "answer": "2",
+      "rate": "61%",
+      "note": "SSPD : 적하목록에는 기재되어 있으나 화물이 항공기에 탑재되지 않은 경우\nOVCD : 예정된 목적지나 경유지를 지나서 다른 곳으로 운송된 경우, 발송준비가 완료되지 않은 상태에서 화물이 발송된 경우, 적하목록에 기재되지 않은 화물이 도착한 경우",
+      "images": [
+        "assets/ham-images/hh20250726m85.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-86",
+      "number": 86,
+      "session": "A",
+      "localNumber": 86,
+      "group": "C",
+      "question": "IATA(International Air Transport Association)에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "정부 간 국제협력기구로서 UN 산하의 전문기관이다."
+        },
+        {
+          "number": "2",
+          "text": "항공권의 약관을 포함한 항공권의 규격 및 발권절차 등의 통일을 도모한다."
+        },
+        {
+          "number": "3",
+          "text": "항공사 간 과당경쟁을 방지하기 위해 운임협정 및 서비스 내용을 다룬다."
+        },
+        {
+          "number": "4",
+          "text": "항공운송장의 표준서식 및 약관을 제정하고 있다."
+        },
+        {
+          "number": "5",
+          "text": "각국 항공사들의 대표가 참석하며, ICAO의 협력기구이다."
+        }
+      ],
+      "answer": "1",
+      "rate": "54%",
+      "note": "국제항공운송협회(IATA)는 민간단체",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-87",
+      "number": 87,
+      "session": "A",
+      "localNumber": 87,
+      "group": "C",
+      "question": "항공화물운송장 작성에 관한 내용으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "Declared Value for Carriage란은 송화인의 운송신고가격을 기재하며, 무가격 신고는 NCV라고 기재한다."
+        },
+        {
+          "number": "2",
+          "text": "Amount of Insurance란은 화주가 보험에 가입하는 경우 보험금액을 기재한다."
+        },
+        {
+          "number": "3",
+          "text": "Chargeable Weight란은 화물의 실제중량과 부피중량 중 높은 쪽의 중량을 기재하며, 최저운임이 적용될 경우 기재할 필요가 없다."
+        },
+        {
+          "number": "4",
+          "text": "Declared Value for Customs란은 세관통관 목적을 위해 송화인의 세관신고가격을 기재한다."
+        },
+        {
+          "number": "5",
+          "text": "Currency란은 AWB 발행국의 화폐단위 코드를 기재한다."
+        }
+      ],
+      "answer": "1",
+      "rate": "29%",
+      "note": "NCV는 세관신고 시 사용하는 용어입니다. 무가격 신고는 NVD로 기재합니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-88",
+      "number": 88,
+      "session": "A",
+      "localNumber": 88,
+      "group": "C",
+      "question": "인천-뉴욕 구간의 전자제품 2,500 kg을 Type 2H 컨테이너에 탑재하였을 경우, 다음 조건에서 팔레트-컨테이너 운임(Bulk Unitization Charge)은 얼마인가?",
+      "options": [
+        {
+          "number": "1",
+          "text": "US$ 9,000"
+        },
+        {
+          "number": "2",
+          "text": "US$ 9,100"
+        },
+        {
+          "number": "3",
+          "text": "US$ 9,200"
+        },
+        {
+          "number": "4",
+          "text": "US$ 9,300"
+        },
+        {
+          "number": "5",
+          "text": "US$ 9,400"
+        }
+      ],
+      "answer": "5",
+      "rate": "56%",
+      "note": "확인값은 5번입니다. US$ 9,400",
+      "images": [
+        "assets/ham-images/hh20250726m88.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-89",
+      "number": 89,
+      "session": "A",
+      "localNumber": 89,
+      "group": "C",
+      "question": "항공운송에서 위험화물(Dangerous Goods)에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "위험화물은 항공운송 중 발생하는 기압, 온도의 변화, 기체의 흔들림 등으로 항공기, 인명, 인접화물 등에 피해를 줄 우려가 있는 화물을 의미한다."
+        },
+        {
+          "number": "2",
+          "text": "IATA의 위험물 취급규정(DGR)에 수송여부 및 제한 사항이 규정되어 있다."
+        },
+        {
+          "number": "3",
+          "text": "IATA DGR의 위험품목은 9개 부류(9 class)로 구분하고 송화인의 책임을 규정하고 있다."
+        },
+        {
+          "number": "4",
+          "text": "화주신고서(shipper's declaration for dangerous goods)에 대한 작성 및 서명은 항공사가 한다."
+        },
+        {
+          "number": "5",
+          "text": "송화인은 IATA DGR에 명시된 절차에 따라 분류, 인식, 포장, 마킹, 라벨링 작업을 하고, 서류를 작성하여야 한다."
+        }
+      ],
+      "answer": "4",
+      "rate": "68%",
+      "note": "4. 서명은 화주 또는 화주의 대리인이 한다",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-90",
+      "number": 90,
+      "session": "A",
+      "localNumber": 90,
+      "group": "C",
+      "question": "다음 설명에 해당하는 컨테이너 화물운송과 관련된 국제협약은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "CCC(Customs Convention on Container, 1956)"
+        },
+        {
+          "number": "2",
+          "text": "TIR(Transport International Routiere, 1959)"
+        },
+        {
+          "number": "3",
+          "text": "CSC(International Convention for Safe Containers, 1972)"
+        },
+        {
+          "number": "4",
+          "text": "CMR(Convention Relative au Contract de Transport International de Marchandises par Route, 1956)"
+        },
+        {
+          "number": "5",
+          "text": "ITI(Customs Convention on the International Transit of Goods, 1971)"
+        }
+      ],
+      "answer": "2",
+      "rate": "32%",
+      "note": "확인값은 2번입니다. TIR(Transport International Routiere, 1959)",
+      "images": [
+        "assets/ham-images/hh20250726m90.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-91",
+      "number": 91,
+      "session": "A",
+      "localNumber": 91,
+      "group": "C",
+      "question": "국제복합운송인에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "실제운송인형 복합운송인은 직접 운송수단을 보유하고 복합운송인의 역할과 책임을 수행한다."
+        },
+        {
+          "number": "2",
+          "text": "계약운송인형 복합운송인은 운송수단을 보유하지 않고 운송주체자로서의 역할과 책임을 수행한다."
+        },
+        {
+          "number": "3",
+          "text": "NVOCC는 미국의 신해운법에서 포워더형 복합운송인을 법제화시킨 개념이다."
+        },
+        {
+          "number": "4",
+          "text": "NVOCC는 자체 Tariff를 가질 수 있으나 자기 명의로 B/L을 발행할 수 없다."
+        },
+        {
+          "number": "5",
+          "text": "NVOCC는 화주와 운송인 사이에서 화주에게는 운송인의 입장이 되고, 운송인에게는 화주의 입장이 된다."
+        }
+      ],
+      "answer": "4",
+      "rate": "68%",
+      "note": "NVOCC는 자기 명의로 B/L 발행할 수 있습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-92",
+      "number": 92,
+      "session": "A",
+      "localNumber": 92,
+      "group": "C",
+      "question": "복합운송증권의 법적 성질에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "상환증권: 증권과 상환으로 물품의 인도를 청구할 수 있다."
+        },
+        {
+          "number": "2",
+          "text": "요식증권: 법률에 의해 일정한 화물 및 운송에 대한 기재사항이 요구되는 증권이다."
+        },
+        {
+          "number": "3",
+          "text": "지시증권: 증권이 지시식으로 발행된 경우 배서에 의해 양도가 가능하다."
+        },
+        {
+          "number": "4",
+          "text": "요인증권: 선적 화물의 수령을 전제로 증권이 발행된다."
+        },
+        {
+          "number": "5",
+          "text": "문언증권: 증권에 기재가 없는 사항에 대해서 책임을 부담한다."
+        }
+      ],
+      "answer": "5",
+      "rate": "48%",
+      "note": "문언증권은 증권에 기재된 사항에 대해서 책임을 부담합니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-93",
+      "number": 93,
+      "session": "A",
+      "localNumber": 93,
+      "group": "C",
+      "question": "국제복합운송에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "복합운송의 기본 요건으로 단일 운송책임, 단일 운송계약, 단일 운임, 이종의 복수 운송수단, 복합운송증권 발행 등이 있다."
+        },
+        {
+          "number": "2",
+          "text": "북미 및 시베리아 횡단철도와 해상운송을 연계하는 복합운송경로의 개척에 힘입어 해륙복합운송이 발달하였다."
+        },
+        {
+          "number": "3",
+          "text": "컨테이너 복합운송은 재래식 운송방식에 비해 하역비, 포장비, 보관비 등에서 경제적 효과가 있다."
+        },
+        {
+          "number": "4",
+          "text": "복합운송인은 FCL화물을 집화ㆍ분류ㆍ혼재한 후 Master B/L을 발행한다."
+        },
+        {
+          "number": "5",
+          "text": "화물 트럭이나 트레일러를 철도 화차에 적재하여 운송하는 방식을 Piggy-Back 방식이라고 한다."
+        }
+      ],
+      "answer": "4",
+      "rate": "58%",
+      "note": "복합운송인은 Master B/L을 발행할 수 없습니다. 개별 화주에게 House B/L을 발행합니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-94",
+      "number": 94,
+      "session": "A",
+      "localNumber": 94,
+      "group": "C",
+      "question": "다음 책임한도에 해당하는 복합운송인 책임 체계와 국제조약이 바르게 연결된 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "단일책임체계 - UN 국제물품복합운송조약(1980)"
+        },
+        {
+          "number": "2",
+          "text": "이종책임체계 - 함부르크규칙(1978)"
+        },
+        {
+          "number": "3",
+          "text": "이종책임체계 - UNCTAD/ICC 복합운송증권통일규칙(1992)"
+        },
+        {
+          "number": "4",
+          "text": "변형단일책임체계 - UN 국제물품복합운송조약(1980)"
+        },
+        {
+          "number": "5",
+          "text": "변형단일책임체계 - UNCTAD/ICC 복합운송증권통일규칙(1992)"
+        }
+      ],
+      "answer": "5",
+      "rate": "29%",
+      "note": "확인값은 5번입니다. 변형단일책임체계 - UNCTAD/ICC 복합운송증권통일규칙(1992)",
+      "images": [
+        "assets/ham-images/hh20250726m94.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-95",
+      "number": 95,
+      "session": "A",
+      "localNumber": 95,
+      "group": "C",
+      "question": "다음에서 설명하는 복합운송경로는?",
+      "options": [
+        {
+          "number": "1",
+          "text": "American Land Bridge"
+        },
+        {
+          "number": "2",
+          "text": "Overland Common Point"
+        },
+        {
+          "number": "3",
+          "text": "Mini Land Bridge"
+        },
+        {
+          "number": "4",
+          "text": "Canadian Land Bridge"
+        },
+        {
+          "number": "5",
+          "text": "Reverse Interior Point Intermodal"
+        }
+      ],
+      "answer": "2",
+      "rate": "33%",
+      "note": "확인값은 2번입니다. Overland Common Point",
+      "images": [
+        "assets/ham-images/hh20250726m95.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-96",
+      "number": 96,
+      "session": "A",
+      "localNumber": 96,
+      "group": "C",
+      "question": "컨테이너 화물의 운송형태에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "CY/CY는 수출지 CY에서 수입지 CY까지 FCL형태로 운송된다."
+        },
+        {
+          "number": "2",
+          "text": "CY/CY는 컨테이너 장점을 최대로 살릴 수 있는 방식으로 Door to Door 서비스가 가능하다."
+        },
+        {
+          "number": "3",
+          "text": "CFS/CFS는 LCL화물을 수출지 CFS에서 혼재하여 FCL화물로 만들어 수입지 CFS까지 운송된다."
+        },
+        {
+          "number": "4",
+          "text": "CFS/CY는 단일 수입상이 다수의 수출상으로부터 물품을 수입할 때 이용된다."
+        },
+        {
+          "number": "5",
+          "text": "CY/CFS는 실무에서 가장 많이 이용되는 방식이다."
+        }
+      ],
+      "answer": "5",
+      "rate": "42%",
+      "note": "실무에서 많이 이용되는 방식은 CY/CY 또는 CFS/CFS 입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-97",
+      "number": 97,
+      "session": "A",
+      "localNumber": 97,
+      "group": "C",
+      "question": "정기선 할증운임에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "“Terminal Handling Charge”는 장척화물이나 벌크화물에 대해 부과되는 운임이다."
+        },
+        {
+          "number": "2",
+          "text": "“Heavy Cargo Surcharge”는 초과 중량에 따라 기본운임에 가산하여 부과된다."
+        },
+        {
+          "number": "3",
+          "text": "“Congestion Surcharge”는 양륙항의 체선이 심해 장기간의 정박이 요구되어 선사에 손해가 발생할 때 부과된다."
+        },
+        {
+          "number": "4",
+          "text": "“Bunker Adjustment Factor”는 선박의 연료인 벙커유 가격 인상에 따른 손실을 보전하기 위해 부과된다."
+        },
+        {
+          "number": "5",
+          "text": "“Currency Adjustment Factor”는 환율변동에 따른 환차손을 보전하기 위해 부과된다."
+        }
+      ],
+      "answer": "1",
+      "rate": "57%",
+      "note": "THC는 CY에 입고된 시점부터 선측까지, 수입화물이 본선 선측에서 CY게이트를 통과하기까지 화물의 처리 및 이동에 따르는 비용입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-98",
+      "number": 98,
+      "session": "A",
+      "localNumber": 98,
+      "group": "C",
+      "question": "다음 설명에 해당하는 부정기선 운임은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "Lump Sum Freight"
+        },
+        {
+          "number": "2",
+          "text": "Pro Rate Freight"
+        },
+        {
+          "number": "3",
+          "text": "Dead Freight"
+        },
+        {
+          "number": "4",
+          "text": "Advance Freight"
+        },
+        {
+          "number": "5",
+          "text": "Back Freight"
+        }
+      ],
+      "answer": "3",
+      "rate": "54%",
+      "note": "확인값은 3번입니다. Dead Freight",
+      "images": [
+        "assets/ham-images/hh20250726m98.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-99",
+      "number": 99,
+      "session": "A",
+      "localNumber": 99,
+      "group": "C",
+      "question": "해상운송관련 국제협약이 아닌 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "Rotterdam Rules"
+        },
+        {
+          "number": "2",
+          "text": "Hamburg Rules"
+        },
+        {
+          "number": "3",
+          "text": "Hague Protocol"
+        },
+        {
+          "number": "4",
+          "text": "Hague Visby Rules"
+        },
+        {
+          "number": "5",
+          "text": "UNCTAD Liner Code"
+        }
+      ],
+      "answer": "3",
+      "rate": "48%",
+      "note": "3번은 헤이그의정서로, 항공운송관련 국제협약 입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-100",
+      "number": 100,
+      "session": "A",
+      "localNumber": 100,
+      "group": "C",
+      "question": "국제해상운송의 특징을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄴ, ㄷ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ, ㄴ, ㄹ"
+        },
+        {
+          "number": "3",
+          "text": "ㄴ, ㄷ, ㄹ"
+        },
+        {
+          "number": "4",
+          "text": "ㄴ, ㄷ, ㅁ"
+        },
+        {
+          "number": "5",
+          "text": "ㄷ, ㄹ, ㅁ"
+        }
+      ],
+      "answer": "2",
+      "rate": "69%",
+      "note": "ㄷ. 문전수송(door to door)은 화물자동차 운송을 제외하고는 불가능합니다.\nㅁ. 전천후 운송수단에 해당하는 것은 철도입니다.",
+      "images": [
+        "assets/ham-images/hh20250726m100.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-101",
+      "number": 101,
+      "session": "A",
+      "localNumber": 101,
+      "group": "C",
+      "question": "용선자가 선적항과 양하항에서의 하역비용을 모두 부담하는 하역비 운임조건은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "Berth Term"
+        },
+        {
+          "number": "2",
+          "text": "Free In"
+        },
+        {
+          "number": "3",
+          "text": "Free Out"
+        },
+        {
+          "number": "4",
+          "text": "Free In and Out"
+        },
+        {
+          "number": "5",
+          "text": "Liner Term"
+        }
+      ],
+      "answer": "4",
+      "rate": "56%",
+      "note": "1번, 5번은 적하 시, 양하 시 하역비를 모두 화주가 부담합니다.\n\n아래와 같은 오류 신고가 있었습니다.\n여러분들의 많은 의견 부탁 드립니다.\n추후 여러분들의 의견을 반영하여 정답을 수정하도록 하겠습니다.\n참고로 정답 변경은 오류 신고 5회 이상일 경우 수정합니다.\n\n[오류 신고 내용]\n해설 화주가아니라 선주임",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-102",
+      "number": 102,
+      "session": "A",
+      "localNumber": 102,
+      "group": "C",
+      "question": "개품운송계약에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "주로 단위화된 화물을 운송할 때 사용하는 방식이다."
+        },
+        {
+          "number": "2",
+          "text": "고정된 운항일정과 항로가 없어 항로의 선택이 자유롭다."
+        },
+        {
+          "number": "3",
+          "text": "불특정 다수의 화주로부터 화물을 집화하여 혼재운송한다."
+        },
+        {
+          "number": "4",
+          "text": "일반적으로 컨테이너 해운에서 사용되는 운송계약형태이다."
+        },
+        {
+          "number": "5",
+          "text": "별도의 운송계약서는 작성하지 아니하고 선하증권을 발급한다."
+        }
+      ],
+      "answer": "2",
+      "rate": "42%",
+      "note": "개품운송계약은 정기선 운송에 해당하는 내용이고, 정기선 운송은 항로가 일정합니다. 부정기선의 경우 항로의 선택이 자유롭다는 특징이 있습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-103",
+      "number": 103,
+      "session": "A",
+      "localNumber": 103,
+      "group": "C",
+      "question": "국제해사관련기구와 역할이 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "IMO(International Maritime Organization) - 해사안전 및 해양오염방지"
+        },
+        {
+          "number": "2",
+          "text": "ICS(International Chamber of Shipping) - 선주들의 권익보호와 상호협력"
+        },
+        {
+          "number": "3",
+          "text": "CMI(Committee Maritime International) - 해사산업 근로자의 권익보호"
+        },
+        {
+          "number": "4",
+          "text": "P&I(Protection & Indemnity) Club - 선박 사고에 대한 선주책임 상호보험"
+        },
+        {
+          "number": "5",
+          "text": "BIMCO(Baltic and International Maritime Council) - 해운정보 제공 및 자료발간"
+        }
+      ],
+      "answer": "3",
+      "rate": "32%",
+      "note": "IMO : 유엔산하 정부 국제기구, 해상안전/해양오염방지\nICS : 민간단체, 선주협회, 선주입장 대변\nCMI : 해상법 연구/통일단체\nP&I : 선주책임 상호보험\nBIMCO : 해운 실무 기준 제공, 자료발간",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-104",
+      "number": 104,
+      "session": "A",
+      "localNumber": 104,
+      "group": "C",
+      "question": "정기선운송과 부정기선운송의 비교로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ"
+        },
+        {
+          "number": "2",
+          "text": "ㄴ"
+        },
+        {
+          "number": "3",
+          "text": "ㄷ"
+        },
+        {
+          "number": "4",
+          "text": "ㄹ"
+        },
+        {
+          "number": "5",
+          "text": "ㅁ"
+        }
+      ],
+      "answer": "3",
+      "rate": "49%",
+      "note": "정기선의 경우 Tariff(운임률표)를 보유하고 있고, 부정기선은 수요공급에 의한 시장운임으로 운임을 결정하게 됩니다.",
+      "images": [
+        "assets/ham-images/hh20250726m104.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-105",
+      "number": 105,
+      "session": "A",
+      "localNumber": 105,
+      "group": "C",
+      "question": "용선계약에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "“Contract of Affreightment”는 계약조항 및 조건에 있어서 1항차 항해용선계약내용의 대부분을 그대로 유지하는 계약이다."
+        },
+        {
+          "number": "2",
+          "text": "“Gross Term Charter”는 선주가 하역비와 항비 일체를 부담하는 계약이다."
+        },
+        {
+          "number": "3",
+          "text": "“Bareboat Charter”는 선박 자체만을 용선하고 용선자가 선장 이하 선원을 고용하는 계약이다."
+        },
+        {
+          "number": "4",
+          "text": "“Time Charter”는 일정기간 동안 용선자가 선주로부터 선박운항권을 양도받고 그에 대한 급부로서 용선료를 지불하는 계약이다."
+        },
+        {
+          "number": "5",
+          "text": "“Voyage Charter”는 특정항구에서 다른 항구까지 화물운송을 위한 용선자와 선주 간에 체결되는 계약이다."
+        }
+      ],
+      "answer": "1",
+      "rate": "34%",
+      "note": "확인값은 1번입니다. “Contract of Affreightment”는 계약조항 및 조건에 있어서 1항차 항해용선계약내용의 대부분을 그대로 유지하는 계약이다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-106",
+      "number": 106,
+      "session": "A",
+      "localNumber": 106,
+      "group": "C",
+      "question": "공항ㆍ항만의 환경변화에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "운송수단의 대형화로 인해 지점-지점(point to point) 전략이 확대되고 있다."
+        },
+        {
+          "number": "2",
+          "text": "권역 내 중심 공항ㆍ항만으로 발전하기 위해 터미널을 대형화하는 추세이다."
+        },
+        {
+          "number": "3",
+          "text": "환적, 화물분류, 통관, 유통가공 등의 부가가치 물류활동이 이루어지는 장소로 변하고 있다."
+        },
+        {
+          "number": "4",
+          "text": "항공기와 선박의 대형화로 인해 공항ㆍ항만 간 경쟁이 치열해지고 있다."
+        },
+        {
+          "number": "5",
+          "text": "공항ㆍ항만들은 경쟁력 확보를 위해 정기선사 또는 항공사와 글로벌 제휴를 확대하고 있다."
+        }
+      ],
+      "answer": "1",
+      "rate": "51%",
+      "note": "운송수단의 대형화로 인해 point to point 전략이 아닌 Hub&spoke 시스템이 구축되고 있습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-107",
+      "number": 107,
+      "session": "A",
+      "localNumber": 107,
+      "group": "C",
+      "question": "항공화물운송장에 관한 설명으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "House AWB는 항공사가 혼재화물에 대하여 발행하는 항공화물운송장이다."
+        },
+        {
+          "number": "2",
+          "text": "원본 3통, 부본 6통으로 발행하는 것이 원칙이며, 추가 부본을 발행할 수 없다."
+        },
+        {
+          "number": "3",
+          "text": "Master AWB는 항공화물 운송주선업자가 혼재화물을 구성하는 개별 화주에게 발행하는 운송장이다."
+        },
+        {
+          "number": "4",
+          "text": "항공화물운송장은 항공사나 항공사의 위임을 받은 대리점이 작성한다."
+        },
+        {
+          "number": "5",
+          "text": "항공화물운송장은 기명식으로 발행되기 때문에 기재되어 있는 수화인이 아니면 화물을 인수할 수 없다."
+        }
+      ],
+      "answer": "5",
+      "rate": "48%",
+      "note": "1. 항공사가 아닌 운송주선업자가 발행함\n2. 추가 부본을 발행할 수 있음\n3. 운송주선업자가 아닌 항공사가 발행함\n4. 항공화물운송장은 화주가 작성함",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-108",
+      "number": 108,
+      "session": "A",
+      "localNumber": 108,
+      "group": "C",
+      "question": "국제물류 보안에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "CSI는 위험성이 높은 미국행 컨테이너 화물을 선별하여 선적 전에 검사하는 컨테이너 보안 협정이다."
+        },
+        {
+          "number": "2",
+          "text": "AEO는 WTO에서 무역안전과 원활화에 관한 국제규범의 일환으로 고안한 제도이다."
+        },
+        {
+          "number": "3",
+          "text": "ISO 28000은 물류보안 인증제도이며 보안심사의 내용은 보안경영방침, 보안위험평가 및 기획ㆍ실행ㆍ운영, 점검 및 시정조치, 경영검토 등이다."
+        },
+        {
+          "number": "4",
+          "text": "24-Hour Rule은 미국으로 수출하는 적하목록을 적재 24시간 전에 미국 관세청에 신고하도록 한 규정이다."
+        },
+        {
+          "number": "5",
+          "text": "C-TPAT 프로그램에 참여하여 인증을 받은 업체에게는 세관검사 축소 등 통관상의 혜택이 주어진다."
+        }
+      ],
+      "answer": "2",
+      "rate": "40%",
+      "note": "AEO는 WCO를 중심으로 국제사회가 채택한 민관협력제도로 세관 당국으로부터 안전성을 공인받은 업체를 말합니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-109",
+      "number": 109,
+      "session": "A",
+      "localNumber": 109,
+      "group": "C",
+      "question": "다음 중 선하증권의 임의 기재사항을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄴ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ, ㄷ"
+        },
+        {
+          "number": "3",
+          "text": "ㄴ, ㄷ"
+        },
+        {
+          "number": "4",
+          "text": "ㄴ, ㄹ"
+        },
+        {
+          "number": "5",
+          "text": "ㄷ, ㄹ"
+        }
+      ],
+      "answer": "4",
+      "rate": "37%",
+      "note": "확인값은 4번입니다. ㄴ, ㄹ",
+      "images": [
+        "assets/ham-images/hh20250726m109.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-110",
+      "number": 110,
+      "session": "A",
+      "localNumber": 110,
+      "group": "C",
+      "question": "복합운송증권의 발행에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "유통성으로 발행된 경우에는 배서ㆍ교부함으로써 양도가 가능하다."
+        },
+        {
+          "number": "2",
+          "text": "본선 적재 전에 화물을 수취ㆍ인수한 상태에서 발행된다."
+        },
+        {
+          "number": "3",
+          "text": "FIATA B/L이 널리 사용되고 있고 대부분 비유통성으로 발행된다."
+        },
+        {
+          "number": "4",
+          "text": "비유통성으로 발행된 경우에는 지명된 수화인을 증권에 기재하여야 한다."
+        },
+        {
+          "number": "5",
+          "text": "UCP 600에 의하면, 은행은 상품의 발송, 수취 또는 선적이 명시되어 있고 복합운송인 또는 그 대리인이 발행한 운송서류를 수리할 수 있다."
+        }
+      ],
+      "answer": "3",
+      "rate": "47%",
+      "note": "3. 대부분 유통성으로 발행됩니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-111",
+      "number": 111,
+      "session": "A",
+      "localNumber": 111,
+      "group": "C",
+      "question": "내륙컨테이너기지(ICD)의 기능으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "본선 선적 및 양하기능"
+        },
+        {
+          "number": "2",
+          "text": "적입 및 적출기능"
+        },
+        {
+          "number": "3",
+          "text": "장치보관기능"
+        },
+        {
+          "number": "4",
+          "text": "집화분류기능"
+        },
+        {
+          "number": "5",
+          "text": "통관기능"
+        }
+      ],
+      "answer": "1",
+      "rate": "60%",
+      "note": "ICD는 내륙에 위치하고 있어 1번의 내용이 불가합니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-112",
+      "number": 112,
+      "session": "A",
+      "localNumber": 112,
+      "group": "C",
+      "question": "관세법상 “수입으로 보지 아니하는 소비 또는 사용”에 해당하지 않는 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "선용품ㆍ기용품 또는 차량용품을 운송수단 안에서 그 용도에 따라 소비 또는 사용하는 경우"
+        },
+        {
+          "number": "2",
+          "text": "선용품ㆍ기용품 또는 차량용품을 관세청장이 정하는 지정보세구역에서 출입국관리법에 따라 출국심사를 마친자에게 제공하여 그 용도에 따라 소비 또는 사용하는 경우"
+        },
+        {
+          "number": "3",
+          "text": "선용품ㆍ기용품 또는 차량용품을 관세청장이 정하는 지정보세구역에서 출입국관리법에 따라 우리나라에 입국하지 아니하고 우리나라를 경유하여 제3국으로 출발하려는 자에게 제공하여 그 용도에 따라 소비 또는 사용하는 경우"
+        },
+        {
+          "number": "4",
+          "text": "여행자가 휴대품을 운송수단 또는 관세통로에서 소비 또는 사용하는 경우"
+        },
+        {
+          "number": "5",
+          "text": "관세법에 의하여 매각된 물품을 그 용도에 따라 소비 또는 사용하는 경우"
+        }
+      ],
+      "answer": "5",
+      "rate": "34%",
+      "note": "관세법에 5번의 내용은 없습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-113",
+      "number": 113,
+      "session": "A",
+      "localNumber": 113,
+      "group": "C",
+      "question": "신협회적하약관 ICC(C) 조건에서 보험자가 담보하지 않는 위험은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "선박ㆍ부선의 좌초ㆍ교사ㆍ침몰ㆍ전복"
+        },
+        {
+          "number": "2",
+          "text": "육상운송용구의 전복ㆍ탈선"
+        },
+        {
+          "number": "3",
+          "text": "지진ㆍ화산의 분화ㆍ낙뢰"
+        },
+        {
+          "number": "4",
+          "text": "공동해손희생"
+        },
+        {
+          "number": "5",
+          "text": "피난항에서 화물의 양륙"
+        }
+      ],
+      "answer": "3",
+      "rate": "46%",
+      "note": "확인값은 3번입니다. 지진ㆍ화산의 분화ㆍ낙뢰",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-114",
+      "number": 114,
+      "session": "A",
+      "localNumber": 114,
+      "group": "C",
+      "question": "상사중재의 절차로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ → ㄷ → ㄴ → ㄹ → ㅁ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ → ㄷ → ㄹ → ㅁ → ㄴ"
+        },
+        {
+          "number": "3",
+          "text": "ㄷ → ㄱ → ㄹ → ㄴ → ㅁ"
+        },
+        {
+          "number": "4",
+          "text": "ㄷ → ㄱ → ㄹ → ㅁ → ㄴ"
+        },
+        {
+          "number": "5",
+          "text": "ㄷ → ㄹ → ㄱ → ㅁ → ㄴ"
+        }
+      ],
+      "answer": "4",
+      "rate": "57%",
+      "note": "신청을 제일 처음 해야하고, 판정을 제일 마지막에 해야 합니다.",
+      "images": [
+        "assets/ham-images/hh20250726m114.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-115",
+      "number": 115,
+      "session": "A",
+      "localNumber": 115,
+      "group": "C",
+      "question": "청약(offer)에 대한 승낙(acceptance)의 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "승낙의 내용은 청약의 내용과 일치하여야 한다."
+        },
+        {
+          "number": "2",
+          "text": "승낙은 절대적이고 무조건적이어야 한다."
+        },
+        {
+          "number": "3",
+          "text": "승낙은 유효기간 내에 행해져야 한다."
+        },
+        {
+          "number": "4",
+          "text": "승낙은 특정의 청약에 대하여 행해져야 한다."
+        },
+        {
+          "number": "5",
+          "text": "승낙은 문서로만 행해져야 한다."
+        }
+      ],
+      "answer": "5",
+      "rate": "61%",
+      "note": "승낙은 구두나 특정 행위로 이루어질 수 있습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-116",
+      "number": 116,
+      "session": "A",
+      "localNumber": 116,
+      "group": "C",
+      "question": "보세운송에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "외국물품의 보세운송 목적지는 개항, 보세구역, 보세구역 외 장치장, 세관관서 등으로 지정되어 있다."
+        },
+        {
+          "number": "2",
+          "text": "보세운송을 하려는 자는 관세청장이 정하는 바에 따라 세관장에게 보세운송의 신고를 하여야 한다."
+        },
+        {
+          "number": "3",
+          "text": "보세운송을 신고 또는 승인 신청할 수 있는 자는 화주, 보세운송업자, 관세사 등이다."
+        },
+        {
+          "number": "4",
+          "text": "보세운송 중에는 세관의 감시ㆍ단속을 일시 벗어나게 되므로 운송통로와 운송기간을 제한하지 않고 있다."
+        },
+        {
+          "number": "5",
+          "text": "수출신고가 수리된 물품은 관세청장이 따로 정하는 것을 제외하고는 보세운송절차를 생략한다."
+        }
+      ],
+      "answer": "4",
+      "rate": "69%",
+      "note": "보세 운송 통로, 기간을 제한할 수 있습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-117",
+      "number": 117,
+      "session": "A",
+      "localNumber": 117,
+      "group": "C",
+      "question": "IncotermsⓇ2020에 관한 설명으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "2그룹 11개의 거래규칙으로 구성되어 있다."
+        },
+        {
+          "number": "2",
+          "text": "매도인의 의무사항 A1-A10을 먼저 나열한 후 매수인의 의무사항 B1-B10을 열거하고 있다."
+        },
+        {
+          "number": "3",
+          "text": "EXW 규칙은 매도인이 자신의 영업장 또는 합의된 장소에서 매수인이 지정한 운송인이나 제3자의 처분 하에 놓인 때에 인도하는 것을 의미한다."
+        },
+        {
+          "number": "4",
+          "text": "DPU 규칙은 지정목적지에서, 물품을 도착한 운송수단에서 양하준비된 상태로 매수인의 처분 하에 놓인 때 인도되는 것을 의미한다."
+        },
+        {
+          "number": "5",
+          "text": "FOB 규칙은 지정선적항에서 매수인이 지정한 선박의 선측에 물품이 놓인 때 인도되는 것을 의미한다."
+        }
+      ],
+      "answer": "1",
+      "rate": "33%",
+      "note": "확인값은 1번입니다. 2그룹 11개의 거래규칙으로 구성되어 있다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-118",
+      "number": 118,
+      "session": "A",
+      "localNumber": 118,
+      "group": "C",
+      "question": "해상보험의 용어에 관한 설명 중 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "보험료(Insurance Premium)는 보험자의 위험부담에 대해 보험계약자가 지급하는 보수를 말한다."
+        },
+        {
+          "number": "2",
+          "text": "피보험자(Insured)는 피보험이익의 주체로서 보험사고의 발생으로 인하여 손해를 입은 경우 보상받을 권리를 갖는자를 말한다."
+        },
+        {
+          "number": "3",
+          "text": "피보험이익(Insurable Interest)은 보험의 목적이 멸실 또는 손상됨으로써 경제적손해를 입게 되는 피보험자와 그 보험의 목적 사이에 존재하는 이해관계를 말한다."
+        },
+        {
+          "number": "4",
+          "text": "보험가액(Insurable Value)은 피보험이익의 평가액으로서 피보험이익에 대하여 발생할 수 있는 경제적 손해의 최고한도액을 말한다."
+        },
+        {
+          "number": "5",
+          "text": "보험금(Claim Amount)은 실제로 보험에 가입한 금액을 말하며 보험자가 보험계약상 부담하는 손해배상책임의 최고한도액을 말한다."
+        }
+      ],
+      "answer": "5",
+      "rate": "45%",
+      "note": "5번은 보험금액에 대한 설명입니다.\n\n보험금 : 실제로 보상받는 금액\n보험가액>보험금액>보험금",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-119",
+      "number": 119,
+      "session": "A",
+      "localNumber": 119,
+      "group": "C",
+      "question": "(주)신라상사가 중국의 (주)난징상사와 수입계약을 체결하였다. 다음과 같은 조건일 때, 매수인인 (주)신라상사가 지불해야 하는 수입가격은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "US$ 10,570"
+        },
+        {
+          "number": "2",
+          "text": "US$ 10,600"
+        },
+        {
+          "number": "3",
+          "text": "US$ 10,670"
+        },
+        {
+          "number": "4",
+          "text": "US$ 10,690"
+        },
+        {
+          "number": "5",
+          "text": "US$ 10,790"
+        }
+      ],
+      "answer": "2",
+      "rate": "31%",
+      "note": "CIF조건은 운임비+보험료 이므로, FOB 비용(이 안에 내륙운송비 포함) + 해상운임 + 해상보험료 = 10,600\n난징공장에서 상하이항까지 내륙운송비는 FOB비용 안에 포함되어있음.",
+      "images": [
+        "assets/ham-images/hh20250726m119.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s1-120",
+      "number": 120,
+      "session": "A",
+      "localNumber": 120,
+      "group": "C",
+      "question": "IncotermsⓇ2020의 주요 개정 내용을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄴ, ㄷ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ, ㄴ, ㄹ"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ, ㄷ, ㅁ"
+        },
+        {
+          "number": "4",
+          "text": "ㄴ, ㄷ, ㄹ"
+        },
+        {
+          "number": "5",
+          "text": "ㄴ, ㄹ, ㅁ"
+        }
+      ],
+      "answer": "1",
+      "rate": "35%",
+      "note": "확인값은 1번입니다. ㄱ, ㄴ, ㄷ",
+      "images": [
+        "assets/ham-images/hh20250726m120.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16512/"
+    },
+    {
+      "id": "s2-1",
+      "number": 121,
+      "session": "B",
+      "localNumber": 1,
+      "group": "D",
+      "question": "보관의 원칙에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "중량특성의 원칙: 중량에 따라 보관장소를 하층부와 상층부로 나누어 보관한다."
+        },
+        {
+          "number": "2",
+          "text": "회전대응의 원칙: 입ㆍ출하 빈도가 높은 물품은 출입구 가까이에 보관한다."
+        },
+        {
+          "number": "3",
+          "text": "동일성ㆍ유사성의 원칙: 동일 품종은 동일 장소에 보관하며, 유사품은 인접 장소에 보관한다."
+        },
+        {
+          "number": "4",
+          "text": "통로대면의 원칙: 작업의 효율성을 위하여 보관물품의 장소와 선반 번호 위치를 표시하여 보관한다."
+        },
+        {
+          "number": "5",
+          "text": "선입선출의 원칙: 먼저 입고한 것을 먼저 출고한다."
+        }
+      ],
+      "answer": "4",
+      "rate": "89%",
+      "note": "통로대면의 원칙 : 통로에 직각으로 대면해 보관",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-2",
+      "number": 122,
+      "session": "B",
+      "localNumber": 2,
+      "group": "D",
+      "question": "물류센터 설계 시 고려되는 요인의 예로 옳지 않은 것을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄴ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ, ㄹ"
+        },
+        {
+          "number": "3",
+          "text": "ㄴ, ㅁ"
+        },
+        {
+          "number": "4",
+          "text": "ㄷ, ㄹ"
+        },
+        {
+          "number": "5",
+          "text": "ㄷ, ㅁ"
+        }
+      ],
+      "answer": "2",
+      "rate": "76%",
+      "note": "ㄱ,ㄹ 바뀜",
+      "images": [
+        "assets/ham-images/hi20250726m2.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-3",
+      "number": 123,
+      "session": "B",
+      "localNumber": 3,
+      "group": "D",
+      "question": "복합물류터미널에 관한 설명으로 옳은 것을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄴ, ㄷ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ, ㄴ, ㄹ"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ, ㄷ, ㅁ"
+        },
+        {
+          "number": "4",
+          "text": "ㄴ, ㄹ, ㅁ"
+        },
+        {
+          "number": "5",
+          "text": "ㄷ, ㄹ, ㅁ"
+        }
+      ],
+      "answer": "2",
+      "rate": "91%",
+      "note": "ㄷ. 공차율은 감소하고 영차율은 증가합니다.\nㅁ. 보관기능보다 환적기능이 더 우세하고. 물류정보의 기능도 포함합니다.",
+      "images": [
+        "assets/ham-images/hi20250726m3.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-4",
+      "number": 124,
+      "session": "B",
+      "localNumber": 4,
+      "group": "D",
+      "question": "보관의 기능이 아닌 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "고객 서비스의 접점 기능"
+        },
+        {
+          "number": "2",
+          "text": "재화의 물리적 보존과 관리 기능"
+        },
+        {
+          "number": "3",
+          "text": "제품에 대한 시간적 효용 창출 기능"
+        },
+        {
+          "number": "4",
+          "text": "물품의 수급 조정 기능"
+        },
+        {
+          "number": "5",
+          "text": "제품의 판매촉진을 위한 장소적 효용 창출 기능"
+        }
+      ],
+      "answer": "5",
+      "rate": "68%",
+      "note": "운송 : 장소적 효용\n보관 : 시간적 효용",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-5",
+      "number": 125,
+      "session": "B",
+      "localNumber": 5,
+      "group": "D",
+      "question": "물류시설에 관한 설명으로 옳은 것을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄴ, ㄷ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ, ㄴ, ㄹ"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ, ㄷ, ㄹ"
+        },
+        {
+          "number": "4",
+          "text": "ㄴ, ㄷ, ㄹ"
+        },
+        {
+          "number": "5",
+          "text": "ㄱ, ㄴ, ㄷ, ㄹ"
+        }
+      ],
+      "answer": "2",
+      "rate": "81%",
+      "note": "ㄷ은 ICD에 대한 내용입니다.",
+      "images": [
+        "assets/ham-images/hi20250726m5.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-6",
+      "number": 126,
+      "session": "B",
+      "localNumber": 6,
+      "group": "D",
+      "question": "다음이 설명하는 컨테이너터미널의 시설은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "Container Yard"
+        },
+        {
+          "number": "2",
+          "text": "Control Center"
+        },
+        {
+          "number": "3",
+          "text": "Marshalling Yard"
+        },
+        {
+          "number": "4",
+          "text": "Apron"
+        },
+        {
+          "number": "5",
+          "text": "Container Freight Station"
+        }
+      ],
+      "answer": "5",
+      "rate": "84%",
+      "note": "확인값은 5번입니다. Container Freight Station",
+      "images": [
+        "assets/ham-images/hi20250726m6.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-7",
+      "number": 127,
+      "session": "B",
+      "localNumber": 7,
+      "group": "D",
+      "question": "보세구역에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "보세공장: 가공무역의 활성화 및 관세행정 편의를 위해 설치된 장소"
+        },
+        {
+          "number": "2",
+          "text": "지정장치장: 통관을 위한 물품을 일시 장치하기 위한 장소"
+        },
+        {
+          "number": "3",
+          "text": "세관검사장: 통관을 위한 물품을 반입하여 세관검사를 받도록 한 장소"
+        },
+        {
+          "number": "4",
+          "text": "특허보세구역: 일반 개인이 신청을 하면 지방자치단체장이 특허해 주는 보세구역"
+        },
+        {
+          "number": "5",
+          "text": "종합보세구역: 동일 장소에서 기존 특허보세구역의 기능을 복합적으로 수행하는 장소"
+        }
+      ],
+      "answer": "4",
+      "rate": "75%",
+      "note": "특허보세구역은 세관장이 특허해주는 장소입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-8",
+      "number": 128,
+      "session": "B",
+      "localNumber": 8,
+      "group": "D",
+      "question": "A회사의 공급지와 수요지 1, 2, 3의 위치를 나타낸 것이다. 수요지 1, 2, 3의 수요량은 각각 100대/월, 200대/월, 200대/월이다. 무게중심법을 이용한 신규물류센터의 최적 입지좌표(X, Y)는?",
+      "options": [
+        {
+          "number": "1",
+          "text": "X: 29, Y: 55"
+        },
+        {
+          "number": "2",
+          "text": "X: 31, Y: 55"
+        },
+        {
+          "number": "3",
+          "text": "X: 31, Y: 61"
+        },
+        {
+          "number": "4",
+          "text": "X: 55, Y: 29"
+        },
+        {
+          "number": "5",
+          "text": "X: 61, Y: 31"
+        }
+      ],
+      "answer": "1",
+      "rate": "69%",
+      "note": "[무게중심법]\nx좌표 : (각 구역의 개별 x좌표 X 해당 구역 가중치)의 합 / 각 구역 개별 가중치의 합 =] 이때 공급지의 x 가중치도 더해줘야 합니다. (공급량=수요량의 합)\ny좌표 : (각 구역의 개별 y좌표 X 해당 구역 가중치)의 합 / 각 구역 개별 가중치의 합 =] 이때 공급지의 y 가중치도 더해줘야 합니다. (공급량=수요량의 합)\n\nx = (100x30+200x10+200x20+500x40) / 100+200+200+500 = 29\ny = (100x20+200x50+200x40+500x70) / 100+200+200+500 = 55",
+      "images": [
+        "assets/ham-images/hi20250726m8.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-9",
+      "number": 129,
+      "session": "B",
+      "localNumber": 9,
+      "group": "D",
+      "question": "물류거점 입지선정 방법에 관한 설명으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "톤-킬로법: 입지거점 대안별로 예상비용을 산출하고, 총비용이 최소가 되는 대안을 선택하는 방법"
+        },
+        {
+          "number": "2",
+          "text": "브라운 & 깁슨법: 입지에 영향을 주는 요인을 필수적 요인, 객관적 요인, 주관적 요인으로 구분하여 평가하는 방법"
+        },
+        {
+          "number": "3",
+          "text": "총비용 비교법: 고려하고 있는 입지요인(접근성, 지역환경, 노동력 등)에 주관적으로 가중치를 설정하여 각 요인을 평가하는 방법"
+        },
+        {
+          "number": "4",
+          "text": "요소분석법: 예상 물동량에 대한 고정비와 변동비를 산출하고 그 합을 비교하여 물동량에 따른 총비용이 최소가 되는 대안을 선택하는 방법"
+        },
+        {
+          "number": "5",
+          "text": "손익분기 도표법: 각 수요처와 배송센터까지의 거리와 운송량을 평가하여 입지를 선택하는 방법"
+        }
+      ],
+      "answer": "2",
+      "rate": "76%",
+      "note": "1번은 총비용 비교법 입니다.\n3번은 요인평정법 입니다.\n4번은 손익분기도표법 입니다.\n5번은 톤킬로법 입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-10",
+      "number": 130,
+      "session": "B",
+      "localNumber": 10,
+      "group": "D",
+      "question": "창고설계의 기본원칙에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "직진성의 원칙: 물품, 통로, 운반기기, 사람 등의 흐름 방향을 직진성에 중점을 두고 설계"
+        },
+        {
+          "number": "2",
+          "text": "모듈화의 원칙: 화물형태, 운반기기, 랙, 통로입구, 기둥간격 등을 모듈화되도록 설계"
+        },
+        {
+          "number": "3",
+          "text": "물품취급 횟수 최소화의 원칙: 화물의 취급과 운반을 집합화, 공동화하여 물품 취급 횟수를 감소하도록 설계"
+        },
+        {
+          "number": "4",
+          "text": "물품이동 간 고저간격의 축소 원칙: 물품 흐름과정에서 높낮이 차의 크기와 횟수를 감소하도록 설계"
+        },
+        {
+          "number": "5",
+          "text": "역행교차 회피의 원칙: 물품, 운반기기, 사람의 흐름 배치는 서로 교차하거나 역주행이 가능하도록 설계"
+        }
+      ],
+      "answer": "5",
+      "rate": "87%",
+      "note": "역행교차 회피의 원칙은 교차나 역주행이 불가능하도록 설계하는 것입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-11",
+      "number": 131,
+      "session": "B",
+      "localNumber": 11,
+      "group": "D",
+      "question": "크로스 도킹(Cross Docking)에 관한 설명으로 옳은 것을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄴ, ㄹ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ, ㄴ, ㅁ"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ, ㄷ, ㄹ"
+        },
+        {
+          "number": "4",
+          "text": "ㄴ, ㄷ, ㅁ"
+        },
+        {
+          "number": "5",
+          "text": "ㄷ, ㄹ, ㅁ"
+        }
+      ],
+      "answer": "1",
+      "rate": "80%",
+      "note": "ㄷ. 일일 처리량이 많을 때 적합한 방식입니다.\nㅁ. 재고회전율은 증가하고 리드타임은 감소하는 것입니다.",
+      "images": [
+        "assets/ham-images/hi20250726m11.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-12",
+      "number": 132,
+      "session": "B",
+      "localNumber": 12,
+      "group": "D",
+      "question": "창고에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "임대창고: 시장환경에 따라 보관장소를 탄력적으로 운영하기 어렵다."
+        },
+        {
+          "number": "2",
+          "text": "자가창고: 취급하는 물품의 특성에 따라 최적의 창고 설계가 가능하다."
+        },
+        {
+          "number": "3",
+          "text": "자동화창고: 입하에서 출하까지 자동화되고, 유닛로드로 처리되는 창고이다."
+        },
+        {
+          "number": "4",
+          "text": "보세창고: 관세법에 근거하여 수출입화물을 취급하는 창고이다."
+        },
+        {
+          "number": "5",
+          "text": "영업창고: 비용지출이 명확하고 초기 창고 건설 및 설비투자 비용이 발생한다."
+        }
+      ],
+      "answer": "5",
+      "rate": "64%",
+      "note": "5번에서 초기 창고 건설 및 설비투자 비용이 발생하는 것은 자가창고입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-13",
+      "number": 133,
+      "session": "B",
+      "localNumber": 13,
+      "group": "D",
+      "question": "다음의 자동분류장치의 설명과 종류의 연결로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ - A, ㄴ – B"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ - A, ㄴ – C"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ - B, ㄴ - C"
+        },
+        {
+          "number": "4",
+          "text": "ㄱ - B, ㄴ – D"
+        },
+        {
+          "number": "5",
+          "text": "ㄱ - C, ㄴ - D"
+        }
+      ],
+      "answer": "4",
+      "rate": "53%",
+      "note": "확인값은 4번입니다. ㄱ - B, ㄴ – D",
+      "images": [
+        "assets/ham-images/hi20250726m13.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-14",
+      "number": 134,
+      "session": "B",
+      "localNumber": 14,
+      "group": "D",
+      "question": "창고관리시스템(Warehouse Management System)의 특성으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "입고관리, 위치관리, 재고관리, 출고관리 등의 기능을 수행한다."
+        },
+        {
+          "number": "2",
+          "text": "전사적 자원관리시스템과 상호 연계하여 자동화의 범위를 확대하고 정보의 가용성을 높인다."
+        },
+        {
+          "number": "3",
+          "text": "피킹관리, 주문진척관리 및 자동발주시스템과 같은 주문관련 기능을 수행한다."
+        },
+        {
+          "number": "4",
+          "text": "물류센터 시설운영의 효율적인 관리와 공간 및 설비의 활용도가 향상된다."
+        },
+        {
+          "number": "5",
+          "text": "기존의 독립된 구매관리시스템, 생산관리시스템, 인사관리시스템 및 영업관리시스템을 통합하여 관리한다."
+        }
+      ],
+      "answer": "5",
+      "rate": "83%",
+      "note": "5번은 ERP에 대한 설명입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-15",
+      "number": 135,
+      "session": "B",
+      "localNumber": 15,
+      "group": "D",
+      "question": "랙(Rack)에 관한 설명으로 옳은 것은 모두 몇 개인가?",
+      "options": [
+        {
+          "number": "1",
+          "text": "1개"
+        },
+        {
+          "number": "2",
+          "text": "2개"
+        },
+        {
+          "number": "3",
+          "text": "3개"
+        },
+        {
+          "number": "4",
+          "text": "4개"
+        },
+        {
+          "number": "5",
+          "text": "5개"
+        }
+      ],
+      "answer": "3",
+      "rate": "58%",
+      "note": "3번은 적층 랙입니다.\n4번은 드라이브스루 랙 입니다.",
+      "images": [
+        "assets/ham-images/hi20250726m15.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-16",
+      "number": 136,
+      "session": "B",
+      "localNumber": 16,
+      "group": "D",
+      "question": "자재소요계획(MRP: Material Requirement Planning)에 관한 설명으로 옳은 것을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄴ, ㄷ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ, ㄴ, ㄹ"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ, ㄷ, ㅁ"
+        },
+        {
+          "number": "4",
+          "text": "ㄴ, ㄹ, ㅁ"
+        },
+        {
+          "number": "5",
+          "text": "ㄷ, ㄹ, ㅁ"
+        }
+      ],
+      "answer": "3",
+      "rate": "74%",
+      "note": "ㄴ은 ERP에 더 적합한 내용입니다.\nㄹ은 JIT에 대한 설명입니다.",
+      "images": [
+        "assets/ham-images/hi20250726m16.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-17",
+      "number": 137,
+      "session": "B",
+      "localNumber": 17,
+      "group": "D",
+      "question": "경제적 주문량(Economic Order Quantity) 모형의 전제조건으로 옳은 것을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄷ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ, ㅁ"
+        },
+        {
+          "number": "3",
+          "text": "ㄴ, ㄷ"
+        },
+        {
+          "number": "4",
+          "text": "ㄴ, ㄹ"
+        },
+        {
+          "number": "5",
+          "text": "ㄹ, ㅁ"
+        }
+      ],
+      "answer": "4",
+      "rate": "75%",
+      "note": "ㄱ. 반비례가 아니라 비례합니다.\nㄷ. 할인율이 없다고 가정합니다.\nㅁ. EOQ에서는 성립하지 않습니다.",
+      "images": [
+        "assets/ham-images/hi20250726m17.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-18",
+      "number": 138,
+      "session": "B",
+      "localNumber": 18,
+      "group": "D",
+      "question": "재고관리에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "주기재고(Cycle Inventory)는 연간 주문횟수를 줄여서 주문비용을 절감하기 위한 활동에서 발생한다."
+        },
+        {
+          "number": "2",
+          "text": "안전재고(Safety Stock)는 재고유지비의 부담을 가중시키므로 적정수준으로 관리해야 한다."
+        },
+        {
+          "number": "3",
+          "text": "서비스율은 수주량에 대한 납기 내 납품량의 비율을 나타낸다."
+        },
+        {
+          "number": "4",
+          "text": "백오더(Back Order)율은 수주량에 대한 납기 내 결품량의 비율로 나타낸다."
+        },
+        {
+          "number": "5",
+          "text": "정기발주법은 연속적으로 재고수준을 점검하므로 연속점검시스템(Continuous Review System)이라 한다."
+        }
+      ],
+      "answer": "5",
+      "rate": "54%",
+      "note": "5번은 정량발주법입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-19",
+      "number": 139,
+      "session": "B",
+      "localNumber": 19,
+      "group": "D",
+      "question": "수요예측에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "시계열분석법은 기존 제품과 관련된 과거의 자료를 분석하여 신제품의 미래수요를 정성적으로 예측하는 방법이다."
+        },
+        {
+          "number": "2",
+          "text": "가중이동평균법은 각 실적치에 동일한 가중치를 부여하지 않고, 과거의 실적치에 더 낮은 가중치를 부여한다."
+        },
+        {
+          "number": "3",
+          "text": "지수평활법은 관찰된 실제수요와 이전 예측치에 상대적인 가중치를 두어 새로운 예측치를 구한다."
+        },
+        {
+          "number": "4",
+          "text": "시장조사법은 설문지, 현장인터뷰 등을 통해 소비자들로부터 자료를 수집ㆍ분석하여 가설을 검증하는 방법이다."
+        },
+        {
+          "number": "5",
+          "text": "전문가조사법을 활용할 경우, 타협이나 절충에 의해 예측 정확도가 낮을 수 있다."
+        }
+      ],
+      "answer": "1",
+      "rate": "52%",
+      "note": "1. 정성적으로 예측하는 것은 아닙니다. 시계열분석법은 정량적 기법입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-20",
+      "number": 140,
+      "session": "B",
+      "localNumber": 20,
+      "group": "D",
+      "question": "JIT(Just In Time) 시스템에 관한 설명으로 옳지 않은 것을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄴ, ㅁ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ, ㄷ, ㄹ"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ, ㄷ, ㅁ"
+        },
+        {
+          "number": "4",
+          "text": "ㄴ, ㄷ, ㄹ"
+        },
+        {
+          "number": "5",
+          "text": "ㄴ, ㄹ, ㅁ"
+        }
+      ],
+      "answer": "2",
+      "rate": "45%",
+      "note": "ㄱ. 운송비가 증가합니다.\nㄷ. JIT는 재고를 보유하고 있지 않습니다. 자재를 거점창고에 보관한다는 것 자체가 비문입니다.\nㄹ. push 시스템이 아니라 pull 시스템입니다.",
+      "images": [
+        "assets/ham-images/hi20250726m20.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-21",
+      "number": 141,
+      "session": "B",
+      "localNumber": 21,
+      "group": "D",
+      "question": "재고관리에 관한 설명과 용어의 연결로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ - A, ㄴ - B, ㄷ – C"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ - A, ㄴ - D, ㄷ – E"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ - C, ㄴ - E, ㄷ - F"
+        },
+        {
+          "number": "4",
+          "text": "ㄱ - E, ㄴ - B, ㄷ – D"
+        },
+        {
+          "number": "5",
+          "text": "ㄱ - F, ㄴ - D, ㄷ - E"
+        }
+      ],
+      "answer": "2",
+      "rate": "87%",
+      "note": "ㄴ. 가공중의 자재 = 재공품",
+      "images": [
+        "assets/ham-images/hi20250726m21.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-22",
+      "number": 142,
+      "session": "B",
+      "localNumber": 22,
+      "group": "D",
+      "question": "K기업이 판매하는 B제품의 지난해 총매출액은 300억 원, 순이익률은 5 %, 연간 재고유지비용은 6억 원, 연간 평균 재고액은 60억 원이었다. 이 기업의 지난해 재고회전율은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "4"
+        },
+        {
+          "number": "2",
+          "text": "5"
+        },
+        {
+          "number": "3",
+          "text": "6"
+        },
+        {
+          "number": "4",
+          "text": "7"
+        },
+        {
+          "number": "5",
+          "text": "8"
+        }
+      ],
+      "answer": "2",
+      "rate": "65%",
+      "note": "연간재고회전율 = 연간 총 매출액 / 연간 평균재고액(재고량)\n= 300억 / 60억 = 5",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-23",
+      "number": 143,
+      "session": "B",
+      "localNumber": 23,
+      "group": "D",
+      "question": "K기업은 A제품의 안전재고를 300개에서 400개로 늘리면서 새로운 재주문점을 고려하고 있다. A제품의 1일 평균수요량은 200개, 주문 리드타임은 3일이었다. 이때 새롭게 설정된 재주문점(개)은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "700"
+        },
+        {
+          "number": "2",
+          "text": "800"
+        },
+        {
+          "number": "3",
+          "text": "900"
+        },
+        {
+          "number": "4",
+          "text": "1,000"
+        },
+        {
+          "number": "5",
+          "text": "1,100"
+        }
+      ],
+      "answer": "4",
+      "rate": "65%",
+      "note": "재주문량 = 일일수요량 X 리드타임 + 안전재고 = 200 X 3 + 400 = 1000",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-24",
+      "number": 144,
+      "session": "B",
+      "localNumber": 24,
+      "group": "D",
+      "question": "A제품을 취급하는 K물류센터의 정보가 아래와 같을 때, 이 물류센터의 연간재고유지비용(원)은? (단, 재고 보충은 없으며, 수요는 일정하다.)",
+      "options": [
+        {
+          "number": "1",
+          "text": "120,000"
+        },
+        {
+          "number": "2",
+          "text": "140,000"
+        },
+        {
+          "number": "3",
+          "text": "160,000"
+        },
+        {
+          "number": "4",
+          "text": "180,000"
+        },
+        {
+          "number": "5",
+          "text": "200,000"
+        }
+      ],
+      "answer": "1",
+      "rate": "81%",
+      "note": "연평균재고 X 제품단가 X 연간재고유지비용 = 1000 X 3000 X 4% = 120,000",
+      "images": [
+        "assets/ham-images/hi20250726m24.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-25",
+      "number": 145,
+      "session": "B",
+      "localNumber": 25,
+      "group": "D",
+      "question": "K기업의 A제품의 연간 수요량이 1,200개, 1회 주문 비용이 60,000원, 연간 단위당 재고유지비용이 900원일 때, 경제적 주문량(EOQ)은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "250"
+        },
+        {
+          "number": "2",
+          "text": "300"
+        },
+        {
+          "number": "3",
+          "text": "350"
+        },
+        {
+          "number": "4",
+          "text": "400"
+        },
+        {
+          "number": "5",
+          "text": "450"
+        }
+      ],
+      "answer": "4",
+      "rate": "72%",
+      "note": "Q^2=2DS/H\nD=연간수요 S=1회주문비용 H=단위당 재고유지비용\nQ^2= 2x1200x60000 / 900\n= 160000\n\nQ=400",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-26",
+      "number": 146,
+      "session": "B",
+      "localNumber": 26,
+      "group": "D",
+      "question": "다음은 K기업의 A제품의 자재소요계획(Material Requirement Planning)에 관한 정보이다. 부품 X와 Y의 순 소요량은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "X: 150, Y: 210"
+        },
+        {
+          "number": "2",
+          "text": "X: 160, Y: 210"
+        },
+        {
+          "number": "3",
+          "text": "X: 180, Y: 240"
+        },
+        {
+          "number": "4",
+          "text": "X: 210, Y: 150"
+        },
+        {
+          "number": "5",
+          "text": "X: 240, Y: 180"
+        }
+      ],
+      "answer": "1",
+      "rate": "62%",
+      "note": "순소요량 : 부품 사용량 - 예정 입고량 - 가용재고\n\nX 순 소요량 : (3개의 X 부품) 60*3 - 20 - 10 = 150 EA\nY 순 소요량 : (4개의 Y 부품) 60*4 - 30 = 210 EA",
+      "images": [
+        "assets/ham-images/hi20250726m26.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-27",
+      "number": 147,
+      "session": "B",
+      "localNumber": 27,
+      "group": "D",
+      "question": "K기업은 제품 판매량을 예측하기 위하여 지수평활법을 사용하고 있다. 6월 제품 판매량은 94,000개로 예측하였으나 실제 판매량은 98,000개이었고, 7월 실제 판매량은 92,000개이었다. 8월의 제품 판매량 예측치(개)는? (단, 평활상수(α) 는 0.3을 사용한다.)",
+      "options": [
+        {
+          "number": "1",
+          "text": "93,880"
+        },
+        {
+          "number": "2",
+          "text": "94,000"
+        },
+        {
+          "number": "3",
+          "text": "94,240"
+        },
+        {
+          "number": "4",
+          "text": "95,200"
+        },
+        {
+          "number": "5",
+          "text": "96,160"
+        }
+      ],
+      "answer": "3",
+      "rate": "59%",
+      "note": "차기예측치 = 당기 판매예측치+a(당기 판매실적치-당기 판매예측치)\n8월의 제품 판매량 예측치를 구하기 위해서는 7월(당기)의 판매 예측치를 구해야 한다.\n7월 예측판매량 = 94000 + 0.3(98000-94000) = 95200\n8월 예측판매량 = 95200 + 0.3(92000-95200) = 94240",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-28",
+      "number": 148,
+      "session": "B",
+      "localNumber": 28,
+      "group": "D",
+      "question": "하역 원칙에 관한 설명으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "경제성 원칙: 하역작업의 횟수를 증가시켜 비용을 최대화한다."
+        },
+        {
+          "number": "2",
+          "text": "운반활성화 원칙: 운반활성화 지수를 최소화한다."
+        },
+        {
+          "number": "3",
+          "text": "화물 단위화의 원칙: 다품종 소량운송을 위해 화물을 개별화하여 하역한다."
+        },
+        {
+          "number": "4",
+          "text": "거리(시간) 최소화 원칙: 하역작업을 수행하는 과정에서 발생하는 화물의 이동거리(시간)를 최소화한다."
+        },
+        {
+          "number": "5",
+          "text": "화물유동화 원칙: 화물의 손상, 분실 등을 최소화하기 위하여 하역공정을 멈추고 불량 검사를 한다."
+        }
+      ],
+      "answer": "4",
+      "rate": "81%",
+      "note": "1. 하역작업의 횟수를 감소해야 한다.\n2. 운반활성화 지수를 최대화 해야한다.\n3. 화물을 단위화 해야한다.\n5. 하역공정을 계속 해야한다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-29",
+      "number": 149,
+      "session": "B",
+      "localNumber": 29,
+      "group": "D",
+      "question": "사내하역에서 하역기기 선정 시 고려기준이 아닌 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "취급화물의 중량과 종류"
+        },
+        {
+          "number": "2",
+          "text": "하역기기의 안전성"
+        },
+        {
+          "number": "3",
+          "text": "건물구조와 시설배치"
+        },
+        {
+          "number": "4",
+          "text": "하역기기의 경제성"
+        },
+        {
+          "number": "5",
+          "text": "취급화물의 원산지와 목적지"
+        }
+      ],
+      "answer": "5",
+      "rate": "88%",
+      "note": "확인값은 5번입니다. 취급화물의 원산지와 목적지",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-30",
+      "number": 150,
+      "session": "B",
+      "localNumber": 30,
+      "group": "D",
+      "question": "다음 용어에 관한 설명으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "디배닝(Devanning): 컨테이너에 화물을 싣는 작업"
+        },
+        {
+          "number": "2",
+          "text": "피킹(Picking): 화물을 유형별, 고객별, 도착지별로 분류하는 작업"
+        },
+        {
+          "number": "3",
+          "text": "스태킹(Stacking): 화물 손상을 방지하기 위해 화물의 밑바닥이나 틈 사이에 물건을 깔거나 끼우는 작업"
+        },
+        {
+          "number": "4",
+          "text": "래싱(Lashing): 운송수단에 적재된 화물이 움직이지 않도록 화물을 고정시키는 작업"
+        },
+        {
+          "number": "5",
+          "text": "분류(Sorting): 출하하는 화물을 수송기기에 바로 실을 수 있도록 정돈하는 작업"
+        }
+      ],
+      "answer": "4",
+      "rate": "77%",
+      "note": "1. 배닝\n2. 분류\n3. 더네이지\n5. 적재준비작업",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-31",
+      "number": 151,
+      "session": "B",
+      "localNumber": 31,
+      "group": "D",
+      "question": "오더피킹의 출고형태 중 케이스 단위로 입고 및 보관하다 케이스 단위로 출고되는 제4형태(C → C)의 적재방식에 활용되는 장비가 아닌 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "암 랙(Arm Rack)"
+        },
+        {
+          "number": "2",
+          "text": "자동 슬라이딩 랙(Automatic Sliding Rack)"
+        },
+        {
+          "number": "3",
+          "text": "슬라이딩 랙(Sliding Rack)"
+        },
+        {
+          "number": "4",
+          "text": "캐로셀 랙(Carrousel Rack)"
+        },
+        {
+          "number": "5",
+          "text": "모빌 랙(Mobile Rack)"
+        }
+      ],
+      "answer": "1",
+      "rate": "63%",
+      "note": "암 랙은 장척화물 전용 랙이므로 C->C 방식에 적합하지 않습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-32",
+      "number": 152,
+      "session": "B",
+      "localNumber": 32,
+      "group": "D",
+      "question": "다음이 설명하는 파렛트 풀(pool) 시스템은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "교환방식"
+        },
+        {
+          "number": "2",
+          "text": "리스ㆍ렌탈방식"
+        },
+        {
+          "number": "3",
+          "text": "교환ㆍ리스병용방식"
+        },
+        {
+          "number": "4",
+          "text": "대차결제방식"
+        },
+        {
+          "number": "5",
+          "text": "임차결제병용방식"
+        }
+      ],
+      "answer": "2",
+      "rate": "89%",
+      "note": "확인값은 2번입니다. 리스ㆍ렌탈방식",
+      "images": [
+        "assets/ham-images/hi20250726m32.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-33",
+      "number": 153,
+      "session": "B",
+      "localNumber": 33,
+      "group": "D",
+      "question": "롤 상자형 파렛트(Roll Box Pallet)에 관한 설명으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "1회용 파렛트로 Push-Pull 장치를 부착한 지게차로 취급된다."
+        },
+        {
+          "number": "2",
+          "text": "주로 액체화물 취급 시 사용되고 밀폐용 커버를 가지며 상부 또는 하부에 개폐장치가 있다."
+        },
+        {
+          "number": "3",
+          "text": "주로 분말화물 취급 시 사용되고 밀폐용 커버를 가지며 하부에 개폐장치가 있다."
+        },
+        {
+          "number": "4",
+          "text": "상부구조는 박스인 파렛트로, 받침대 밑면에는 바퀴가 달려 있으며 최근에는 배송용으로도 많이 사용된다."
+        },
+        {
+          "number": "5",
+          "text": "핸드 리프트로 하역할 수 있도록 만들어진 단면형 및 양면형 파렛트이다."
+        }
+      ],
+      "answer": "4",
+      "rate": "81%",
+      "note": "1. 시트 파렛트\n2. 탱크 파렛트\n3. 단면형 파렛트\n5. 양면형 파렛트",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-34",
+      "number": 154,
+      "session": "B",
+      "localNumber": 34,
+      "group": "D",
+      "question": "자동분류(Sorting)방식 중 동작에 의한 분류방식을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄴ"
+        },
+        {
+          "number": "2",
+          "text": "ㄴ, ㄷ"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ, ㄷ, ㄹ"
+        },
+        {
+          "number": "4",
+          "text": "ㄴ, ㄷ, ㄹ"
+        },
+        {
+          "number": "5",
+          "text": "ㄱ, ㄴ, ㄷ, ㄹ"
+        }
+      ],
+      "answer": "3",
+      "rate": "83%",
+      "note": "바코드 방식은 스캐너를 통해 판매시점정보를 관리하기 위한 정보에 대한 분류방식입니다.",
+      "images": [
+        "assets/ham-images/hi20250726m34.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-35",
+      "number": 155,
+      "session": "B",
+      "localNumber": 35,
+      "group": "D",
+      "question": "항공하역 장비에 해당하는 것을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄴ, ㄹ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ, ㄷ, ㅁ"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ, ㅁ, ㅂ"
+        },
+        {
+          "number": "4",
+          "text": "ㄴ, ㄷ, ㄹ"
+        },
+        {
+          "number": "5",
+          "text": "ㄴ, ㅁ, ㅂ"
+        }
+      ],
+      "answer": "3",
+      "rate": "75%",
+      "note": "ㄴ,ㄹ은 항만하역장비입니다.\nㄷ은 컨테이너터미널에서 사용되는 장비입니다.",
+      "images": [
+        "assets/ham-images/hi20250726m35.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-36",
+      "number": 156,
+      "session": "B",
+      "localNumber": 36,
+      "group": "D",
+      "question": "다음이 설명하는 하역장비는?",
+      "options": [
+        {
+          "number": "1",
+          "text": "Over Head Bridge Crane"
+        },
+        {
+          "number": "2",
+          "text": "Rail-Mounted Gantry Crane"
+        },
+        {
+          "number": "3",
+          "text": "Reach Stacker"
+        },
+        {
+          "number": "4",
+          "text": "Rubber-Tired Gantry Crane"
+        },
+        {
+          "number": "5",
+          "text": "Yard Tractor"
+        }
+      ],
+      "answer": "3",
+      "rate": "74%",
+      "note": "확인값은 3번입니다. Reach Stacker",
+      "images": [
+        "assets/ham-images/hi20250726m36.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-37",
+      "number": 157,
+      "session": "B",
+      "localNumber": 37,
+      "group": "D",
+      "question": "항공화물의 탑재와 하기에 사용되는 단위탑재용기(Unit Load Device)에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "지상조업시간의 단축에 따른 항공기 가동률을 증가시킬 수 있다."
+        },
+        {
+          "number": "2",
+          "text": "항공기의 모든 기종에 호환사용이 가능하여 사용회전률을 증가시킬 수 있다."
+        },
+        {
+          "number": "3",
+          "text": "악천후, 도난, 파손으로부터 화물을 보호할 수 있다."
+        },
+        {
+          "number": "4",
+          "text": "형태에 따라 파렛트류, 컨테이너류 등으로 구분할 수 있다."
+        },
+        {
+          "number": "5",
+          "text": "항공기의 안전을 위하여 국제항공운송협회(IATA)의 검증을 거쳐 제작된 단위탑재용기도 있다."
+        }
+      ],
+      "answer": "2",
+      "rate": "77%",
+      "note": "항공컨테이너는 모든 항공기에 호환사용할 수 있는 것은 아닙니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-38",
+      "number": 158,
+      "session": "B",
+      "localNumber": 38,
+      "group": "D",
+      "question": "화인에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "부화인(Counter Mark): 대조번호 화인으로서 생산자 또는 공급자의 약호를 붙여야 하는 경우에 표기한다."
+        },
+        {
+          "number": "2",
+          "text": "취급주의 화인(Care Mark): 화물의 취급, 운송, 적재요령을 나타내는 주의표시를 의미한다."
+        },
+        {
+          "number": "3",
+          "text": "레이블링(Labeling) 방법: 종이, 알루미늄 등의 판에 표시내용을 기재한 다음 철사나 끈 등으로 적절히 매는 방법이다."
+        },
+        {
+          "number": "4",
+          "text": "주화인(Main Mark): 수입업자 화인으로 수입업자의 전체 주소, 성명을 문자로 기입하지 않고, 일반적으로 도형 속에 머리글자를 표기한다."
+        },
+        {
+          "number": "5",
+          "text": "스텐실(Stencil) 방법: 기름기가 많은 종이나 셀룰로이드판 등의 시트에 문자를 파 두었다가 붓, 스프레이를 사용하여 칠하는 방법이다."
+        }
+      ],
+      "answer": "3",
+      "rate": "62%",
+      "note": "레이블링은 '붙이다'라는 뜻입니다.\n'매다' = 태그",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-39",
+      "number": 159,
+      "session": "B",
+      "localNumber": 39,
+      "group": "D",
+      "question": "화물 포장과 관련된 원칙으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "대량화ㆍ대형화의 원칙: 포장의 대형화 및 대량화를 통해 물류비를 절감한다."
+        },
+        {
+          "number": "2",
+          "text": "집중화ㆍ집약화의 원칙: 물량을 집중 및 집약시켜 물류비를 절감한다."
+        },
+        {
+          "number": "3",
+          "text": "심미성우선의 원칙: 과잉포장 배제를 통해 심미성을 화물보호보다 우선한다."
+        },
+        {
+          "number": "4",
+          "text": "사양변경의 원칙: 사양변경을 통해 물류비를 절감한다."
+        },
+        {
+          "number": "5",
+          "text": "재질변경의 원칙: 내용품의 보호에 지장이 없는 범위 내에서 재질을 변경한다."
+        }
+      ],
+      "answer": "3",
+      "rate": "78%",
+      "note": "포장은 보호가 1차적인 기능입니다. 심미성은 그 다음 입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-40",
+      "number": 160,
+      "session": "B",
+      "localNumber": 40,
+      "group": "D",
+      "question": "집합포장방법에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "쉬링크(Shrink)는 위/아래의 틀로 고정하는 방법으로 적어도 4개 정도의 밴드를 사용한다."
+        },
+        {
+          "number": "2",
+          "text": "밴드결속은 종이, 플라스틱 및 금속밴드를 이용하며, 코너패드를 보호재로 사용하여 수평 또는 수직으로 묶는다."
+        },
+        {
+          "number": "3",
+          "text": "슬리브(Sleeve)는 필름의 열 수축력에 의해서 파렛트와 그 위의 적재된 포장화물을 집합하는 방법이다."
+        },
+        {
+          "number": "4",
+          "text": "스트레치(Stretch)는 생선, 청과물 등의 포장에 스트레치 필름의 접착성을 이용하는 방법이다."
+        },
+        {
+          "number": "5",
+          "text": "꺽쇠ㆍ물림쇠는 칸막이 상자 등에서 상자가 고정되도록 사용하는 방법이다."
+        }
+      ],
+      "answer": "1",
+      "rate": "47%",
+      "note": "아래와 같은 오류 신고가 있었습니다.\n여러분들의 많은 의견 부탁 드립니다.\n추후 여러분들의 의견을 반영하여 정답을 수정하도록 하겠습니다.\n참고로 정답 변경은 오류 신고 5회 이상일 경우 수정합니다.\n\n[오류 신고 내용]\n1번 선지랑 3번 선지가 바뀌었습니다.\n정답은 1번 3번 두 개 입니다.\n\n[관리자 입니다.\n문제지 사진원본 확인해 봤는데\n이상 없습니다.\n1번, 3번 보기 정확합니다.\n다른 문제집 확인 가능한분 계시면 확인 부탁 드립니다.\n신고시 출판사명까지 기제 부탁 드립니다.]\n\n[추가 오류 신고]\n1번 : 밴드결속에 대한 내용입니다. 쉬링크는 열수축필름을 사용합니다.\n3번 : 쉬링크 포장에 관한 내용입니다. 슬리브는 보통 필름으로 슬리브를 만들어 4개 측면을 감싸는 방법입니다.\n\n=>> [2026 에듀윌 관리 항목 한권끝장+무료특강]책의 3권 5개년 기출 문제집 58쪽 40번을 보시면 위 문제와 보기는 일치합니다.\n다만 25년 관리 항목 시험에서 보관하역론 40번의 정답이 1,3번으로 복수정답 처리되었습니다.\n\n[관리자 입니다.\n다른 문제집 확인 가능한분 계시면 확인 부탁 드립니다.\n신고시 출판사명까지 기제 부탁 드립니다.\n\n다만, 확인된바에 따르면\n3번에 대한 이의 제기가 있었지만\n공단측에서 1번만 최종 정답 처리하였다고 합니다.\n참고부탁 드립니다.]\n\n[추가 오류 신고]\n2026 시대에듀 관리 항목에도 답이 1번, 3번 복수정답 처리 되었습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-41",
+      "number": 161,
+      "session": "B",
+      "localNumber": 41,
+      "group": "E",
+      "question": "물류정책기본법령상 물류사업의 범위에 관한 대분류ㆍ세분류ㆍ세세분류의 연결이 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "종합물류서비스업 - 종합물류서비스업 - 종합물류서비스업"
+        },
+        {
+          "number": "2",
+          "text": "화물운송업 - 항공화물운송업 - 상업서류송달업"
+        },
+        {
+          "number": "3",
+          "text": "물류시설운영업 - 창고업 - 위험물품보관업"
+        },
+        {
+          "number": "4",
+          "text": "물류서비스업 - 해운부대사업 - 선박관리업"
+        },
+        {
+          "number": "5",
+          "text": "화물운송업 - 항만운송관련업 - 운반ㆍ적치ㆍ하역장비 임대업"
+        }
+      ],
+      "answer": "5",
+      "rate": "64%",
+      "note": "항만운송관련업은 물류서비스업에 속합니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-42",
+      "number": 162,
+      "session": "B",
+      "localNumber": 42,
+      "group": "E",
+      "question": "물류정책기본법상 물류계획의 수립ㆍ시행에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "특별자치시장ㆍ도지사 및 특별자치도지사는 지역물류체계의 효율화를 위하여 필요한 경우에는 지역물류기본계획을 수립할 수 있다."
+        },
+        {
+          "number": "2",
+          "text": "특별시장 및 광역시장은 지역물류정책의 기본방향을 설정하는 10년 단위의 지역물류기본계획을 5년마다 수립하여야 한다."
+        },
+        {
+          "number": "3",
+          "text": "국가물류기본계획에는 물류보안에 관한 사항이 포함되어야 한다."
+        },
+        {
+          "number": "4",
+          "text": "국가물류기본계획은 ｢국토기본법｣에 따라 수립된 국토종합계획 및 ｢국가통합 교통체계효율화법｣에 따라 수립된 국가기간교통망계획에 우선한다."
+        },
+        {
+          "number": "5",
+          "text": "국토교통부장관 및 해양수산부장관은 국가물류정책의 기본방향을 설정하는 10년 단위의 국가물류기본계획을 5년마다 공동으로 수립하여야 한다."
+        }
+      ],
+      "answer": "4",
+      "rate": "63%",
+      "note": "4. 국가기간 교통망 계획에 조화를 이루어야한다",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-43",
+      "number": 163,
+      "session": "B",
+      "localNumber": 43,
+      "group": "E",
+      "question": "물류정책기본법령상 국가물류정책위원회에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "국가물류정책위원회의 위원장은 국토교통부장관이 된다."
+        },
+        {
+          "number": "2",
+          "text": "국가물류정책위원회는 위원장을 제외한 20명 이내의 위원으로 구성하고, 위원은 연임할 수 없다."
+        },
+        {
+          "number": "3",
+          "text": "국가물류정책위원회는 국가물류체계의 효율화에 관한 중요 정책 사항을 심의ㆍ조정한다."
+        },
+        {
+          "number": "4",
+          "text": "국가물류정책위원회의 회의는 재적위원 과반수의 출석으로 개의하고, 출석위원과반수의 찬성으로 의결한다."
+        },
+        {
+          "number": "5",
+          "text": "국가물류정책에 관한 주요 사항을 심의하기 위하여 국토교통부장관 소속으로 국가물류정책위원회를 둔다."
+        }
+      ],
+      "answer": "2",
+      "rate": "77%",
+      "note": "(26.07.21) 국가물류정책위원회: 위원장 포함 23명 이내 / 위원장 국토부장관\n제18조(국가물류정책위원회의 구성 등)\n① 국가물류정책위원회는 위원장을 포함한 23명 이내의 위원으로 구성한다.\n② 국가물류정책위원회의 위원장은 국토교통부장관이 되고, 위원은 다음 각 호의 자가 된다.\n1. 재정경제부, 과학기술정보통신부, 교육부, 외교부, 농림축산식품부, 산업통상부, 고용노동부, 국토교통부, 해양수산부, 중소벤처기업부, 기획예산처, 국가정보원 및 관세청의 고위공무원단에 속하는 공무원 또는 이에 상당하는 공무원 중에서 해당 기관의 장이 지명하는 자 각 1명\n2. 물류 관련 분야에 관한 전문지식 및 경험이 풍부한 자 중에서 위원장이 위촉하는 10명 이내의 자",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-44",
+      "number": 164,
+      "session": "B",
+      "localNumber": 44,
+      "group": "E",
+      "question": "물류정책기본법령상 우수물류기업의 인증에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "화물정보망기업에 대한 우수물류기업 인증의 주체는 국토교통부장관ㆍ해양수산부장관 공동이다."
+        },
+        {
+          "number": "2",
+          "text": "국토교통부장관 및 해양수산부장관은 우수물류기업 인증심사 대행기관이 정당한 사유 없이 인증업무를 거부한 경우에는 공동으로 그 지정을 취소할 수 있다."
+        },
+        {
+          "number": "3",
+          "text": "국토교통부장관 및 해양수산부장관은 ｢공공기관의 운영에 관한 법률｣에 따른 공공기관을 우수물류기업 인증심사 대행기관으로 공동으로 지정하여 인증신청의 접수 업무를 하게 할 수 있다."
+        },
+        {
+          "number": "4",
+          "text": "국토교통부장관 및 해양수산부장관은 물류기업의 육성과 물류산업 발전을 위하여 소관 물류기업을 각각 우수물류기업으로 인증할 수 있다."
+        },
+        {
+          "number": "5",
+          "text": "국토교통부장관 또는 해양수산부장관은 소관 인증우수물류기업이 물류사업으로 인하여 공정거래위원회로부터 시정조치를 받은 경우에는 그 인증을 취소할 수 있다."
+        }
+      ],
+      "answer": "1",
+      "rate": "55%",
+      "note": "화물자동차운송기업 , 국제물류주선기업 , 화물정보망기업 : 인증 주체는 국장\n물류창고기업 : 인증 주체는 국장 또는 해장\n종합물류서비스업 : 인증 주체는 국장과 해장 공동",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-45",
+      "number": 165,
+      "session": "B",
+      "localNumber": 45,
+      "group": "E",
+      "question": "물류정책기본법령상 국제물류주선업에 관한 설명으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "국제물류주선업을 경영하려는 자는 국토교통부장관의 허가를 받아야 한다."
+        },
+        {
+          "number": "2",
+          "text": "국제물류주선업자가 그 사업을 양도하거나 사망한 때에는 그 양수인ㆍ상속인은 국제물류주선업의 등록에 따른 권리ㆍ의무를 승계하지 아니한다."
+        },
+        {
+          "number": "3",
+          "text": "｢공항시설법｣또는 ｢해운법｣을 위반하여 벌금형을 선고받고 2년이 지나지 아니한 자는 국제물류주선업의 등록을 할 수 없다."
+        },
+        {
+          "number": "4",
+          "text": "국제물류주선업자가 등록한 사항 중 자본금이 감소되는 경우에는 변경등록을 하지 않아도 된다."
+        },
+        {
+          "number": "5",
+          "text": "국토교통부장관은 국제물류주선업자가 거짓이나 그 밖의 부정한 방법으로 허가를 받은 경우에는 허가를 취소할 수 있다."
+        }
+      ],
+      "answer": "3",
+      "rate": "66%",
+      "note": "1. 시도지사의 등록을 받아야 합니다.\n2. 권리,의무를 승계합니다.\n4. 자본금이 감소되는 경우는 변경등록을 해야합니다.\n5. 거짓이나 그 밖의 부정한 방법은 허가를 취소해야만 합니다. (반드시)",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-46",
+      "number": 166,
+      "session": "B",
+      "localNumber": 46,
+      "group": "E",
+      "question": "물류정책기본법령상 과태료 부과의 개별기준에 관한 내용이다. ( )에 들어갈 숫자를 바르게 나열한 것은? (단, 과태료의 가중 및 감경은 고려하지 않음)",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ: 50, ㄴ: 100, ㄷ: 150"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ: 50, ㄴ: 100, ㄷ: 200"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ: 100, ㄴ: 150, ㄷ: 200"
+        },
+        {
+          "number": "4",
+          "text": "ㄱ: 100, ㄴ: 150, ㄷ: 300"
+        },
+        {
+          "number": "5",
+          "text": "ㄱ: 100, ㄴ: 200, ㄷ: 300"
+        }
+      ],
+      "answer": "2",
+      "rate": "67%",
+      "note": "확인값은 2번입니다. ㄱ: 50, ㄴ: 100, ㄷ: 200",
+      "images": [
+        "assets/ham-images/hi20250726m46.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-47",
+      "number": 167,
+      "session": "B",
+      "localNumber": 47,
+      "group": "E",
+      "question": "물류정책기본법령상 물류체계의 효율화에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "국토교통부장관은 물류기업 및 화주기업이 기업물류비 산정지침에 따라 물류비를 관리하도록 권고할 수 있다."
+        },
+        {
+          "number": "2",
+          "text": "국토교통부장관 또는 해양수산부장관은 물류표준화에 관한 업무를 효과적으로 추진하기 위하여 필요하다고 인정하는 경우에는 산업통상자원부장관에게 ｢산업표준화법｣에 따른 한국산업표준의 제정ㆍ개정 또는 폐지를 요청할 수 있다."
+        },
+        {
+          "number": "3",
+          "text": "국토교통부장관ㆍ해양수산부장관ㆍ산업통상자원부장관 또는 관세청장은 물류공동화를 확산하기 위하여 필요한 경우에는 시범사업을 선정하여 운영할 수 있다."
+        },
+        {
+          "number": "4",
+          "text": "｢민법｣제32조에 따라 설립된 물류와 관련된 비영리법인이 기존 물류시설을 정비할 때에는 주변 물류시설과의 기능중복 여부를 고려하여야 한다."
+        },
+        {
+          "number": "5",
+          "text": "기업물류비 산정지침에는 물류비 계산서의 표준 서식이 포함되어야 한다."
+        }
+      ],
+      "answer": "3",
+      "rate": "60%",
+      "note": "관세청장은 물류정보화와 관련있습니다. 물류공동화는 시도지사입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-48",
+      "number": 168,
+      "session": "B",
+      "localNumber": 48,
+      "group": "E",
+      "question": "물류정책기본법령상 물류정보화에 관한 설명으로 옳은 것을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄴ"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ, ㄴ"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ, ㄷ"
+        },
+        {
+          "number": "4",
+          "text": "ㄴ, ㄷ"
+        },
+        {
+          "number": "5",
+          "text": "ㄱ, ㄴ, ㄷ"
+        }
+      ],
+      "answer": "1",
+      "rate": "48%",
+      "note": "ㄷ. 한국도로공사법이 아닌 한국교통안전공단법입니다.\n\nㄱ. 10000리터 -> 10톤\n\n다른 해설 작성자분께서 10톤이라고 작성하셨는데 화학물질관리법에 따른 유해화학물질은 10톤이 아닌 5톤입니다. 하단내용 참고하시면 될 것 같습니다.\n\n1. 위험물안전관리법에 따른 위험물 -> 10,000리터 이상\n\n2. 폐기물관리법에 따른 지정폐기물(액상 폐기물 및 같은 법에 따라 환경부장관이 정하여 고시한 폐기물 중 금속성 분진, 분말로 한정). 다만, 의료폐기물은 제외한다. -> 10,000킬로그램 이상\n\n3. 화학물질관리법에 따른 유해화학물질 -> 5,000킬로그램 이상\n\n4. 고압가스 안전관리법 시행규칙에 따른 가연성가스 6,000킬로그램 이상\n고압가스 안전관리법 시행규칙에 따른 독성가스 2,000킬로그램 이상",
+      "images": [
+        "assets/ham-images/hi20250726m48.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-49",
+      "number": 169,
+      "session": "B",
+      "localNumber": 49,
+      "group": "E",
+      "question": "물류시설의 개발 및 운영에 관한 법률상 용어의 정의에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "물류의 공동화ㆍ자동화 및 정보화를 위한 시설은 “물류시설”에 해당한다."
+        },
+        {
+          "number": "2",
+          "text": "｢유통산업발전법｣에 따른 집배송시설을 경영하는 사업은 “물류터미널사업”에서 제외된다."
+        },
+        {
+          "number": "3",
+          "text": "｢철도사업법｣에 따른 철도사업자가 여객의 수하물 또는 소화물을 보관하는 것은 “물류창고업”에서 제외된다."
+        },
+        {
+          "number": "4",
+          "text": "“도시첨단물류단지”란 도시 내 물류를 지원하기 위하여 지정ㆍ개발하는 일단의 토지 및 시설로서 스마트물류단지와 일반물류단지로 구분된다."
+        },
+        {
+          "number": "5",
+          "text": "물류단지시설의 운영을 효율적으로 지원하기 위하여 물류단지 안에 설치되는 물류단지 종사자 및 이용자의 생활과 편의를 위한 시설은 “지원시설”에 해당한다."
+        }
+      ],
+      "answer": "4",
+      "rate": "51%",
+      "note": "4. 도시첨단물류단지가 나뉘지 않습니다.\n\n도시첨단물류단지가 나뉘는 것이 아니라, 물류단지가 도시첨단물류단지와 일반물류단지로 나뉜다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-50",
+      "number": 170,
+      "session": "B",
+      "localNumber": 50,
+      "group": "E",
+      "question": "물류시설의 개발 및 운영에 관한 법령상 물류창고업에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "물류창고 면적의 100분의 10 이상의 증감이 있는 경우 물류창고업자는 그 사유가 발생한 날부터 30일 이내에 변경등록을 하여야 한다."
+        },
+        {
+          "number": "2",
+          "text": "보관장소 전체면적의 합계가 2천500제곱미터 이상인 물류창고를 소유 또는 임차하여 물류창고업을 경영하려는 자는 물류창고업의 등록을 하여야 한다."
+        },
+        {
+          "number": "3",
+          "text": "물류창고업자의 사업자단체가 수행하는 물류창고업자 및 관련 종사자에 대한 교육ㆍ훈련 사업은 국가 또는 지방자치단체의 재정적 지원 대상이 될 수 있다."
+        },
+        {
+          "number": "4",
+          "text": "물류창고업의 등록 및 변경등록 신청을 하려는 자는 국토교통부령으로 정하는 바에 따라 수수료를 내야 한다."
+        },
+        {
+          "number": "5",
+          "text": "물류창고업 등록을 취소하여야 하는 경우로서 그 등록의 취소로써 그 사업의 이용자 등에게 심한 불편을 주는 경우에도 그 등록취소처분을 갈음하여 과징금을 부과할 수 없다."
+        }
+      ],
+      "answer": "2",
+      "rate": "55%",
+      "note": "보관장소는 전체 바닥면적 합계 4500제곱미터 이상 입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-51",
+      "number": 171,
+      "session": "B",
+      "localNumber": 51,
+      "group": "E",
+      "question": "물류시설의 개발 및 운영에 관한 법률상 도시첨단물류단지의 지정을 위한 토지소유자 등의 동의에 관한 조문의 일부이다. ( )에 들어갈 내용은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ: 2분의 1, ㄴ: 2분의 1"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ: 2분의 1, ㄴ: 3분의 2"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ: 3분의 2, ㄴ: 2분의 1"
+        },
+        {
+          "number": "4",
+          "text": "ㄱ: 3분의 2, ㄴ: 4분의 3"
+        },
+        {
+          "number": "5",
+          "text": "ㄱ: 4분의 3, ㄴ: 4분의 3"
+        }
+      ],
+      "answer": "1",
+      "rate": "50%",
+      "note": "도시첨단물류단지 동의요건은 전부 1/2 이상\n토지면적, 토지소유자 수, 건축물 소유자 수",
+      "images": [
+        "assets/ham-images/hi20250726m51.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-52",
+      "number": 172,
+      "session": "B",
+      "localNumber": 52,
+      "group": "E",
+      "question": "물류시설의 개발 및 운영에 관한 법률상 물류단지의 개발 및 운영에 관한 설명으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "시ㆍ도지사가 일반물류단지를 지정할 때에는 시장ㆍ군수ㆍ구청장의 신청이 있어야 한다."
+        },
+        {
+          "number": "2",
+          "text": "물류단지개발사업의 시행자가 물류단지 예정지역의 토지소유자가 설립한 조합인 경우 시행자는 물류단지개발사업에 필요한 토지등을 수용하거나 사용할 수 없다."
+        },
+        {
+          "number": "3",
+          "text": "｢지방공기업법｣에 따른 지방공사가 물류단지개발사업의 시행으로 기존의 공공시설에 대체되는 공공시설을 설치한 경우에는 종래의 공공시설은 그 시설을 관리할 지방자치단체에 무상으로 귀속된다."
+        },
+        {
+          "number": "4",
+          "text": "물류단지지정권자가 물류단지재정비사업을 하려는 경우에는 입주업체 2분의 1 이상의 동의가 있어야 한다."
+        },
+        {
+          "number": "5",
+          "text": "물류단지개발실시계획의 승인을 한 물류단지지정권자는 시행자가 사정이 변경되어 물류단지개발사업을 계속 시행하는 것이 불가능하게 된 경우 그 승인을 취소하여야 한다."
+        }
+      ],
+      "answer": "2",
+      "rate": "29%",
+      "note": "1. 신청이 아니라 지역물류정책위원회의 심의가 필요합니다.\n3. 지방자치단체가 아닌 시행자에게 무상으로 귀속됩니다.\n4. 없는 내용입니다.\n5. 승인 취소가 아니라 지정 해제입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-53",
+      "number": 173,
+      "session": "B",
+      "localNumber": 53,
+      "group": "E",
+      "question": "물류시설의 개발 및 운영에 관한 법령상 물류단지 안에서 시장ㆍ군수ㆍ구청장의 허가를 받지 아니하고 할 수 있는 행위는? (단, 국토의 계획 및 이용에 관한 법률은 고려하지 않고, 재해복구 또는 재난수습에 필요한 응급조치를 위하여 하는 행위는 제외함)",
+      "options": [
+        {
+          "number": "1",
+          "text": "토지분할"
+        },
+        {
+          "number": "2",
+          "text": "죽목의 벌채"
+        },
+        {
+          "number": "3",
+          "text": "｢건축법｣에 따른 가설건축물의 건축"
+        },
+        {
+          "number": "4",
+          "text": "｢건축법｣에 따른 건축물의 용도변경"
+        },
+        {
+          "number": "5",
+          "text": "물류단지에 존치하기로 결정된 대지 안에서 물건을 쌓아놓는 행위"
+        }
+      ],
+      "answer": "5",
+      "rate": "80%",
+      "note": "확인값은 5번입니다. 물류단지에 존치하기로 결정된 대지 안에서 물건을 쌓아놓는 행위",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-54",
+      "number": 174,
+      "session": "B",
+      "localNumber": 54,
+      "group": "E",
+      "question": "물류시설의 개발 및 운영에 관한 법령상 물류단지의 관리기구에 해당하지 않는 자는?",
+      "options": [
+        {
+          "number": "1",
+          "text": "｢한국토지주택공사법｣에 따른 한국토지주택공사"
+        },
+        {
+          "number": "2",
+          "text": "｢한국철도공사법｣에 따른 한국철도공사"
+        },
+        {
+          "number": "3",
+          "text": "｢한국도로공사법｣에 따른 한국도로공사"
+        },
+        {
+          "number": "4",
+          "text": "｢항만공사법｣에 따른 항만공사"
+        },
+        {
+          "number": "5",
+          "text": "｢지방공기업법｣에 따른 지방공사"
+        }
+      ],
+      "answer": "2",
+      "rate": "48%",
+      "note": "확인값은 2번입니다. ｢한국철도공사법｣에 따른 한국철도공사",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-55",
+      "number": 175,
+      "session": "B",
+      "localNumber": 55,
+      "group": "E",
+      "question": "물류시설의 개발 및 운영에 관한 법률상 과태료 부과대상은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "공사시행인가를 받지 아니하고 공사를 시행한 복합물류터미널사업자"
+        },
+        {
+          "number": "2",
+          "text": "등록증을 대여한 물류창고업자"
+        },
+        {
+          "number": "3",
+          "text": "부정한 방법으로 물류단지개발사업의 시행자로 지정을 받은 자"
+        },
+        {
+          "number": "4",
+          "text": "시ㆍ도지사가 소속 공무원에게 물류단지의 관리에 관한 관리기관의 업무를 검사하게 한 경우 그 검사를 방해ㆍ거부한 자"
+        },
+        {
+          "number": "5",
+          "text": "물류단지시설의 설치를 완료하기 전에 분양받은 토지 또는 시설을 시행자 또는 관리기관에 양도하지 아니하고 처분한 입주기업체"
+        }
+      ],
+      "answer": "4",
+      "rate": "75%",
+      "note": "1,2,3번은 벌금형 또는 징역형입니다.\n4번은 300만원 이하의 과태료에 처합니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-56",
+      "number": 176,
+      "session": "B",
+      "localNumber": 56,
+      "group": "E",
+      "question": "물류시설의 개발 및 운영에 관한 법령상 물류 교통ㆍ환경 정비지구(이하 '정비지구'라 함)에 관한 설명으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "정비지구의 지정을 신청하려면 해당 지역의 면적이 50만 제곱미터 이상이어야 한다."
+        },
+        {
+          "number": "2",
+          "text": "정비지구가 둘 이상의 시ㆍ군ㆍ구의 관할지역에 걸쳐있는 경우에는 시ㆍ도지사가 물류 교통ㆍ환경 정비계획을 수립한다."
+        },
+        {
+          "number": "3",
+          "text": "정비지구 면적의 100분의 10 미만의 변경을 신청하는 경우에는 주민의 의견청취절차를 거치지 아니할 수 있다."
+        },
+        {
+          "number": "4",
+          "text": "정비지구를 지정하려면 지역물류정책위원회와 ｢국토의 계획 및 이용에 관한 법률｣에 따른 지방도시계획위원회가 공동으로 하는 심의를 거쳐야 한다."
+        },
+        {
+          "number": "5",
+          "text": "국가는 시ㆍ도지사가 지정한 정비지구에서 시장ㆍ군수ㆍ구청장에게 ｢화물자동차운수사업법｣에 따른 공영차고지 및 화물자동차 휴게소의 설치 사업에 대하여 행정적ㆍ재정적 지원을 할 수 있다."
+        }
+      ],
+      "answer": "5",
+      "rate": "53%",
+      "note": "1. 30만 제곱미터 이상입니다.\n2. 두명의 시장이 공동으로 수립합니다.\n3. 경미한 사항에 대해서 의견청취 절차를 거치지 아니할 수 있는데, 그 정도는 100분의 5미만입니다.\n4. 협의도 필요합니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-57",
+      "number": 177,
+      "session": "B",
+      "localNumber": 57,
+      "group": "E",
+      "question": "화물자동차 운수사업법령상 화물자동차 운송사업에서 여객자동차 운송사업용 자동차에 싣기 부적합한 것으로서 화주가 밴형 화물자동차에 함께 탈 때 실을 수 있는 화물의 기준으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "화주 1명당 화물의 중량이 10킬로그램 이상일 것"
+        },
+        {
+          "number": "2",
+          "text": "화주 1명당 화물의 용적이 4만 세제곱센티미터 이상일 것"
+        },
+        {
+          "number": "3",
+          "text": "화물이 기계ㆍ기구류 등 공산품에 해당하는 물품일 것"
+        },
+        {
+          "number": "4",
+          "text": "화물이 합판ㆍ각목 등 건축기자재에 해당하는 물품일 것"
+        },
+        {
+          "number": "5",
+          "text": "화물이 혐오감을 주는 식물에 해당하는 물품일 것"
+        }
+      ],
+      "answer": "1",
+      "rate": "58%",
+      "note": "10킬로그램이 아닌 20킬로그램입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-58",
+      "number": 178,
+      "session": "B",
+      "localNumber": 58,
+      "group": "E",
+      "question": "화물자동차 운수사업법령상 화물자동차 운송사업의 허가 등에 관한 설명으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "운송사업자가 화물자동차의 대폐차에 관한 사항을 변경하려면 국토교통부장관의 변경허가를 받아야 한다."
+        },
+        {
+          "number": "2",
+          "text": "개인 운송사업자는 주사무소 외의 장소에서 상주하여 영업하려면 국토교통부장관의 허가를 받아 영업소를 설치하여야 한다."
+        },
+        {
+          "number": "3",
+          "text": "임시허가를 받은 자가 허가 기간 내에 다른 운송사업자와 위ㆍ수탁계약을 체결하지 못하고 임시허가 기간이 만료된 경우 3개월 내에 화물자동차 운송사업허가를 신청할 수 있다."
+        },
+        {
+          "number": "4",
+          "text": "화물자동차 운송사업의 증차를 수반하는 변경허가에는 조건 또는 기한을 붙일 수 없다."
+        },
+        {
+          "number": "5",
+          "text": "국토교통부장관은 운송사업자가 사업정지처분을 받은 경우에도 주사무소를 이전하는 변경허가를 할 수 있다."
+        }
+      ],
+      "answer": "3",
+      "rate": "50%",
+      "note": "1. 화물자동차의 대폐차에 관한 사항은 신고사항입니다.\n2. 개인 운송사업자는 예외입니다.\n4. 기한을 붙일 수 있습니다.\n5. 변경 허가 불가합니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-59",
+      "number": 179,
+      "session": "B",
+      "localNumber": 59,
+      "group": "E",
+      "question": "화물자동차 운수사업법령상 운송사업자의 운송약관에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "운송약관 변경신고가 있는 경우 그 변경신고를 받은 날부터 3일 이내에 신고수리 여부가 신고인에게 통지되어야 한다."
+        },
+        {
+          "number": "2",
+          "text": "운송사업자는 운송약관을 영업소 또는 화물자동차에 갖추어 두고 이용자가 요구하면 이를 내보여야 한다."
+        },
+        {
+          "number": "3",
+          "text": "운송약관에는 운송책임이 시작되는 시기 및 끝나는 시기를 적어야 한다."
+        },
+        {
+          "number": "4",
+          "text": "공정거래위원회는 화물운송에 관한 표준이 되는 약관을 작성하여 운송사업자에게 그 사용을 권장할 수 있다."
+        },
+        {
+          "number": "5",
+          "text": "운송약관의 신고는 ｢화물자동차 운수사업법｣에 따라 설립된 협회로 하여금 대리하게 할 수 있다."
+        }
+      ],
+      "answer": "4",
+      "rate": "51%",
+      "note": "표준 약관을 권장할 수 있는 건 국토부장관입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-60",
+      "number": 180,
+      "session": "B",
+      "localNumber": 60,
+      "group": "E",
+      "question": "화물자동차 운수사업법상 화물자동차 운송사업의 허가를 받을 수 없는 자가 아닌 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "임원 중 ｢화물자동차 운수사업법｣을 위반하여 징역 이상의 형의 집행유예를 선고받고 그 유예 기간 중에 있는 자가 있는 법인"
+        },
+        {
+          "number": "2",
+          "text": "임원 중 파산선고를 받고 복권되지 아니한 자가 있는 법인"
+        },
+        {
+          "number": "3",
+          "text": "부정한 방법으로 화물자동차 운송사업의 허가를 받아 허가가 취소된 후 3년이 지난 자"
+        },
+        {
+          "number": "4",
+          "text": "부정한 방법으로 화물자동차 운송사업의 변경허가를 받아 변경허가가 취소된 후 3년이 지난 자"
+        },
+        {
+          "number": "5",
+          "text": "빈번한 교통사고로 1명 이상의 사상자를 발생하게 하여 화물자동차 운송사업의 허가가 취소된 후 3년이 지난 자"
+        }
+      ],
+      "answer": "5",
+      "rate": "67%",
+      "note": "허가 취소는 2년이 지나지 않은 경우에는 불가한데 3년이 지난 경우는 가능합니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-61",
+      "number": 181,
+      "session": "B",
+      "localNumber": 61,
+      "group": "E",
+      "question": "화물자동차 운수사업법상 화물자동차 운송주선사업에 관한 설명으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "화물의 멸실ㆍ훼손 또는 인도의 지연으로 발생한 운송주선사업자의 손해배상책임에 관하여는 ｢상법｣제135조(손해배상책임)를 준용한다."
+        },
+        {
+          "number": "2",
+          "text": "화물자동차 운송가맹사업의 허가를 받은 자는 화물자동차 운송주선사업의 허가를 받아야 화물자동차 운송주선사업을 경영할 수 있다."
+        },
+        {
+          "number": "3",
+          "text": "운송주선사업자는 주사무소 외의 장소에서 상주하여 영업하려면 미리 국토교통부장관에게 신고하여야 한다."
+        },
+        {
+          "number": "4",
+          "text": "운송주선사업자는 필요한 경우 자기 명의로 다른 사람에게 화물자동차 운송주선사업을 경영하게 할 수 있다."
+        },
+        {
+          "number": "5",
+          "text": "운송주선사업자는 화주로부터 중개를 의뢰받은 화물에 대하여 운송가맹사업자에게 수수료를 받고 화물의 운송을 주선하는 행위를 할 수 없다."
+        }
+      ],
+      "answer": "1",
+      "rate": "56%",
+      "note": "2. 운송주선사업의 허가를 받지 않아도 됩니다.\n3. 국토부장관에게 허가를 받아야 합니다.\n4. 자기 명의로 다른 사람에게 운송주선사업을 경영하게 할 수 없습니다.\n5. 화물의 운송을 주선하는 행위를 할 수 있습니다. 다른 운송사업자에게는 할 수 없습니다.\n\n(26/07/21) 5. \"운송주선사업자는 화주로부터 중개를 의뢰받은 화물에 대하여 운송가맹사업자에게 수수료를 받고 화물의 운송을 주선하는 행위를 할 수 있다. (다른 운송사업자에게도 당연히 주선할 수 있다.)\"",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-62",
+      "number": 182,
+      "session": "B",
+      "localNumber": 62,
+      "group": "E",
+      "question": "화물자동차 운수사업법령상 운송가맹사업자의 허가사항 변경신고의 대상을 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄹ"
+        },
+        {
+          "number": "2",
+          "text": "ㄴ, ㄷ"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ, ㄴ, ㄷ"
+        },
+        {
+          "number": "4",
+          "text": "ㄴ, ㄷ, ㄹ"
+        },
+        {
+          "number": "5",
+          "text": "ㄱ, ㄴ, ㄷ, ㄹ"
+        }
+      ],
+      "answer": "4",
+      "rate": "38%",
+      "note": "확인값은 4번입니다. ㄴ, ㄷ, ㄹ",
+      "images": [
+        "assets/ham-images/hi20250726m62.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-63",
+      "number": 183,
+      "session": "B",
+      "localNumber": 63,
+      "group": "E",
+      "question": "화물자동차 운수사업법상 운송사업자에게 할 수 있는 개선명령 사항에 해당하지 않는 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "화물자동차의 구조변경"
+        },
+        {
+          "number": "2",
+          "text": "운송시설의 개선"
+        },
+        {
+          "number": "3",
+          "text": "화물의 안전운송을 위한 조치"
+        },
+        {
+          "number": "4",
+          "text": "｢자동차손해배상 보장법｣에 따라 운송사업자가 의무적으로 가입하여야 하는 보험ㆍ공제에 가입"
+        },
+        {
+          "number": "5",
+          "text": "｢가맹사업거래의 공정화에 관한 법률｣에 따른 정보공개서 제공의무의 통지"
+        }
+      ],
+      "answer": "5",
+      "rate": "50%",
+      "note": "5번은 규정에 없습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-64",
+      "number": 184,
+      "session": "B",
+      "localNumber": 64,
+      "group": "E",
+      "question": "화물자동차 운수사업법령상 적재물배상보험등에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "운송사업자는 각 사업자별로 사고 건당 2천만원 이상의 금액을 지급할 책임을 지는 적재물배상보험등에 가입하여야 한다."
+        },
+        {
+          "number": "2",
+          "text": "운송가맹사업자는 적재물배상보험등에 가입하여야 한다."
+        },
+        {
+          "number": "3",
+          "text": "이사화물을 취급하는 운송주선사업자는 적재물배상보험등에 가입하여야 한다."
+        },
+        {
+          "number": "4",
+          "text": "책임보험계약등의 계약 종료사실 통지에는 계약기간이 종료된 후 적재물배상보험등에 가입하지 아니하는 경우에는 500만원 이하의 과태료가 부과된다는 사실에 관한 안내가 포함되어야 한다."
+        },
+        {
+          "number": "5",
+          "text": "보험회사등은 자기와 책임보험계약등을 체결한 보험등 의무가입자가 그 계약이 끝난 후 새로운 계약을 체결하지 아니하면 그 사실을 지체 없이 국토교통부장관에게 알려야 한다."
+        }
+      ],
+      "answer": "1",
+      "rate": "49%",
+      "note": "1. 각 사업자별이 아닌 화물자동차별입니다. 각 사업자별은 운송주선업자입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-65",
+      "number": 185,
+      "session": "B",
+      "localNumber": 65,
+      "group": "E",
+      "question": "화물자동차 운수사업법령상 경영의 위탁에 관한 설명으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "운송사업자는 화물자동차 운송사업의 효율적인 수행을 위하여 필요하면 다른 사람에게 경영의 전부를 위탁할 수 있다."
+        },
+        {
+          "number": "2",
+          "text": "화물자동차 운송사업의 허가권자는 경영의 위탁을 제한할 수 없다."
+        },
+        {
+          "number": "3",
+          "text": "위ㆍ수탁계약을 체결하는 경우 운수종사자 교육에 관한 사항을 계약서에 명시하여야 한다."
+        },
+        {
+          "number": "4",
+          "text": "위ㆍ수탁계약의 기간은 3년 이상으로 하여야 한다."
+        },
+        {
+          "number": "5",
+          "text": "시장ㆍ군수ㆍ구청장은 위ㆍ수탁계약서의 작성 여부에 대한 실태조사를 매년 2회 이상 실시한다."
+        }
+      ],
+      "answer": "3",
+      "rate": "59%",
+      "note": "1. 경영의 일부를 위탁할 수 있습니다.\n2. 경영의 위탁을 제한할 수 있습니다.\n4. 위수탁계약의 기간은 2년 이상으로 하여야 합니다.\n5. 매년 1회 이상 실시합니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-66",
+      "number": 186,
+      "session": "B",
+      "localNumber": 66,
+      "group": "E",
+      "question": "화물자동차 운수사업법령상 화물자동차 운송사업에 종사하는 운수종사자의 준수사항이 아닌 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "고장 및 사고차량 등 화물의 운송과 관련하여 자동차관리사업자와 부정한 금품을 주고받는 행위를 하여서는 아니 된다."
+        },
+        {
+          "number": "2",
+          "text": "적재된 화물이 떨어지지 아니하도록 국토교통부령으로 정하는 기준 및 방법에 따라 덮개ㆍ포장ㆍ고정장치 등 필요한 조치를 하지 아니하고 화물자동차를 운행하는 행위를 하여서는 아니 된다."
+        },
+        {
+          "number": "3",
+          "text": "택시 요금미터기의 장착 등 국토교통부령으로 정하는 택시 유사표시행위를 하여서는 아니 된다."
+        },
+        {
+          "number": "4",
+          "text": "｢자동차관리법｣에 따른 승인을 받지 않고 튜닝된 화물자동차를 운행하는 행위를 하여서는 아니 된다."
+        },
+        {
+          "number": "5",
+          "text": "일정한 장소에 오랜 시간 정차하여 화주를 호객하는 행위를 하여서는 아니 된다."
+        }
+      ],
+      "answer": "4",
+      "rate": "64%",
+      "note": "4. 튜닝된 화물자동차를 운행하는 행위를 하여서는 아니된다. 라는 내용은 운수종사자만의 준수사항이 아닙니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-67",
+      "number": 187,
+      "session": "B",
+      "localNumber": 67,
+      "group": "E",
+      "question": "유통산업발전법령상 유통업상생발전협의회(이하 '협의회'라 함)에 관한 설명으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "협의회 위원의 임기는 1년으로 한다."
+        },
+        {
+          "number": "2",
+          "text": "성별 및 분야별 대표성 등을 고려하여 회장 1명을 포함한 10명 이내의 위원으로 구성한다."
+        },
+        {
+          "number": "3",
+          "text": "회장은 해당 지역의 시장ㆍ군수ㆍ구청장이 된다."
+        },
+        {
+          "number": "4",
+          "text": "협의회는 매월 1회 이상 개최하는 것을 원칙으로 하되, 회장은 필요에 따라 그 개최 주기를 달리할 수 있다."
+        },
+        {
+          "number": "5",
+          "text": "해당 지역의 주민단체의 대표는 협의회 위원으로 위촉될 수 있다."
+        }
+      ],
+      "answer": "5",
+      "rate": "54%",
+      "note": "1. 협의회 위원의 임기는 2년입니다.\n2. 11명 이내의 위원입니다.\n3. 회장은 부시장,부군수,부구청장이 됩니다.\n4. 분기별 1회 이상입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-68",
+      "number": 188,
+      "session": "B",
+      "localNumber": 68,
+      "group": "E",
+      "question": "유통산업발전법령상 공동집배송센터의 지정요건에 관한 설명이다. ( )에 들어갈 숫자를 바르게 나열한 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ: 2, ㄴ: 1, ㄷ: 1"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ: 3, ㄴ: 2, ㄷ: 1"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ: 3, ㄴ: 2, ㄷ: 2"
+        },
+        {
+          "number": "4",
+          "text": "ㄱ: 5, ㄴ: 3, ㄷ: 2"
+        },
+        {
+          "number": "5",
+          "text": "ㄱ: 5, ㄴ: 3, ㄷ: 3"
+        }
+      ],
+      "answer": "2",
+      "rate": "70%",
+      "note": "확인값은 2번입니다. ㄱ: 3, ㄴ: 2, ㄷ: 1",
+      "images": [
+        "assets/ham-images/hi20250726m68.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-69",
+      "number": 189,
+      "session": "B",
+      "localNumber": 69,
+      "group": "E",
+      "question": "유통산업발전법령상 유통분쟁조정위원회의 분쟁조정 대상이 아닌 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "등록된 대규모점포등과 중소제조업체 사이의 ｢독점규제 및 공정거래에 관한 법률｣을 적용받는 영업활동에 관한 분쟁"
+        },
+        {
+          "number": "2",
+          "text": "대규모점포등개설자의 인근 지역주민 피해ㆍ불만의 신속한 처리와 관련한 분쟁"
+        },
+        {
+          "number": "3",
+          "text": "등록된 대규모점포등과 인근 지역의 주민 사이의 대규모점포등의 개설로 인한 인근 지역의 대기오염, 토양오염, 수질오염 및 해양오염에 관한 분쟁"
+        },
+        {
+          "number": "4",
+          "text": "대규모점포등개설자의 상거래질서 확립 업무 수행과 관련한 분쟁"
+        },
+        {
+          "number": "5",
+          "text": "대규모점포등개설자의 소비자 안전유지와 관련한 분쟁"
+        }
+      ],
+      "answer": "1",
+      "rate": "42%",
+      "note": "1. 독점규제 및 공정거래에 관한 법률을 적용은 제외입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-70",
+      "number": 190,
+      "session": "B",
+      "localNumber": 70,
+      "group": "E",
+      "question": "유통산업발전법령상 대규모점포등개설등록신청서에 첨부하여야 하는 상권영향평가서에 포함되는 사항이 아닌 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "상권영향분석의 범위"
+        },
+        {
+          "number": "2",
+          "text": "상권의 특성"
+        },
+        {
+          "number": "3",
+          "text": "재무구조"
+        },
+        {
+          "number": "4",
+          "text": "요약문"
+        },
+        {
+          "number": "5",
+          "text": "기존 사업자 현황 분석"
+        }
+      ],
+      "answer": "3",
+      "rate": "62%",
+      "note": "3번은 특정기업 입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-71",
+      "number": 191,
+      "session": "B",
+      "localNumber": 71,
+      "group": "E",
+      "question": "유통산업발전법상 상점가진흥조합에 관한 설명으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "｢중소기업기본법｣에 따른 중소기업자는 조합원이 될 수 없다."
+        },
+        {
+          "number": "2",
+          "text": "상점가진흥조합은 협동조합으로 설립하여야 하고 사업조합의 형식으로는 설립할 수 없다."
+        },
+        {
+          "number": "3",
+          "text": "조합원의 자격이 있는 자 중 같은 업종을 경영하는 자가 2분의 1 이상인 경우에는 그 같은 업종을 경영하는 자의 5분의 3 이상의 동의를 받아 결성할 수 있다."
+        },
+        {
+          "number": "4",
+          "text": "다른 상점가진흥조합의 구역과 중복되어 구역을 지정할 수 있다."
+        },
+        {
+          "number": "5",
+          "text": "상점가진흥조합의 주차장ㆍ휴게소 등 공공시설 설치사업은 지방자치단체의 장이 필요한 자금을 지원할 수 있는 사업에 해당하지 않는다."
+        }
+      ],
+      "answer": "3",
+      "rate": "70%",
+      "note": "1. 조합원이 될 수 있습니다.\n2. 설립할 수 있습니다.\n4. 중복되어 구역을 지정할 수 없습니다.\n5. 사업에 해당합니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-72",
+      "number": 192,
+      "session": "B",
+      "localNumber": 72,
+      "group": "E",
+      "question": "항만운송사업법령상 항만운송관련사업에 해당하지 않는 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "항만용역업"
+        },
+        {
+          "number": "2",
+          "text": "선용품공급업"
+        },
+        {
+          "number": "3",
+          "text": "선박연료공급업"
+        },
+        {
+          "number": "4",
+          "text": "컨테이너수리업"
+        },
+        {
+          "number": "5",
+          "text": "선적화물검수업"
+        }
+      ],
+      "answer": "5",
+      "rate": "53%",
+      "note": "확인값은 5번입니다. 선적화물검수업",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-73",
+      "number": 193,
+      "session": "B",
+      "localNumber": 73,
+      "group": "E",
+      "question": "항만운송사업법령상 부두운영회사에 관한 설명으로 옳은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "항만시설운영자등은 부두운영회사의 운영성과 평가 결과에 따라 부두운영회사에 대하여 항만시설등의 임대료를 감면할 수는 없다."
+        },
+        {
+          "number": "2",
+          "text": "항만시설등의 임대료를 2개월 이상 연체한 경우 항만시설운영자등은 부두운영계약을 해지하고, 위약금을 부과한다."
+        },
+        {
+          "number": "3",
+          "text": "부두운영회사가 부두운영계약의 계약기간을 연장하려는 경우 그 계약기간이 만료되기 3개월 전까지 항만시설운영자등에게 부두운영계약의 갱신을 신청하여야 한다."
+        },
+        {
+          "number": "4",
+          "text": "항만시설운영자등은 화물유치 또는 투자 계획을 이행하지 못한 부두운영회사에 대하여 그 귀책사유를 불문하고 위약금을 부과할 수 있다."
+        },
+        {
+          "number": "5",
+          "text": "｢항만공사법｣에 따른 항만공사와 임대차계약을 체결하고, 해양수산부장관이 컨테이너 부두로 정하여 고시한 항만시설을 임차하여 사용하는 자는 부두운영회사에 해당하지 않는다."
+        }
+      ],
+      "answer": "5",
+      "rate": "39%",
+      "note": "1. 임대료를 감면할 수 있습니다.\n2. 2개월이 아닌 3개월입니다.\n3. 만료되기 3개월 전까지가 아닌 6개월 전까지입니다.\n4. 귀책사유가 없으면 위약금을 부과하지 않을 수 있습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-74",
+      "number": 194,
+      "session": "B",
+      "localNumber": 74,
+      "group": "E",
+      "question": "항만운송사업법령상 타인의 수요에 응하여 하는 행위로서 항만운송에 해당하지 않는 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "선박을 이용하여 운송될 화물을 화물주 또는 선박운항업자의 위탁을 받아 항만에서 화물주로부터 인수하거나 선박에 인도하는 행위"
+        },
+        {
+          "number": "2",
+          "text": "항만에서 선박 또는 부선(艀船)을 이용하여 선박에서 사용하는 물품을 공급하기 위하여 운송하는 행위"
+        },
+        {
+          "number": "3",
+          "text": "항만에서 선박 또는 부선을 이용하여 운송될 화물을 하역장에서 내가는 행위"
+        },
+        {
+          "number": "4",
+          "text": "항만에서 목재를 뗏목으로 편성하여 운송하는 행위"
+        },
+        {
+          "number": "5",
+          "text": "항만에서 뗏목으로 편성하여 운송된 목재를 수면 목재저장소에 들여놓는 행위"
+        }
+      ],
+      "answer": "2",
+      "rate": "56%",
+      "note": "2번은 제외대상 입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-75",
+      "number": 195,
+      "session": "B",
+      "localNumber": 75,
+      "group": "E",
+      "question": "철도사업법상 부가 운임의 징수에 관한 내용이다. ( )에 들어갈 숫자를 바르게 나열한 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ: 20, ㄴ: 5"
+        },
+        {
+          "number": "2",
+          "text": "ㄱ: 20, ㄴ: 10"
+        },
+        {
+          "number": "3",
+          "text": "ㄱ: 30, ㄴ: 5"
+        },
+        {
+          "number": "4",
+          "text": "ㄱ: 30, ㄴ: 10"
+        },
+        {
+          "number": "5",
+          "text": "ㄱ: 30, ㄴ: 15"
+        }
+      ],
+      "answer": "3",
+      "rate": "69%",
+      "note": "확인값은 3번입니다. ㄱ: 30, ㄴ: 5",
+      "images": [
+        "assets/ham-images/hi20250726m75.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-76",
+      "number": 196,
+      "session": "B",
+      "localNumber": 76,
+      "group": "E",
+      "question": "철도사업법령상 철도사업의 관리에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "철도사업자가 인가받은 공동운수협정에 따른 운행구간별 열차 운행횟수를 10분의 1 이내에서 변경하려는 경우에는 국토교통부장관의 변경인가를 받아야 한다."
+        },
+        {
+          "number": "2",
+          "text": "국토교통부장관은 공동운수협정을 인가하려면 미리 공정거래위원회와 협의하여야 한다."
+        },
+        {
+          "number": "3",
+          "text": "철도사업자는 다른 철도사업자 또는 철도사업 외의 사업을 경영하는 자와 합병하려는 경우에는 국토교통부장관의 인가를 받아야 한다."
+        },
+        {
+          "number": "4",
+          "text": "철도사업자가 사업계획 중 여객열차의 운행구간을 변경하려는 경우에는 국토교통부장관의 인가를 받아야 한다."
+        },
+        {
+          "number": "5",
+          "text": "철도사업자가 선로 또는 교량의 파괴로 휴업하려는 경우에는 국토교통부장관에게 신고하여야 하고, 그 휴업기간은 6개월을 넘을 수 있다."
+        }
+      ],
+      "answer": "1",
+      "rate": "60%",
+      "note": "1. 변경인가가 아닌 신고사항입니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-77",
+      "number": 197,
+      "session": "B",
+      "localNumber": 77,
+      "group": "E",
+      "question": "철도사업법상 신고하여야 하는 경우를 모두 고른 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "ㄱ, ㄷ"
+        },
+        {
+          "number": "2",
+          "text": "ㄴ, ㅁ"
+        },
+        {
+          "number": "3",
+          "text": "ㄷ, ㄹ, ㅁ"
+        },
+        {
+          "number": "4",
+          "text": "ㄱ, ㄴ, ㄷ, ㄹ"
+        },
+        {
+          "number": "5",
+          "text": "ㄱ, ㄴ, ㄷ, ㄹ, ㅁ"
+        }
+      ],
+      "answer": "4",
+      "rate": "43%",
+      "note": "ㄱ,ㄴ,ㄷ,ㄹ = 신고사항\nㅁ = 인가를 받아야 함",
+      "images": [
+        "assets/ham-images/hi20250726m77.gif"
+      ],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-78",
+      "number": 198,
+      "session": "B",
+      "localNumber": 78,
+      "group": "E",
+      "question": "철도사업법상 점용허가를 받지 아니하고 국유철도시설을 점용한 자에 대하여 국토교통부장관이 징수할 수 있는 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "과태료"
+        },
+        {
+          "number": "2",
+          "text": "점용료"
+        },
+        {
+          "number": "3",
+          "text": "변상금"
+        },
+        {
+          "number": "4",
+          "text": "과징금"
+        },
+        {
+          "number": "5",
+          "text": "이행강제금"
+        }
+      ],
+      "answer": "3",
+      "rate": "48%",
+      "note": "확인값은 3번입니다. 변상금",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-79",
+      "number": 199,
+      "session": "B",
+      "localNumber": 79,
+      "group": "E",
+      "question": "농수산물 유통 및 가격안정에 관한 법령상 농수산물도매시장에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "시가 지방도매시장을 개설하려면 도지사의 허가를 받아야 한다."
+        },
+        {
+          "number": "2",
+          "text": "도매시장법인이 다른 도매시장법인을 인수하거나 합병하는 경우에는 해당 도매시장 개설자의 승인을 받아야 한다."
+        },
+        {
+          "number": "3",
+          "text": "중앙도매시장의 개설자는 양곡부류와 수산부류에 대하여는 도매시장법인을 두어야 한다."
+        },
+        {
+          "number": "4",
+          "text": "시가 개설하는 지방도매시장의 개설구역에 인접한 구역으로서 그 지방도매시장이 속한 도의 일정 구역에 대하여는 해당 도지사가 그 지방도매시장의 개설구역으로 편입하게 할 수 있다."
+        },
+        {
+          "number": "5",
+          "text": "지방도매시장의 개설자인 시가 업무규정을 변경하는 때에는 도지사의 승인을 받아야 한다."
+        }
+      ],
+      "answer": "3",
+      "rate": "50%",
+      "note": "3. 도매시장법인은 부류별로 지정.\n\n26/07/21\n제18조의2(도매시장법인을 두어야 하는 부류) ① 법 제22조 단서에서 “농림축산식품부령 또는 해양수산부령으로 정하는 부류”란 청과부류와 수산부류를 말한다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    },
+    {
+      "id": "s2-80",
+      "number": 200,
+      "session": "B",
+      "localNumber": 80,
+      "group": "E",
+      "question": "농수산물 유통 및 가격안정에 관한 법률상 농수산물공판장(이하 '공판장'이라함)에 관한 설명으로 옳지 않은 것은?",
+      "options": [
+        {
+          "number": "1",
+          "text": "공익법인이 공판장을 개설하려면 시ㆍ도지사의 승인을 받아야 한다."
+        },
+        {
+          "number": "2",
+          "text": "공판장을 개설하려는 장소가 교통체증을 유발할 수 있는 위치에 있는 경우는 공판장 개설승인 제한사유이다."
+        },
+        {
+          "number": "3",
+          "text": "공판장의 중도매인은 공판장의 개설자가 지정한다."
+        },
+        {
+          "number": "4",
+          "text": "공판장에는 중도매인, 매매참가인, 산지유통인 및 경매사를 둘 수 있다."
+        },
+        {
+          "number": "5",
+          "text": "농림수협등의 유통자회사(流通子會社)는 도매시장공판장을 운영할 수 없다."
+        }
+      ],
+      "answer": "5",
+      "rate": "64%",
+      "note": "5. 도매시장공판장을 운영할 수 있습니다.",
+      "images": [],
+      "sourceUrl": "https://www.comcbt.com/cbt/exam/16513/"
+    }
+  ]
+}

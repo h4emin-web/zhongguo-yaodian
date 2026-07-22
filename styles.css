@@ -2520,6 +2520,348 @@ body.tool-auth-open {
   font-weight: 800;
 }
 
+.ham-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 31;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  color: #111111;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+.ham-fullscreen.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ham-topbar {
+  flex: 0 0 auto;
+  padding: 18px clamp(20px, 4vw, 48px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--line);
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(31, 36, 41, 0.04);
+}
+
+.ham-topbar-title h2 {
+  margin: 0 0 4px;
+  color: #111111;
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 800;
+}
+
+.ham-topbar-title .wc-search-meta {
+  margin: 0;
+  color: #111111;
+}
+
+.ham-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ham-topbar-actions input {
+  height: 46px;
+  width: min(320px, 46vw);
+  padding: 0 16px;
+  border: 1px solid #e8ebef;
+  border-radius: 8px;
+  color: #111111;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  background: #ffffff;
+  box-shadow: var(--shadow-soft);
+}
+
+.ham-topbar-actions input:focus {
+  outline: none;
+  border-color: #9fa6ad;
+  box-shadow: 0 0 0 4px rgba(17, 17, 17, 0.08);
+}
+
+.ham-close,
+.ham-restore-button {
+  padding: 0 18px;
+  height: 46px;
+  border: 1px solid #dfe3e8;
+  border-radius: 8px;
+  color: #111111;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  background: #ffffff;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.ham-close:hover,
+.ham-close:focus-visible,
+.ham-restore-button:hover,
+.ham-restore-button:focus-visible {
+  transform: translateY(-1px);
+  outline: none;
+  border-color: #b9c0c8;
+}
+
+.ham-restore-button:disabled {
+  opacity: 0.42;
+  cursor: default;
+  transform: none;
+}
+
+.ham-layout {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(140px, 180px) 1fr;
+}
+
+.ham-sidebar {
+  min-height: 0;
+  padding: 22px 16px;
+  border-right: 1px solid #eceff2;
+  background: #ffffff;
+  overflow: auto;
+}
+
+.ham-group-list {
+  display: grid;
+  gap: 8px;
+}
+
+.ham-group-button {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: #111111;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  background: transparent;
+  cursor: pointer;
+}
+
+.ham-group-button strong {
+  color: #111111;
+  font-size: 13px;
+}
+
+.ham-group-button:hover,
+.ham-group-button:focus-visible,
+.ham-group-button.is-active {
+  outline: none;
+  border-color: #e4e8ec;
+  background: #f8f9fa;
+}
+
+.ham-hidden-meta {
+  margin: 16px 2px 0;
+  color: #111111;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.ham-results {
+  min-width: 0;
+  overflow: auto;
+  padding: clamp(20px, 3vw, 40px) clamp(20px, 4vw, 48px) 48px;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.ham-entry {
+  max-width: 1080px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 22px;
+  border: 1px solid #e8ebef;
+  border-radius: 10px;
+  color: #111111;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(31, 36, 41, 0.045);
+}
+
+.ham-entry-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.ham-entry-index,
+.ham-entry-group {
+  min-width: 32px;
+  height: 28px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e4e8ec;
+  border-radius: 999px;
+  color: #111111;
+  font-size: 13px;
+  font-weight: 800;
+  background: #ffffff;
+}
+
+.ham-hide-button {
+  margin-left: auto;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid #dfe3e8;
+  border-radius: 8px;
+  color: #111111;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.ham-hide-button:hover,
+.ham-hide-button:focus-visible {
+  outline: none;
+  border-color: #b9c0c8;
+  background: #f8f9fa;
+}
+
+.ham-question {
+  margin: 0 0 14px;
+  color: #111111;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.65;
+}
+
+.ham-entry-images {
+  margin: 0 0 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.ham-entry-image {
+  max-width: min(100%, 720px);
+  height: auto;
+  border: 1px solid #edf0f3;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.ham-options {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  list-style: none;
+}
+
+.ham-options li {
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  gap: 8px;
+  border: 1px solid #edf0f3;
+  border-radius: 8px;
+  color: #111111;
+  background: #ffffff;
+}
+
+.ham-options li.is-answer {
+  border-color: #d7dce2;
+  background: #f7f8f9;
+  font-weight: 800;
+}
+
+.ham-options span {
+  color: #111111;
+  font-weight: 800;
+}
+
+.ham-options p {
+  margin: 0;
+  color: #111111;
+  line-height: 1.55;
+}
+
+.ham-answer {
+  margin-top: 14px;
+  border-top: 1px solid #edf0f3;
+  color: #111111;
+}
+
+.ham-answer summary {
+  padding: 14px 0 0;
+  color: #111111;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.ham-answer-body {
+  padding-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.ham-answer-line,
+.ham-note {
+  margin: 0;
+  color: #111111;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.ham-answer-line {
+  font-weight: 800;
+}
+
+@media (max-width: 760px) {
+  .ham-topbar {
+    align-items: stretch;
+  }
+
+  .ham-topbar-actions {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .ham-topbar-actions input {
+    width: 100%;
+  }
+
+  .ham-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ham-sidebar {
+    border-right: 0;
+    border-bottom: 1px solid #eceff2;
+  }
+
+  .ham-group-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 .worklog-fullscreen {
   position: fixed;
   inset: 0;
