@@ -4467,7 +4467,18 @@ function addHamHighlight(itemId, field, selectedText) {
   const terms = normalizeHamStringArray(entry[field]);
 
   if (terms.includes(text)) {
-    return false;
+    entry[field] = terms.filter((term) => term !== text);
+
+    const question = normalizeHamStringArray(entry.question);
+    const note = normalizeHamStringArray(entry.note);
+
+    if (question.length > 0 || note.length > 0) {
+      hamHighlights[itemId] = { question, note };
+    } else {
+      delete hamHighlights[itemId];
+    }
+
+    return true;
   }
 
   entry[field] = [...terms, text];
