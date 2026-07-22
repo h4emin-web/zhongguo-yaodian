@@ -1528,8 +1528,19 @@ body.tool-auth-open {
   gap: 14px;
 }
 
+.calendar-stock-heading {
+  min-width: 0;
+}
+
+.calendar-stock-title-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .calendar-stock-top p {
-  margin: 0 0 4px;
+  margin: 0;
   color: var(--text);
   font-size: 16px;
   font-weight: 800;
@@ -1571,23 +1582,23 @@ body.tool-auth-open {
 }
 
 .calendar-stock-main {
-  margin-top: 14px;
+  margin-top: 0;
   display: flex;
   align-items: baseline;
-  gap: 10px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
 .calendar-stock-price {
   color: var(--text);
-  font-size: 28px;
+  font-size: 14px;
   font-weight: 800;
   line-height: 1;
 }
 
 .calendar-stock-change {
   color: var(--muted);
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 800;
 }
 
@@ -1604,18 +1615,18 @@ body.tool-auth-open {
 }
 
 .side-tools .calendar-stock-main {
-  align-items: flex-start;
-  flex-direction: column;
+  align-items: baseline;
+  flex-direction: row;
   gap: 6px;
 }
 
 .side-tools .calendar-stock-price {
-  font-size: 20px;
+  font-size: 14px;
 }
 
 @media (max-width: 620px) {
   .calendar-stock-price {
-    font-size: 24px;
+    font-size: 13px;
   }
 }
 
