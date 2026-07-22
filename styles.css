@@ -3384,8 +3384,8 @@ body.tool-auth-open {
     align-items: flex-start;
     flex-direction: column;
     justify-content: flex-start;
-    min-height: 168px;
-    padding: 16px 18px 44px;
+    min-height: 76px;
+    padding: 16px 18px;
     gap: 8px;
   }
 
@@ -3396,14 +3396,11 @@ body.tool-auth-open {
   }
 
   .top-bar-video {
-    --tb-video-w: 112vw;
-    top: 75%;
-    animation-duration: 13s;
-    animation-delay: -3.4s;
+    display: none;
   }
 
   .top-bar-video-backdrop {
-    opacity: 0.82;
+    opacity: 0;
   }
 
   .api-market-link {
@@ -3414,15 +3411,7 @@ body.tool-auth-open {
   }
 
   .market-index-strip {
-    position: relative;
-    right: auto;
-    top: auto;
-    z-index: 3;
-    width: 100%;
-    justify-content: flex-start;
-    gap: 9px;
-    font-size: 11px;
-    white-space: normal;
+    display: none;
   }
 
   .market-index-item strong {
@@ -3480,7 +3469,21 @@ body.tool-auth-open {
     gap: 14px;
   }
 
+  .search-area {
+    display: contents;
+  }
+
+  .search-area label {
+    order: 1;
+    margin-bottom: -4px;
+  }
+
+  .search-area input {
+    order: 2;
+  }
+
   .hana-rate-card {
+    order: 3;
     min-height: 0;
     padding: 15px;
   }
@@ -3492,6 +3495,18 @@ body.tool-auth-open {
   .hana-rate-values dd {
     font-size: 18px;
     overflow-wrap: anywhere;
+  }
+
+  .workspace-toggle {
+    order: 4;
+    height: 30px;
+    min-height: 0;
+    margin-top: -2px;
+    border-radius: 8px;
+  }
+
+  .workspace-toggle::after {
+    font-size: 16px;
   }
 
   .workspace-catalog {
