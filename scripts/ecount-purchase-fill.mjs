@@ -387,7 +387,7 @@ async function fillTextAt(page, x, y, value) {
 }
 
 async function fillPurchaseForm(page, payload) {
-  const transactionTypeResult = await setPurchaseTransactionType(page, payload.transactionType || PURCHASE_TRANSACTION_TYPE_VALUE);
+  const transactionTypeResult = await setPurchaseTransactionType(page, PURCHASE_TRANSACTION_TYPE_VALUE);
   const currencyPlaceholder = "\ud1b5\ud654";
   const exchangeInput = page.locator(`input[placeholder="${currencyPlaceholder}"]`).last();
   await exchangeInput.fill(String(payload.exchangeRate));
