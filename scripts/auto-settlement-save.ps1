@@ -78,11 +78,12 @@ function Get-LastRegexNumber([string]$text, [string]$label) {
 function Sum-LeftLabels($sheet, [string[]]$labels) {
   $amount = 0
   $vat = 0
+  $normalizedLabels = @($labels | ForEach-Object { ([string]$_).Trim() -replace "\s+", "" })
 
   for ($row = 1; $row -le 60; $row++) {
-    $label = ([string]$sheet.Cells.Item($row, 2).Text).Trim() -replace "\s+", " "
+    $label = ([string]$sheet.Cells.Item($row, 2).Text).Trim() -replace "\s+", ""
 
-    if ($labels -contains $label) {
+    if ($normalizedLabels -contains $label) {
       $amount += Get-CellNumber $sheet "D$row"
       $vat += Get-CellNumber $sheet "G$row"
     }
@@ -94,14 +95,15 @@ function Sum-LeftLabels($sheet, [string[]]$labels) {
 function Sum-RightLabels($sheet, [string[]]$labels) {
   $amount = 0
   $vat = 0
+  $normalizedLabels = @($labels | ForEach-Object { ([string]$_).Trim() -replace "\s+", "" })
 
   for ($row = 1; $row -le 60; $row++) {
-    $label = ([string]$sheet.Cells.Item($row, 12).Text).Trim() -replace "\s+", " "
+    $label = ([string]$sheet.Cells.Item($row, 12).Text).Trim() -replace "\s+", ""
 
-    if ($labels -contains $label) {
+    if ($normalizedLabels -contains $label) {
       $amount += Get-CellNumber $sheet "M$row"
 
-      $nextLabel = ([string]$sheet.Cells.Item($row + 1, 12).Text).Trim() -replace "\s+", " "
+      $nextLabel = ([string]$sheet.Cells.Item($row + 1, 12).Text).Trim() -replace "\s+", ""
       if ($nextLabel -eq "부가세") {
         $vat += Get-CellNumber $sheet "M$($row + 1)"
       }
