@@ -346,6 +346,45 @@ async function clickOptionText(page, optionText) {
   return false;
 }
 
+async function dismissLoginToast(page) {
+  await page.evaluate(() => {
+    const closers = [...document.querySelectorAll("button, span, div, a, i")];
+    const toastClose = closers.find((element) => {
+      const rect = element.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0 || rect.width > 40 || rect.height > 40) {
+        return false;
+      }
+      const text = (element.textContent || "").trim();
+      const label = (element.getAttribute("aria-label") || "").toLowerCase();
+      return text === "×" || text === "X" || label.includes("close");
+    });
+    toastClose?.click();
+  }).catch(() => {});
+  await page.waitForTimeout(300);
+}
+
+async function clickDashboardLink(page, label, timeoutMs = 15000) {
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < timeoutMs) {
+    for (const frame of page.frames()) {
+      const locator = frame.getByText(label, { exact: true }).first();
+      const box = await locator.boundingBox().catch(() => null);
+
+      if (box && box.width > 0 && box.height > 0) {
+        const clicked = await locator.click({ timeout: 2000 }).then(() => true).catch(() => false);
+        if (clicked) {
+          return true;
+        }
+      }
+    }
+
+    await page.waitForTimeout(400);
+  }
+
+  return false;
+}
+
 async function closeCustomDropdown(page, controlBox = null) {
   await page.keyboard.press("Tab").catch(() => {});
   await page.waitForTimeout(250);
@@ -357,7 +396,7 @@ async function closeCustomDropdown(page, controlBox = null) {
 }
 
 async function setPurchaseTransactionType(page, desiredType = PURCHASE_TRANSACTION_TYPE_VALUE) {
-  for (let attempt = 0; attempt < 4; attempt += 1) {
+  for (let attempt = 0; attempt < 8; attempt += 1) {
     const inputs = await collectVisibleInputs(page);
     const alreadySelected = inputs.find((input) => {
       const text = `${input.value} ${input.selectedText} ${input.text}`.replace(/\s+/g, " ").trim();
@@ -552,8 +591,12 @@ async function main() {
 
     setStep("login");
     await login(page);
+    await dismissLoginToast(page);
     setStep("open purchase search");
-    await page.mouse.click(153, 424);
+    const openedPurchaseSearch = await clickDashboardLink(page, "구매조회");
+    if (!openedPurchaseSearch) {
+      await page.mouse.click(153, 424);
+    }
     await page.waitForTimeout(4500);
 
     setStep("search product");
