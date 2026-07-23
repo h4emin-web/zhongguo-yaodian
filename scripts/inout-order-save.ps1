@@ -317,31 +317,36 @@ try {
   }
 
   if ($Commit) {
-    $sheet.Cells.Item($rowIndex, 12).Value2 = $dueDateValue.ToString("yyyy-MM-dd")
-    $sheet.Cells.Item($rowIndex, 12).NumberFormat = "yyyy-mm-dd"
-    $sheet.Cells.Item($rowIndex, 10).Formula = ([math]::Round($UnitPrice, 0)).ToString([Globalization.CultureInfo]::InvariantCulture)
-    $sheet.Cells.Item($rowIndex, 10).NumberFormat = "#,##0"
-    $sheet.Cells.Item($rowIndex, 11).Formula = ([math]::Round($Amount, 0)).ToString([Globalization.CultureInfo]::InvariantCulture)
-    $sheet.Cells.Item($rowIndex, 11).NumberFormat = "#,##0"
+    Invoke-WithComRetry {
+      $sheet.Cells.Item($rowIndex, 12).Value2 = $dueDateValue.ToString("yyyy-MM-dd")
+      $sheet.Cells.Item($rowIndex, 12).NumberFormat = "yyyy-mm-dd"
+      $sheet.Cells.Item($rowIndex, 10).Formula = ([math]::Round($UnitPrice, 0)).ToString([Globalization.CultureInfo]::InvariantCulture)
+      $sheet.Cells.Item($rowIndex, 10).NumberFormat = "#,##0"
+      $sheet.Cells.Item($rowIndex, 11).Formula = ([math]::Round($Amount, 0)).ToString([Globalization.CultureInfo]::InvariantCulture)
+      $sheet.Cells.Item($rowIndex, 11).NumberFormat = "#,##0"
+    } "입출고 지시서 값 입력"
 
-    $sheet.Range("A$rowIndex").Select() | Out-Null
+    Invoke-WithComRetry { $sheet.Range("A$rowIndex").Select() | Out-Null } "입출고 오더선택 셀 선택"
     Run-WorkbookMacro $excel $workbook "출고수정선택"
     Start-EnterKeyHelper $workbook.Name
     Run-WorkbookMacro $excel $workbook "출고수정"
 
-    Start-Sleep -Milliseconds 700
-    $sheet.Range("B1").Value2 = $ProductCode
+    Start-Sleep -Milliseconds 1800
+    Invoke-WithComRetry {
+      $sheet.Activate() | Out-Null
+      $sheet.Range("B1").Value2 = $ProductCode
+    } "입출고 저장 후 품목코드 재검색어 입력" 120 700
     Run-WorkbookMacro $excel $workbook "조회_메이커"
 
-    $verifiedRow = Find-OrderRow $sheet $orderNo
+    $verifiedRow = Invoke-WithComRetry { Find-OrderRow $sheet $orderNo } "입출고 저장 후 오더번호 재조회" 90 600
 
     if ($verifiedRow -eq 0) {
       throw "입출고 지시서 저장 후 오더번호 $orderNo 재조회에 실패했습니다."
     }
 
-    $verifiedDueDate = (Convert-ToDateValue $sheet.Cells.Item($verifiedRow, 12).Text)
-    $verifiedUnitPrice = [math]::Round((Convert-ToNumber $sheet.Cells.Item($verifiedRow, 10).Text), 0)
-    $verifiedAmount = [math]::Round((Convert-ToNumber $sheet.Cells.Item($verifiedRow, 11).Text), 0)
+    $verifiedDueDate = Invoke-WithComRetry { Convert-ToDateValue $sheet.Cells.Item($verifiedRow, 12).Text } "입출고 저장 후 납기일 확인"
+    $verifiedUnitPrice = Invoke-WithComRetry { [math]::Round((Convert-ToNumber $sheet.Cells.Item($verifiedRow, 10).Text), 0) } "입출고 저장 후 단가 확인"
+    $verifiedAmount = Invoke-WithComRetry { [math]::Round((Convert-ToNumber $sheet.Cells.Item($verifiedRow, 11).Text), 0) } "입출고 저장 후 금액 확인"
     $expectedUnitPrice = [math]::Round($UnitPrice, 0)
     $expectedAmount = [math]::Round($Amount, 0)
 
