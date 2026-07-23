@@ -171,6 +171,92 @@ async function fillHandle(input, value) {
   await input.frame.waitForTimeout(200).catch(() => {});
 }
 
+async function findPurchaseSearchInput(page, timeoutMs = 15000) {
+  const startedAt = Date.now();
+  let lastInputs = [];
+
+  while (Date.now() - startedAt < timeoutMs) {
+    const candidates = [];
+
+    for (const frame of page.frames()) {
+      const handles = await frame.locator("input").elementHandles().catch(() => []);
+
+      for (const handle of handles) {
+        const box = await handle.boundingBox().catch(() => null);
+
+        if (!box || box.width <= 0 || box.height <= 0) {
+          continue;
+        }
+
+        const meta = await handle.evaluate((input) => {
+          const style = window.getComputedStyle(input);
+          return {
+            value: input.value || "",
+            placeholder: input.getAttribute("placeholder") || "",
+            id: input.id || "",
+            type: String(input.getAttribute("type") || "").toLowerCase(),
+            disabled: Boolean(input.disabled),
+            readonly: Boolean(input.readOnly),
+            visible: style.visibility !== "hidden" && style.display !== "none"
+          };
+        }).catch(() => null);
+
+        if (!meta || !meta.visible || meta.disabled || meta.readonly || meta.type === "hidden") {
+          continue;
+        }
+
+        if (meta.placeholder.includes("메뉴검색") || meta.id === "inputFavMSearch") {
+          continue;
+        }
+
+        const placeholderScore = meta.placeholder.includes("입력 후") ? 1000 : 0;
+        const topSearchScore = box.x >= 850 && box.x <= 1080 && box.y >= 210 && box.y <= 305 ? 500 : 0;
+        const sizeScore = box.width >= 70 && box.width <= 190 && box.height >= 22 ? 80 : 0;
+        const emptyScore = String(meta.value || "").trim() ? 0 : 20;
+        const score = placeholderScore + topSearchScore + sizeScore + emptyScore - Math.abs(box.y - 253);
+
+        if (score > 0) {
+          candidates.push({ frame, handle, box, meta, score });
+        }
+      }
+    }
+
+    candidates.sort((a, b) => b.score - a.score || a.box.y - b.box.y || a.box.x - b.box.x);
+
+    if (candidates[0]) {
+      return {
+        frame: candidates[0].frame,
+        handle: candidates[0].handle,
+        box: candidates[0].box,
+        meta: candidates[0].meta,
+        score: candidates[0].score
+      };
+    }
+
+    lastInputs = await collectVisibleInputs(page).catch(() => []);
+    await page.waitForTimeout(500);
+  }
+
+  await writeFile("tmp/ecount-purchase-search-inputs.json", JSON.stringify(lastInputs, null, 2), "utf8").catch(() => {});
+  await page.screenshot({ path: "tmp/ecount-purchase-search-input-missing.png", fullPage: true }).catch(() => {});
+  throw new Error("Could not locate ECOUNT purchase product search input.");
+}
+
+async function searchPurchaseProduct(page, productCode) {
+  const input = await findPurchaseSearchInput(page);
+  await input.handle.click({ timeout: 5000, force: true });
+  await page.keyboard.press("Control+A");
+  await page.keyboard.type(String(productCode));
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(4500);
+  return {
+    method: "visible-search-input",
+    placeholder: input.meta.placeholder,
+    x: Math.round(input.box.x),
+    y: Math.round(input.box.y)
+  };
+}
+
 async function readHandleText(handle) {
   return await handle.evaluate((element) => {
     const tagName = String(element.tagName || "").toUpperCase();
@@ -471,10 +557,8 @@ async function main() {
     await page.waitForTimeout(4500);
 
     setStep("search product");
-    await page.locator("input").nth(1).click();
-    await page.locator("input").nth(1).fill(payload.productCode);
-    await page.locator("input").nth(1).press("Enter");
-    await page.waitForTimeout(4500);
+    const searchInputResult = await searchPurchaseProduct(page, payload.productCode);
+    console.error(`[ecount-purchase-fill] product search input ${JSON.stringify(searchInputResult)}`);
 
     setStep("select row");
     const sameQuantityRows = searchRows.filter((row) => {
