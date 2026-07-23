@@ -260,6 +260,16 @@ async function clickOptionText(page, optionText) {
   return false;
 }
 
+async function closeCustomDropdown(page, controlBox = null) {
+  await page.keyboard.press("Tab").catch(() => {});
+  await page.waitForTimeout(250);
+
+  if (controlBox) {
+    await page.mouse.click(Math.max(8, controlBox.x - 24), controlBox.y + controlBox.height / 2).catch(() => {});
+    await page.waitForTimeout(250);
+  }
+}
+
 async function setPurchaseTransactionType(page, desiredType = PURCHASE_TRANSACTION_TYPE_VALUE) {
   for (let attempt = 0; attempt < 4; attempt += 1) {
     const inputs = await collectVisibleInputs(page);
@@ -291,9 +301,12 @@ async function setPurchaseTransactionType(page, desiredType = PURCHASE_TRANSACTI
         if (clicked) {
           await page.waitForTimeout(500);
           const current = await readHandleText(labeledControl.handle);
-          if (current.includes(desiredType)) {
-            return { applied: true, method: "dropdown-option", value: desiredType };
-          }
+          await closeCustomDropdown(page, box);
+          return {
+            applied: true,
+            method: current.includes(desiredType) ? "dropdown-option" : "dropdown-option-clicked",
+            value: desiredType
+          };
         }
       }
 
