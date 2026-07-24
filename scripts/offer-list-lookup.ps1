@@ -122,6 +122,31 @@ function Run-WorkbookMacro {
   $Excel.Run($macro) | Out-Null
 }
 
+function Invoke-ComRetry {
+  param(
+    [Parameter(Mandatory=$true)][scriptblock]$Action,
+    [int]$MaxAttempts = 8,
+    [int]$DelayMs = 400
+  )
+
+  for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
+    try {
+      return & $Action
+    } catch {
+      $isRpcBusy = $_.Exception.Message -match "0x80010001" -or
+        $_.Exception.Message -match "0x8001010A" -or
+        $_.Exception.HResult -eq -2147418111 -or
+        $_.Exception.HResult -eq -2147417846
+
+      if (-not $isRpcBusy -or $attempt -eq $MaxAttempts) {
+        throw
+      }
+
+      Start-Sleep -Milliseconds $DelayMs
+    }
+  }
+}
+
 $resolvedPath = Resolve-OfferWorkbookPath $WorkbookPath
 $normalizedPoNo = Normalize-PoNo $PoNo
 $excel = Get-RunningExcel
@@ -137,24 +162,24 @@ $workbook = $null
 $oldDisplayAlerts = $null
 
 try {
-  $excel.Visible = $true
-  $oldDisplayAlerts = $excel.DisplayAlerts
-  $excel.DisplayAlerts = $false
+  Invoke-ComRetry { $excel.Visible = $true } | Out-Null
+  $oldDisplayAlerts = Invoke-ComRetry { $excel.DisplayAlerts }
+  Invoke-ComRetry { $excel.DisplayAlerts = $false } | Out-Null
 
-  $workbook = Find-Workbook $excel $resolvedPath
+  $workbook = Invoke-ComRetry { Find-Workbook $excel $resolvedPath }
 
   if (-not $workbook) {
-    $workbook = $excel.Workbooks.Open($resolvedPath)
+    $workbook = Invoke-ComRetry { $excel.Workbooks.Open($resolvedPath) }
     $openedWorkbook = $true
   }
 
-  $sheet = $workbook.Worksheets.Item("PO메인")
-  $sheet.Activate() | Out-Null
-  $sheet.Range("B1").Value2 = $normalizedPoNo
+  $sheet = Invoke-ComRetry { $workbook.Worksheets.Item("PO메인") }
+  Invoke-ComRetry { $sheet.Activate() } | Out-Null
+  Invoke-ComRetry { $sheet.Range("B1").Value2 = $normalizedPoNo } | Out-Null
 
-  Run-WorkbookMacro $excel $workbook "PO복사"
+  Invoke-ComRetry { Run-WorkbookMacro $excel $workbook "PO복사" } | Out-Null
 
-  $lastRow = $sheet.Range("A500000").End($xlUp).Row
+  $lastRow = Invoke-ComRetry { $sheet.Range("A500000").End($xlUp).Row }
   $targetRow = 0
 
   for ($row = 3; $row -le $lastRow; $row++) {
