@@ -1373,9 +1373,7 @@ importCertDropzone.addEventListener("drop", (event) => {
   }
 });
 
-let globalSearchDebounce = null;
-
-searchInput.addEventListener("input", () => {
+function runGlobalSearchFromInput() {
   const keyword = searchInput.value.trim().toLowerCase();
 
   cards.forEach((card) => {
@@ -1383,9 +1381,21 @@ searchInput.addEventListener("input", () => {
     card.hidden = keyword.length > 0 && !cardText.includes(keyword);
   });
 
-  clearTimeout(globalSearchDebounce);
-  globalSearchDebounce = setTimeout(() => renderGlobalSearch(keyword), 300);
-});
+  renderGlobalSearch(keyword);
+}
+
+function runOnEnter(input, handler) {
+  input.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" || event.isComposing) {
+      return;
+    }
+
+    event.preventDefault();
+    handler();
+  });
+}
+
+runOnEnter(searchInput, runGlobalSearchFromInput);
 
 async function ensureGlobalSearchData() {
   await Promise.all([loadWcData(), loadMfdsData(), loadCnphData(), loadUsdmfData(), loadIndiawcData()]);
@@ -4865,15 +4875,15 @@ function renderWorklog() {
   `).join("");
 }
 
-wcSearchInput.addEventListener("input", renderWcResults);
+runOnEnter(wcSearchInput, renderWcResults);
 excelExportButton.addEventListener("click", exportWcResults);
-mfdsSearchInput.addEventListener("input", renderMfdsResults);
+runOnEnter(mfdsSearchInput, renderMfdsResults);
 mfdsExcelExportButton.addEventListener("click", exportMfdsResults);
-cnphSearchInput.addEventListener("input", renderCnphResults);
+runOnEnter(cnphSearchInput, renderCnphResults);
 cnphExcelExportButton.addEventListener("click", exportCnphResults);
-usdmfSearchInput.addEventListener("input", renderUsdmfResults);
+runOnEnter(usdmfSearchInput, renderUsdmfResults);
 usdmfExcelExportButton.addEventListener("click", exportUsdmfResults);
-indiawcSearchInput.addEventListener("input", renderIndiawcResults);
+runOnEnter(indiawcSearchInput, renderIndiawcResults);
 indiawcExcelExportButton.addEventListener("click", exportIndiawcResults);
 cnphCriteriaToggle.addEventListener("click", () => {
   cnphCriteria.hidden = !cnphCriteria.hidden;
@@ -4941,7 +4951,7 @@ worklogFileInput.addEventListener("change", () => {
     loadWorklogFile(file);
   }
 });
-worklogFilterInput.addEventListener("input", renderWorklog);
+runOnEnter(worklogFilterInput, renderWorklog);
 
 hamClose.addEventListener("click", closeHamTool);
 hamSidebarToggle.addEventListener("click", () => {
