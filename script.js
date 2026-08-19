@@ -130,10 +130,7 @@ const calendarSelectedDateLabel = document.querySelector(".calendar-selected-dat
 const ddayList = document.querySelector(".dday-list");
 const calendarDday = document.querySelector(".calendar-dday");
 const calendarDdayToggle = document.querySelector(".calendar-dday-toggle");
-const calendarStockCard = document.querySelector(".calendar-stock-card");
-const calendarStockRefresh = document.querySelector(".calendar-stock-refresh");
-const calendarStockPrice = document.querySelector(".calendar-stock-price");
-const calendarStockChange = document.querySelector(".calendar-stock-change");
+const calendarStockCards = document.querySelectorAll(".calendar-stock-card");
 const localLauncherButtons = document.querySelectorAll(".local-launcher-start");
 const importCostPanel = document.querySelector(".import-cost-panel");
 const importPriceInput = document.querySelector("#import-price-input");
@@ -159,7 +156,7 @@ const PROTECTED_TOOL_PASSWORD = "1515";
 const STAR_BURST_COUNT = 12;
 const STAR_BURST_HUE_STEP = 47;
 const HANA_RATE_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
-const RZNOMICS_STOCK_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+const STOCK_PRICE_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const MARKET_INDEX_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const HAM_DATA_URL = "data/ham-library.json";
 const HAM_PROGRESS_STORAGE_KEY = "haemin-workspace-ham-progress";
@@ -307,7 +304,7 @@ let hamMemoSaveTimer = null;
 let hamMemos = {};
 let starBurstHue = 0;
 let hanaRateTimer = null;
-let rznomicsStockTimer = null;
+let stockPriceTimer = null;
 let marketIndexTimer = null;
 let workspaceHeartTimer = null;
 let dailyNewsLoaded = false;
@@ -668,50 +665,79 @@ function formatSignedStockChange(value, rate) {
   return `${sign}${Math.abs(Math.round(change)).toLocaleString()}원 ${sign}${Math.abs(changeRate).toFixed(2)}%`;
 }
 
-function renderRznomicsStockPrice(data) {
-  if (!calendarStockCard || !calendarStockPrice || !calendarStockChange) {
+function getStockCardElements(card) {
+  if (!card) {
+    return null;
+  }
+
+  return {
+    price: card.querySelector(".calendar-stock-price"),
+    change: card.querySelector(".calendar-stock-change"),
+    refresh: card.querySelector(".calendar-stock-refresh")
+  };
+}
+
+function renderStockPrice(card, data) {
+  const elements = getStockCardElements(card);
+
+  if (!elements?.price || !elements.change) {
     return;
   }
 
-  calendarStockCard.classList.remove("is-error", "is-up", "is-down", "is-flat");
-  calendarStockCard.classList.add(data.direction === "up" ? "is-up" : data.direction === "down" ? "is-down" : "is-flat");
-  calendarStockPrice.textContent = formatKrwStockValue(data.price);
-  calendarStockChange.textContent = formatSignedStockChange(data.change, data.changeRate);
+  card.classList.remove("is-error", "is-up", "is-down", "is-flat");
+  card.classList.add(data.direction === "up" ? "is-up" : data.direction === "down" ? "is-down" : "is-flat");
+  elements.price.textContent = formatKrwStockValue(data.price);
+  elements.change.textContent = formatSignedStockChange(data.change, data.changeRate);
 }
 
-function renderRznomicsStockError(message) {
-  if (!calendarStockCard || !calendarStockPrice || !calendarStockChange) {
+function renderStockError(card, message) {
+  const elements = getStockCardElements(card);
+
+  if (!elements?.price || !elements.change) {
     return;
   }
 
-  calendarStockCard.classList.add("is-error");
-  calendarStockCard.classList.remove("is-up", "is-down", "is-flat");
-  calendarStockPrice.textContent = "-";
-  calendarStockChange.textContent = message || "조회 실패";
+  card.classList.add("is-error");
+  card.classList.remove("is-up", "is-down", "is-flat");
+  elements.price.textContent = "-";
+  elements.change.textContent = message || "조회 실패";
 }
 
-async function fetchRznomicsStockPrice({ showLoading = false } = {}) {
-  if (!calendarStockCard) {
+async function fetchStockPrice(card, { showLoading = false } = {}) {
+  if (!card) {
+    return;
+  }
+
+  const elements = getStockCardElements(card);
+  const stockCode = card.dataset.stockCode || "";
+  const stockName = card.dataset.stockName || "주가";
+  const stockMarket = card.dataset.stockMarket || "";
+
+  if (!elements?.change) {
     return;
   }
 
   if (showLoading) {
-    calendarStockCard.classList.remove("is-error");
-    calendarStockChange.textContent = "조회 중";
+    card.classList.remove("is-error");
+    elements.change.textContent = "조회 중";
   }
 
   if (!supabaseClient) {
-    renderRznomicsStockError("Supabase 연결 설정 필요");
+    renderStockError(card, "Supabase 연결 설정 필요");
     return;
   }
 
-  if (calendarStockRefresh) {
-    calendarStockRefresh.disabled = true;
+  if (elements.refresh) {
+    elements.refresh.disabled = true;
   }
 
   try {
     const { data, error } = await supabaseClient.functions.invoke("rznomics-stock-price", {
-      body: {}
+      body: {
+        code: stockCode,
+        name: stockName,
+        market: stockMarket
+      }
     });
 
     if (error) {
@@ -719,45 +745,49 @@ async function fetchRznomicsStockPrice({ showLoading = false } = {}) {
     }
 
     if (!data || !data.ok) {
-      throw new Error((data && data.error) || "알지노믹스 주가 조회 실패");
+      throw new Error((data && data.error) || `${stockName} 주가 조회 실패`);
     }
 
-    renderRznomicsStockPrice(data);
+    renderStockPrice(card, data);
   } catch (error) {
     console.error(error);
     const message = error && typeof error === "object" && "message" in error
       ? error.message
       : String(error);
-    renderRznomicsStockError(`주가 조회 실패: ${message}`);
+    renderStockError(card, `주가 조회 실패: ${message}`);
   } finally {
-    if (calendarStockRefresh) {
-      calendarStockRefresh.disabled = false;
+    if (elements.refresh) {
+      elements.refresh.disabled = false;
     }
   }
 }
 
-function startRznomicsStockUpdates() {
-  if (!calendarStockCard) {
-    return;
-  }
-
-  if (rznomicsStockTimer) {
-    window.clearInterval(rznomicsStockTimer);
-  }
-
-  fetchRznomicsStockPrice({ showLoading: true });
-  rznomicsStockTimer = window.setInterval(() => {
-    fetchRznomicsStockPrice();
-  }, RZNOMICS_STOCK_REFRESH_INTERVAL_MS);
+function fetchAllStockPrices({ showLoading = false } = {}) {
+  return Promise.all(Array.from(calendarStockCards).map((card) => fetchStockPrice(card, { showLoading })));
 }
 
-function stopRznomicsStockUpdates() {
-  if (!rznomicsStockTimer) {
+function startStockPriceUpdates() {
+  if (!calendarStockCards.length) {
     return;
   }
 
-  window.clearInterval(rznomicsStockTimer);
-  rznomicsStockTimer = null;
+  if (stockPriceTimer) {
+    window.clearInterval(stockPriceTimer);
+  }
+
+  fetchAllStockPrices({ showLoading: true });
+  stockPriceTimer = window.setInterval(() => {
+    fetchAllStockPrices();
+  }, STOCK_PRICE_REFRESH_INTERVAL_MS);
+}
+
+function stopStockPriceUpdates() {
+  if (!stockPriceTimer) {
+    return;
+  }
+
+  window.clearInterval(stockPriceTimer);
+  stockPriceTimer = null;
 }
 
 function setWorkspaceExpanded(isExpanded) {
@@ -1253,7 +1283,10 @@ calendarDdayToggle.addEventListener("click", () => {
   calendarDdayToggle.setAttribute("aria-expanded", String(!isCollapsed));
 });
 
-calendarStockRefresh?.addEventListener("click", () => fetchRznomicsStockPrice({ showLoading: true }));
+calendarStockCards.forEach((card) => {
+  const refreshButton = card.querySelector(".calendar-stock-refresh");
+  refreshButton?.addEventListener("click", () => fetchStockPrice(card, { showLoading: true }));
+});
 
 renderCalendarColorSwatches();
 setSelectedCalendarColor(DEFAULT_EVENT_COLOR);
@@ -5093,7 +5126,7 @@ worklogDropzone.addEventListener("drop", (event) => {
 
 initializeHanaExchangeRate();
 initializeMarketIndexTrend();
-startRznomicsStockUpdates();
+startStockPriceUpdates();
 loadWorklogFromStorage();
 
 if (location.hash === "#worklog") {

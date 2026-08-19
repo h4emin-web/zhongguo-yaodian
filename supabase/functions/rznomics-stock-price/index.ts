@@ -10,9 +10,17 @@ const JSON_HEADERS = {
   "Content-Type": "application/json",
   "Cache-Control": "no-store"
 };
-const STOCK_CODE = "476830";
-const STOCK_NAME = "알지노믹스";
-const NAVER_REALTIME_URL = `https://polling.finance.naver.com/api/realtime?query=SERVICE_ITEM:${STOCK_CODE}`;
+const DEFAULT_STOCK_CODE = "476830";
+const STOCKS: Record<string, { name: string; market: string }> = {
+  "476830": { name: "알지노믹스", market: "KOSDAQ" },
+  "066570": { name: "LG전자", market: "KOSPI" }
+};
+
+type StockRequest = {
+  code?: unknown;
+  name?: unknown;
+  market?: unknown;
+};
 
 type NaverStockData = {
   cd?: string;
@@ -55,11 +63,33 @@ function numberOrZero(value: unknown) {
   return Number.isFinite(number) ? number : 0;
 }
 
-async function fetchStockPrice() {
-  const response = await fetch(NAVER_REALTIME_URL, {
+function stringOrEmpty(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function sanitizeStockCode(value: unknown) {
+  const code = stringOrEmpty(value).replace(/\D/g, "");
+  return /^\d{6}$/.test(code) ? code : DEFAULT_STOCK_CODE;
+}
+
+function getStockMeta(stockCode: string, input: StockRequest) {
+  const knownStock = STOCKS[stockCode];
+
+  return {
+    name: knownStock?.name || stringOrEmpty(input.name) || stockCode,
+    market: knownStock?.market || stringOrEmpty(input.market)
+  };
+}
+
+async function fetchStockPrice(input: StockRequest = {}) {
+  const stockCode = sanitizeStockCode(input.code);
+  const stockMeta = getStockMeta(stockCode, input);
+  const naverRealtimeUrl = `https://polling.finance.naver.com/api/realtime?query=SERVICE_ITEM:${stockCode}`;
+
+  const response = await fetch(naverRealtimeUrl, {
     headers: {
       "Accept": "application/json, text/plain, */*",
-      "Referer": `https://finance.naver.com/item/main.naver?code=${STOCK_CODE}`,
+      "Referer": `https://finance.naver.com/item/main.naver?code=${stockCode}`,
       "User-Agent": "Mozilla/5.0"
     }
   });
@@ -71,10 +101,10 @@ async function fetchStockPrice() {
   const payload = await response.json();
   const stock = payload?.result?.areas
     ?.find((area: { name?: string }) => area.name === "SERVICE_ITEM")
-    ?.datas?.find((item: NaverStockData) => item.cd === STOCK_CODE) as NaverStockData | undefined;
+    ?.datas?.find((item: NaverStockData) => item.cd === stockCode) as NaverStockData | undefined;
 
   if (!stock) {
-    throw new Error(`${STOCK_CODE} stock data was not found.`);
+    throw new Error(`${stockCode} stock data was not found.`);
   }
 
   const direction = directionFromRf(stock.rf);
@@ -84,9 +114,9 @@ async function fetchStockPrice() {
   return {
     ok: true,
     source: "Naver Finance",
-    code: STOCK_CODE,
-    name: stock.nm || STOCK_NAME,
-    market: "KOSDAQ",
+    code: stockCode,
+    name: stock.nm || stockMeta.name,
+    market: stockMeta.market,
     price: numberOrZero(stock.nv),
     previousClose: numberOrZero(stock.sv || stock.pcv),
     change: direction.sign * changeAbs,
@@ -116,7 +146,15 @@ Deno.serve(async (req) => {
   }
 
   try {
-    return json(await fetchStockPrice());
+    let body: StockRequest = {};
+
+    try {
+      body = await req.json();
+    } catch {
+      body = {};
+    }
+
+    return json(await fetchStockPrice(body));
   } catch (error) {
     return json({
       ok: false,
