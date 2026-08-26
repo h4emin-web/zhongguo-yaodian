@@ -13,7 +13,7 @@ const JSON_HEADERS = {
 const DEFAULT_STOCK_CODE = "476830";
 const STOCKS: Record<string, { name: string; market: string }> = {
   "476830": { name: "알지노믹스", market: "KOSDAQ" },
-  "066570": { name: "LG전자", market: "KOSPI" }
+  "028050": { name: "삼성E&A", market: "KOSPI" }
 };
 
 type StockRequest = {
