@@ -62,6 +62,14 @@ const hamSidebarToggle = document.querySelector(".ham-sidebar-toggle");
 const hamNotesToggle = document.querySelector(".ham-notes-toggle");
 const hamGroupList = document.querySelector(".ham-group-list");
 const hamNoteMeta = document.querySelector(".ham-note-meta");
+const hamSearchInput = document.querySelector("#ham-search-input");
+const hamVocabForm = document.querySelector(".ham-vocab-form");
+const hamJapaneseInput = document.querySelector("#ham-japanese-input");
+const hamMeaningInput = document.querySelector("#ham-meaning-input");
+const hamReadingInput = document.querySelector("#ham-reading-input");
+const hamVocabMemoInput = document.querySelector("#ham-vocab-memo-input");
+const hamVocabSubmit = document.querySelector(".ham-vocab-submit");
+const hamVocabCancel = document.querySelector(".ham-vocab-cancel");
 const hamResults = document.querySelector(".ham-results");
 const marginCostInput = document.querySelector("#margin-cost-input");
 const marginPriceInput = document.querySelector("#margin-price-input");
@@ -158,12 +166,12 @@ const STAR_BURST_HUE_STEP = 47;
 const HANA_RATE_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 const STOCK_PRICE_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const MARKET_INDEX_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
-const HAM_DATA_URL = "data/ham-library.json";
-const HAM_PROGRESS_STORAGE_KEY = "haemin-workspace-ham-progress";
-const HAM_SYNC_FUNCTION = "ham-progress-sync";
+const HAM_VOCAB_STORAGE_KEY = "haemin-workspace-japanese-vocab";
+const HAM_SYNC_FUNCTION = "japanese-vocab-sync";
 const HAM_ALL_GROUP_ID = "__all";
 const HAM_ALL_GROUP = { id: HAM_ALL_GROUP_ID, label: "전체" };
 const HAM_MEMO_MAX_LENGTH = 2000;
+const HAM_VOCAB_MAX_TEXT_LENGTH = 300;
 const CALENDAR_STORAGE_KEY = "haemin-workspace-calendar-events";
 const EVENT_COLORS = [
   "#FF9EEB",
@@ -302,6 +310,8 @@ let hamProgressSyncing = false;
 let hamProgressSaveQueued = false;
 let hamMemoSaveTimer = null;
 let hamMemos = {};
+let hamSearchKeyword = "";
+let hamEditingId = "";
 let starBurstHue = 0;
 let hanaRateTimer = null;
 let stockPriceTimer = null;
@@ -4240,88 +4250,75 @@ function renderMultilineText(value) {
   return escapeHtml(value).replaceAll("\n", "<br>");
 }
 
-function normalizeHamStringArray(value) {
-  return Array.from(new Set(
-    Array.isArray(value)
-      ? value.filter((item) => typeof item === "string").map((item) => item.trim()).filter(Boolean)
-      : []
-  ));
+function normalizeHamText(value, max = HAM_VOCAB_MAX_TEXT_LENGTH) {
+  return String(value || "").trim().slice(0, max);
 }
 
-function normalizeHamHighlights(value) {
-  if (!value || typeof value !== "object") {
-    return {};
+function normalizeHamVocabItems(value) {
+  if (!Array.isArray(value)) {
+    return [];
   }
 
-  return Object.entries(value).reduce((acc, [itemId, fields]) => {
-    if (!fields || typeof fields !== "object") {
-      return acc;
+  return value.reduce((items, rawItem) => {
+    if (!rawItem || typeof rawItem !== "object") {
+      return items;
     }
 
-    const question = normalizeHamStringArray(fields.question);
-    const note = normalizeHamStringArray(fields.note);
+    const item = rawItem;
+    const japanese = normalizeHamText(item.japanese);
+    const meaning = normalizeHamText(item.meaning);
+    const reading = normalizeHamText(item.reading);
+    const memo = normalizeHamText(item.memo, HAM_MEMO_MAX_LENGTH);
 
-    if (question.length > 0 || note.length > 0) {
-      acc[itemId] = { question, note };
+    if (!japanese && !meaning) {
+      return items;
     }
 
-    return acc;
-  }, {});
+    items.push({
+      id: normalizeHamText(item.id, 80) || createHamVocabId(),
+      japanese,
+      meaning,
+      reading,
+      memo,
+      createdAt: normalizeHamText(item.createdAt, 40) || new Date().toISOString(),
+      updatedAt: normalizeHamText(item.updatedAt, 40) || new Date().toISOString()
+    });
+
+    return items;
+  }, []);
 }
 
-function normalizeHamMemos(value) {
-  if (!value || typeof value !== "object") {
-    return {};
-  }
-
-  return Object.entries(value).reduce((acc, [itemId, memo]) => {
-    if (typeof memo !== "string") {
-      return acc;
-    }
-
-    const text = memo.slice(0, HAM_MEMO_MAX_LENGTH);
-
-    if (text.trim()) {
-      acc[itemId] = text;
-    }
-
-    return acc;
-  }, {});
+function createHamVocabId() {
+  return `jp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function loadHamProgressLocally() {
+function loadHamVocabLocally() {
   try {
-    localStorage.removeItem("haemin-workspace-ham-hidden");
-    const saved = JSON.parse(localStorage.getItem(HAM_PROGRESS_STORAGE_KEY) || "{}");
-
-    hamStarredIds = new Set(normalizeHamStringArray(saved.starredIds));
-    hamHighlights = normalizeHamHighlights(saved.highlights);
-    hamMemos = normalizeHamMemos(saved.memos);
+    const saved = JSON.parse(localStorage.getItem(HAM_VOCAB_STORAGE_KEY) || "{}");
+    hamItems = normalizeHamVocabItems(saved.items);
   } catch {
-    hamStarredIds = new Set();
-    hamHighlights = {};
-    hamMemos = {};
+    hamItems = [];
   }
 }
 
-function persistHamProgressLocally() {
-  localStorage.setItem(HAM_PROGRESS_STORAGE_KEY, JSON.stringify({
-    starredIds: Array.from(hamStarredIds),
-    highlights: hamHighlights,
-    memos: hamMemos
+function persistHamVocabLocally() {
+  localStorage.setItem(HAM_VOCAB_STORAGE_KEY, JSON.stringify({
+    items: hamItems,
+    savedAt: new Date().toISOString()
   }));
 }
 
-async function saveHamProgress({ remote = true } = {}) {
-  persistHamProgressLocally();
+async function saveHamVocab({ remote = true } = {}) {
+  persistHamVocabLocally();
 
   if (remote) {
-    await saveHamProgressToStorage();
+    await saveHamVocabToStorage();
   }
 }
 
-async function saveHamProgressToStorage() {
+async function saveHamVocabToStorage() {
   if (!supabaseClient) {
+    updateHamMeta(getFilteredHamItems().length, "브라우저 임시 저장");
     return;
   }
 
@@ -4339,9 +4336,7 @@ async function saveHamProgressToStorage() {
       const { error } = await supabaseClient.functions.invoke(HAM_SYNC_FUNCTION, {
         body: {
           action: "save",
-          starredIds: Array.from(hamStarredIds),
-          highlights: hamHighlights,
-          memos: hamMemos
+          items: hamItems
         }
       });
 
@@ -4349,36 +4344,40 @@ async function saveHamProgressToStorage() {
         throw error;
       }
     } while (hamProgressSaveQueued);
+
+    updateHamMeta(getFilteredHamItems().length, "서버 저장 완료");
   } catch (error) {
     console.error(error);
+    updateHamMeta(getFilteredHamItems().length, "서버 저장 확인 필요");
   } finally {
     hamProgressSyncing = false;
   }
 }
 
-function scheduleHamProgressSave(delay = 650) {
-  persistHamProgressLocally();
+function scheduleHamVocabSave(delay = 450) {
+  persistHamVocabLocally();
   window.clearTimeout(hamMemoSaveTimer);
   hamMemoSaveTimer = window.setTimeout(() => {
     hamMemoSaveTimer = null;
-    saveHamProgress();
+    saveHamVocab();
   }, delay);
 }
 
-async function flushScheduledHamProgress() {
+async function flushScheduledHamVocabSave() {
   if (!hamMemoSaveTimer) {
     return;
   }
 
   window.clearTimeout(hamMemoSaveTimer);
   hamMemoSaveTimer = null;
-  await saveHamProgress();
+  await saveHamVocab();
 }
 
-async function loadHamProgressFromStorage() {
-  loadHamProgressLocally();
+async function loadHamVocabFromStorage() {
+  loadHamVocabLocally();
 
   if (!supabaseClient) {
+    renderHamEntries("브라우저 임시 저장");
     return;
   }
 
@@ -4388,23 +4387,22 @@ async function loadHamProgressFromStorage() {
     });
 
     if (error || !data || !data.ok) {
+      renderHamEntries("서버 자료 확인 필요");
       return;
     }
 
-    hamStarredIds = new Set(normalizeHamStringArray(data.starredIds));
-    hamHighlights = normalizeHamHighlights(data.highlights);
-    hamMemos = normalizeHamMemos(data.memos);
-    persistHamProgressLocally();
+    hamItems = normalizeHamVocabItems(data.items);
+    persistHamVocabLocally();
+    renderHamEntries("서버 저장됨");
   } catch (error) {
     console.error(error);
+    renderHamEntries("서버 자료 확인 필요");
   }
 }
 
 async function loadHamLibrary() {
   if (hamLoaded) {
-    await loadHamProgressFromStorage();
-    setDefaultHamGroup();
-    renderHamEntries();
+    await loadHamVocabFromStorage();
     return;
   }
 
@@ -4413,93 +4411,48 @@ async function loadHamLibrary() {
   }
 
   hamLoading = true;
-  hamMeta.textContent = "자료를 불러오는 중입니다.";
+  hamMeta.textContent = "일본어 단어장을 불러오는 중입니다.";
   hamResults.innerHTML = '<p class="empty-result">불러오는 중입니다.</p>';
 
   try {
-    const response = await fetch(HAM_DATA_URL, { cache: "no-store" });
-
-    if (!response.ok) {
-      throw new Error("자료를 불러오지 못했습니다.");
-    }
-
-    const data = await response.json();
-    hamItems = Array.isArray(data.items) ? data.items : [];
+    await loadHamVocabFromStorage();
     hamLoaded = true;
-    await loadHamProgressFromStorage();
-    setDefaultHamGroup();
-    renderHamGroupButtons();
-    renderHamEntries();
-  } catch (error) {
-    console.error(error);
-    hamResults.innerHTML = '<p class="empty-result">자료를 불러오지 못했습니다.</p>';
-    hamMeta.textContent = "자료 확인 필요";
   } finally {
     hamLoading = false;
   }
 }
 
 function getFilteredHamItems() {
-  return hamItems.filter((item) => {
-    if (hamNotesOnly) {
-      return hamStarredIds.has(item.id)
-        && (!hamActiveGroup || hamActiveGroup === HAM_ALL_GROUP_ID || item.group === hamActiveGroup);
-    }
+  const keyword = hamSearchKeyword.trim().toLowerCase();
 
-    if (hamActiveGroup && hamActiveGroup !== HAM_ALL_GROUP_ID && item.group !== hamActiveGroup) {
-      return false;
-    }
+  if (!keyword) {
+    return hamItems;
+  }
 
-    return true;
-  });
+  return hamItems.filter((item) => [
+    item.japanese,
+    item.meaning,
+    item.reading,
+    item.memo
+  ].some((value) => String(value || "").toLowerCase().includes(keyword)));
 }
 
-function updateHamMeta(filteredCount = 0) {
-  const starredCount = hamStarredIds.size;
-  const memoCount = Object.keys(hamMemos).length;
-  hamMeta.textContent = hamNotesOnly
-    ? `오답노트 ${starredCount}건 중 ${filteredCount}건 표시`
-    : `${hamItems.length}건 중 ${filteredCount}건 표시`;
-  hamNoteMeta.textContent = `오답노트 ${starredCount}건 · 메모 ${memoCount}건`;
-  hamNotesToggle.setAttribute("aria-pressed", String(hamNotesOnly));
-}
+function updateHamMeta(filteredCount = 0, status = "") {
+  const total = hamItems.length;
+  const searchText = hamSearchKeyword ? ` · 검색 ${filteredCount}건` : "";
+  const statusText = status ? ` · ${status}` : "";
 
-function getFirstHamGroupId() {
-  return hamItems.find((item) => item.group)?.group
-    || HAM_ALL_GROUP_ID;
-}
+  hamMeta.textContent = `일본어 단어 ${total}건${searchText}${statusText}`;
 
-function setDefaultHamGroup() {
-  if (!hamActiveGroup) {
-    hamActiveGroup = getFirstHamGroupId();
+  if (hamNoteMeta) {
+    hamNoteMeta.textContent = `저장된 단어 ${total}건`;
   }
 }
 
 function setHamSidebarOpen(isOpen) {
   hamSidebarOpen = isOpen;
   hamFullscreen.classList.toggle("is-sidebar-open", hamSidebarOpen);
-  hamSidebarToggle.setAttribute("aria-expanded", String(hamSidebarOpen));
-}
-
-function getHamGroups() {
-  const groups = [];
-  const seen = new Set();
-
-  hamItems.forEach((item) => {
-    const id = item.group || "";
-
-    if (!id || seen.has(id)) {
-      return;
-    }
-
-    seen.add(id);
-    groups.push({
-      id,
-      label: item.groupLabel || id
-    });
-  });
-
-  return [HAM_ALL_GROUP, ...groups];
+  hamSidebarToggle?.setAttribute("aria-expanded", String(hamSidebarOpen));
 }
 
 function renderHamGroupButtons() {
@@ -4507,209 +4460,145 @@ function renderHamGroupButtons() {
     return;
   }
 
-  const groups = getHamGroups();
-  const counts = groups.reduce((acc, group) => {
-    acc[group.id] = hamItems.filter((item) => {
-      if (hamNotesOnly) {
-        return hamStarredIds.has(item.id)
-          && (group.id === HAM_ALL_GROUP_ID || item.group === group.id);
-      }
-
-      return group.id === HAM_ALL_GROUP_ID || item.group === group.id;
-    }).length;
-    return acc;
-  }, {});
-
-  hamGroupList.innerHTML = groups.map((group) => `
-    <button class="ham-group-button${hamActiveGroup === group.id ? " is-active" : ""}" type="button" data-ham-group="${escapeHtml(group.id)}">
-      <span>${escapeHtml(group.label)}</span>
-      <strong>${counts[group.id] || 0}</strong>
+  hamGroupList.innerHTML = `
+    <button class="ham-group-button is-active" type="button" data-ham-group="${HAM_ALL_GROUP_ID}">
+      <span>${escapeHtml(HAM_ALL_GROUP.label)}</span>
+      <strong>${hamItems.length}</strong>
     </button>
-  `).join("");
+  `;
 }
 
-function getHamHighlightTerms(itemId, field) {
-  return normalizeHamStringArray(hamHighlights[itemId]?.[field]);
+function resetHamVocabForm() {
+  hamEditingId = "";
+  hamVocabForm?.reset();
+
+  if (hamVocabSubmit) {
+    hamVocabSubmit.textContent = "단어 추가";
+  }
+
+  if (hamVocabCancel) {
+    hamVocabCancel.hidden = true;
+  }
 }
 
-function renderHighlightedText(value, itemId, field) {
-  const text = String(value || "");
-  const terms = getHamHighlightTerms(itemId, field).sort((a, b) => b.length - a.length);
-
-  if (terms.length === 0) {
-    return renderMultilineText(text);
-  }
-
-  const ranges = [];
-
-  terms.forEach((term) => {
-    let index = text.indexOf(term);
-
-    while (index >= 0) {
-      ranges.push({ start: index, end: index + term.length });
-      index = text.indexOf(term, index + term.length);
-    }
-  });
-
-  ranges.sort((left, right) => left.start - right.start || right.end - left.end);
-
-  const merged = [];
-  ranges.forEach((range) => {
-    const last = merged[merged.length - 1];
-
-    if (!last || range.start >= last.end) {
-      merged.push({ ...range });
-    }
-  });
-
-  if (merged.length === 0) {
-    return renderMultilineText(text);
-  }
-
-  let cursor = 0;
-  let html = "";
-
-  merged.forEach((range) => {
-    html += renderMultilineText(text.slice(cursor, range.start));
-    html += `<mark class="ham-highlight">${renderMultilineText(text.slice(range.start, range.end))}</mark>`;
-    cursor = range.end;
-  });
-
-  html += renderMultilineText(text.slice(cursor));
-  return html;
-}
-
-function addHamHighlight(itemId, field, selectedText) {
-  const rawText = String(selectedText || "").trim();
-  const compactText = rawText.replace(/\s+/g, " ").trim();
-
-  if (!itemId || !field || compactText.length < 2) {
-    return false;
-  }
-
-  const item = hamItems.find((entry) => entry.id === itemId);
-  const sourceText = field === "note" ? item?.note : item?.question;
-  const text = sourceText?.includes(rawText) ? rawText : compactText;
-
-  if (!sourceText || !sourceText.includes(text)) {
-    return false;
-  }
-
-  const entry = hamHighlights[itemId] || { question: [], note: [] };
-  const terms = normalizeHamStringArray(entry[field]);
-
-  if (terms.includes(text)) {
-    entry[field] = terms.filter((term) => term !== text);
-
-    const question = normalizeHamStringArray(entry.question);
-    const note = normalizeHamStringArray(entry.note);
-
-    if (question.length > 0 || note.length > 0) {
-      hamHighlights[itemId] = { question, note };
-    } else {
-      delete hamHighlights[itemId];
-    }
-
-    return true;
-  }
-
-  entry[field] = [...terms, text];
-  hamHighlights[itemId] = {
-    question: normalizeHamStringArray(entry.question),
-    note: normalizeHamStringArray(entry.note)
-  };
-
-  return true;
-}
-
-function getHamMemoValue(itemId) {
-  return typeof hamMemos[itemId] === "string" ? hamMemos[itemId] : "";
-}
-
-function getHamMemoInputId(itemId) {
-  return `ham-memo-${String(itemId || "").replace(/[^a-zA-Z0-9_-]/g, "-")}`;
-}
-
-function updateHamMemo(itemId, value) {
-  if (!itemId) {
-    return false;
-  }
-
-  const text = String(value || "").slice(0, HAM_MEMO_MAX_LENGTH);
-
-  if (text.trim()) {
-    hamMemos[itemId] = text;
-  } else {
-    delete hamMemos[itemId];
-  }
-
-  return true;
-}
-
-function renderHamEntries() {
-  const filtered = getFilteredHamItems();
-  updateHamMeta(filtered.length);
-  renderHamGroupButtons();
-
-  if (filtered.length === 0) {
-    hamResults.innerHTML = hamNotesOnly
-      ? '<p class="empty-result">오답노트에 저장된 항목이 없습니다.</p>'
-      : '<p class="empty-result">표시할 항목이 없습니다.</p>';
+function setHamVocabForm(item) {
+  if (!item) {
+    resetHamVocabForm();
     return;
   }
 
-  hamResults.innerHTML = filtered.map((item) => {
-    const answerOption = (item.options || []).find((option) => option.number === item.answer);
-    const entryNumber = item.displayNumber || item.number;
-    const entryGroup = item.groupLabel || item.group;
-    const memoId = getHamMemoInputId(item.id);
-    const memoValue = getHamMemoValue(item.id);
-    const optionHtml = (item.options || []).map((option) => `
-      <li${option.number === item.answer ? ' class="is-answer"' : ""}>
-        <span>${escapeHtml(option.number)}</span>
-        <p>${escapeHtml(option.text)}</p>
-      </li>
-    `).join("");
-    const imageHtml = (item.images || []).map((src) => `
-      <img class="ham-entry-image" src="${escapeHtml(src)}" alt="" loading="lazy">
-    `).join("");
+  hamEditingId = item.id;
+  hamJapaneseInput.value = item.japanese || "";
+  hamMeaningInput.value = item.meaning || "";
+  hamReadingInput.value = item.reading || "";
+  hamVocabMemoInput.value = item.memo || "";
 
-    return `
-      <article class="ham-entry" data-ham-id="${escapeHtml(item.id)}">
-        <div class="ham-entry-head">
-          <button class="ham-star-button${hamStarredIds.has(item.id) ? " is-starred" : ""}" type="button" data-ham-star="${escapeHtml(item.id)}" aria-pressed="${hamStarredIds.has(item.id) ? "true" : "false"}" aria-label="오답노트 저장">${hamStarredIds.has(item.id) ? "★" : "☆"}</button>
-          <span class="ham-entry-index">${escapeHtml(entryNumber)}</span>
-          <span class="ham-entry-group">${escapeHtml(entryGroup)}</span>
+  if (hamVocabSubmit) {
+    hamVocabSubmit.textContent = "수정 저장";
+  }
+
+  if (hamVocabCancel) {
+    hamVocabCancel.hidden = false;
+  }
+
+  hamJapaneseInput.focus();
+}
+
+function getHamVocabPayload() {
+  return {
+    japanese: normalizeHamText(hamJapaneseInput?.value),
+    meaning: normalizeHamText(hamMeaningInput?.value),
+    reading: normalizeHamText(hamReadingInput?.value),
+    memo: normalizeHamText(hamVocabMemoInput?.value, HAM_MEMO_MAX_LENGTH)
+  };
+}
+
+async function upsertHamVocabItem() {
+  const payload = getHamVocabPayload();
+
+  if (!payload.japanese && !payload.meaning) {
+    alert("일본어 또는 뜻을 입력하세요.");
+    return;
+  }
+
+  const now = new Date().toISOString();
+
+  if (hamEditingId) {
+    hamItems = hamItems.map((item) => item.id === hamEditingId
+      ? { ...item, ...payload, updatedAt: now }
+      : item);
+  } else {
+    hamItems = [{
+      id: createHamVocabId(),
+      ...payload,
+      createdAt: now,
+      updatedAt: now
+    }, ...hamItems];
+  }
+
+  resetHamVocabForm();
+  await saveHamVocab();
+  renderHamEntries("서버 저장 완료");
+}
+
+async function deleteHamVocabItem(itemId) {
+  if (!itemId) {
+    return;
+  }
+
+  hamItems = hamItems.filter((item) => item.id !== itemId);
+
+  if (hamEditingId === itemId) {
+    resetHamVocabForm();
+  }
+
+  await saveHamVocab();
+  renderHamEntries("삭제 완료");
+}
+
+function renderHamEntries(status = "") {
+  const filtered = getFilteredHamItems();
+  updateHamMeta(filtered.length, status);
+  renderHamGroupButtons();
+
+  if (filtered.length === 0) {
+    hamResults.innerHTML = hamSearchKeyword
+      ? '<p class="empty-result">검색된 단어가 없습니다.</p>'
+      : '<p class="empty-result">아직 저장된 단어가 없습니다. 위에서 모르는 일본어를 추가하세요.</p>';
+    return;
+  }
+
+  hamResults.innerHTML = filtered.map((item, index) => `
+    <article class="ham-entry ham-vocab-entry" data-ham-id="${escapeHtml(item.id)}">
+      <div class="ham-entry-head">
+        <span class="ham-entry-index">${index + 1}</span>
+        <span class="ham-entry-group">${escapeHtml(item.reading || "읽는법 없음")}</span>
+        <div class="ham-vocab-entry-actions">
+          <button class="ham-vocab-edit" type="button" data-ham-edit="${escapeHtml(item.id)}">수정</button>
+          <button class="ham-vocab-delete" type="button" data-ham-delete="${escapeHtml(item.id)}">삭제</button>
         </div>
-        <p class="ham-question ham-highlightable" data-ham-highlight-field="question">${renderHighlightedText(item.question, item.id, "question")}</p>
-        ${imageHtml ? `<div class="ham-entry-images">${imageHtml}</div>` : ""}
-        <ol class="ham-options">${optionHtml}</ol>
-        <details class="ham-answer">
-          <summary>확인</summary>
-          <div class="ham-answer-body">
-            <p class="ham-answer-line">확인값 ${escapeHtml(item.answer)}${answerOption ? ` · ${escapeHtml(answerOption.text)}` : ""}</p>
-            <p class="ham-note ham-highlightable" data-ham-highlight-field="note">${renderHighlightedText(item.note, item.id, "note")}</p>
-          </div>
-        </details>
-        <div class="ham-memo">
-          <label for="${escapeHtml(memoId)}">메모</label>
-          <textarea id="${escapeHtml(memoId)}" data-ham-memo="${escapeHtml(item.id)}" maxlength="${HAM_MEMO_MAX_LENGTH}" rows="3" placeholder="이 문제에 대한 메모를 입력하세요">${escapeHtml(memoValue)}</textarea>
-        </div>
-      </article>
-    `;
-  }).join("");
+      </div>
+      <p class="ham-question ham-vocab-word">${renderMultilineText(item.japanese || "-")}</p>
+      <div class="ham-vocab-detail">
+        <p><strong>뜻</strong><span>${renderMultilineText(item.meaning || "-")}</span></p>
+        <p><strong>읽는법</strong><span>${renderMultilineText(item.reading || "-")}</span></p>
+        ${item.memo ? `<p><strong>메모</strong><span>${renderMultilineText(item.memo)}</span></p>` : ""}
+      </div>
+    </article>
+  `).join("");
 }
 
 function openHamTool() {
   hamFullscreen.classList.add("is-open");
   hamFullscreen.setAttribute("aria-hidden", "false");
   hamActiveGroup = "";
+  hamNotesOnly = false;
   setHamSidebarOpen(false);
   loadHamLibrary();
 }
 
 function closeHamTool() {
-  flushScheduledHamProgress();
+  flushScheduledHamVocabSave();
   hamFullscreen.classList.remove("is-open");
   hamFullscreen.setAttribute("aria-hidden", "true");
 }
@@ -5018,17 +4907,29 @@ worklogFileInput.addEventListener("change", () => {
 runOnEnter(worklogFilterInput, renderWorklog);
 
 hamClose.addEventListener("click", closeHamTool);
-hamSidebarToggle.addEventListener("click", () => {
+hamSidebarToggle?.addEventListener("click", () => {
   setHamSidebarOpen(!hamSidebarOpen);
 });
-hamNotesToggle.addEventListener("click", () => {
+hamNotesToggle?.addEventListener("click", () => {
   hamNotesOnly = !hamNotesOnly;
   hamActiveGroup = hamNotesOnly ? HAM_ALL_GROUP_ID : "";
   setHamSidebarOpen(false);
-  setDefaultHamGroup();
   renderHamEntries();
 });
-hamGroupList.addEventListener("click", (event) => {
+if (hamSearchInput) {
+  runOnEnter(hamSearchInput, () => {
+    hamSearchKeyword = hamSearchInput.value.trim();
+    renderHamEntries();
+  });
+}
+hamVocabForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  upsertHamVocabItem();
+});
+hamVocabCancel?.addEventListener("click", () => {
+  resetHamVocabForm();
+});
+hamGroupList?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-ham-group]");
 
   if (!button) {
@@ -5040,87 +4941,19 @@ hamGroupList.addEventListener("click", (event) => {
   renderHamEntries();
 });
 hamResults.addEventListener("click", async (event) => {
-  const button = event.target.closest("[data-ham-star]");
+  const editButton = event.target.closest("[data-ham-edit]");
+  const deleteButton = event.target.closest("[data-ham-delete]");
 
-  if (!button) {
+  if (editButton) {
+    const item = hamItems.find((entry) => entry.id === editButton.dataset.hamEdit);
+    setHamVocabForm(item);
     return;
   }
 
-  const itemId = button.dataset.hamStar;
-
-  if (hamStarredIds.has(itemId)) {
-    hamStarredIds.delete(itemId);
-  } else {
-    hamStarredIds.add(itemId);
-  }
-
-  await saveHamProgress();
-  renderHamEntries();
-});
-
-hamResults.addEventListener("input", (event) => {
-  const memoInput = event.target.closest("[data-ham-memo]");
-
-  if (!memoInput) {
+  if (deleteButton) {
+    await deleteHamVocabItem(deleteButton.dataset.hamDelete);
     return;
   }
-
-  updateHamMemo(memoInput.dataset.hamMemo, memoInput.value);
-  scheduleHamProgressSave();
-  updateHamMeta(getFilteredHamItems().length);
-});
-
-hamResults.addEventListener("change", async (event) => {
-  const memoInput = event.target.closest("[data-ham-memo]");
-
-  if (!memoInput) {
-    return;
-  }
-
-  updateHamMemo(memoInput.dataset.hamMemo, memoInput.value);
-  await flushScheduledHamProgress();
-});
-
-async function handleHamTextSelection() {
-  const selection = window.getSelection();
-
-  if (!selection || selection.isCollapsed) {
-    return;
-  }
-
-  const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-
-  if (!range) {
-    return;
-  }
-
-  const container = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
-    ? range.commonAncestorContainer
-    : range.commonAncestorContainer.parentElement;
-  const highlightable = container?.closest(".ham-highlightable");
-  const selectedText = selection.toString();
-
-  if (!highlightable || !highlightable.contains(range.startContainer) || !highlightable.contains(range.endContainer)) {
-    return;
-  }
-
-  const entry = highlightable.closest(".ham-entry");
-  const didAdd = addHamHighlight(entry?.dataset.hamId, highlightable.dataset.hamHighlightField, selectedText);
-
-  if (!didAdd) {
-    return;
-  }
-
-  selection.removeAllRanges();
-  await saveHamProgress();
-  renderHamEntries();
-}
-
-hamResults.addEventListener("mouseup", () => {
-  setTimeout(handleHamTextSelection, 0);
-});
-hamResults.addEventListener("touchend", () => {
-  setTimeout(handleHamTextSelection, 80);
 });
 
 let worklogDragDepth = 0;

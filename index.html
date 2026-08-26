@@ -702,20 +702,43 @@
     <div class="ham-topbar">
       <div class="ham-topbar-title">
         <h2>햄</h2>
-        <p class="wc-search-meta ham-meta">자료를 불러오는 중입니다.</p>
+        <p class="wc-search-meta ham-meta">일본어 단어장을 불러오는 중입니다.</p>
       </div>
       <div class="ham-topbar-actions">
-        <button class="ham-sidebar-toggle" type="button" aria-expanded="false">분류</button>
-        <button class="ham-notes-toggle" type="button" aria-pressed="false">오답노트</button>
+        <input id="ham-search-input" type="search" placeholder="일본어, 뜻, 읽는법 검색" autocomplete="off">
         <button class="ham-close" type="button" aria-label="close ham">Close</button>
       </div>
     </div>
     <div class="ham-layout">
       <aside class="ham-sidebar" aria-label="햄 분류">
         <div class="ham-group-list" role="list"></div>
-        <p class="ham-note-meta">오답노트 0건</p>
+        <p class="ham-note-meta">저장된 단어 0건</p>
       </aside>
-      <div class="ham-results" aria-live="polite"></div>
+      <div class="ham-content">
+        <form class="ham-vocab-form">
+          <label>
+            <span>일본어</span>
+            <input id="ham-japanese-input" type="text" autocomplete="off" placeholder="예: たべる">
+          </label>
+          <label>
+            <span>뜻</span>
+            <input id="ham-meaning-input" type="text" autocomplete="off" placeholder="예: 먹다">
+          </label>
+          <label>
+            <span>읽는법</span>
+            <input id="ham-reading-input" type="text" autocomplete="off" placeholder="예: 타베루">
+          </label>
+          <label class="ham-vocab-memo-field">
+            <span>메모</span>
+            <textarea id="ham-vocab-memo-input" rows="2" placeholder="헷갈리는 점을 적어두세요"></textarea>
+          </label>
+          <div class="ham-vocab-actions">
+            <button class="ham-vocab-submit" type="submit">단어 추가</button>
+            <button class="ham-vocab-cancel" type="button" hidden>취소</button>
+          </div>
+        </form>
+        <div class="ham-results" aria-live="polite"></div>
+      </div>
     </div>
   </div>
 

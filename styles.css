@@ -2726,6 +2726,115 @@ body.tool-auth-open {
   align-content: start;
 }
 
+.ham-content {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: clamp(20px, 3vw, 40px) clamp(20px, 4vw, 48px) 48px;
+}
+
+.ham-content .ham-results {
+  overflow: visible;
+  padding: 0;
+}
+
+.ham-vocab-form {
+  max-width: 1080px;
+  width: 100%;
+  margin: 0 auto 16px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  border: 1px solid #e8ebef;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(31, 36, 41, 0.045);
+}
+
+.ham-vocab-form label {
+  display: grid;
+  gap: 7px;
+  color: #111111;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.ham-vocab-form input,
+.ham-vocab-form textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid #e4e8ec;
+  border-radius: 8px;
+  color: #111111;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.45;
+  background: #ffffff;
+}
+
+.ham-vocab-form textarea {
+  resize: vertical;
+}
+
+.ham-vocab-form input:focus,
+.ham-vocab-form textarea:focus {
+  outline: none;
+  border-color: #b9c0c8;
+  box-shadow: 0 0 0 4px rgba(17, 17, 17, 0.06);
+}
+
+.ham-vocab-memo-field {
+  grid-column: 1 / -1;
+}
+
+.ham-vocab-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ham-vocab-submit,
+.ham-vocab-cancel,
+.ham-vocab-edit,
+.ham-vocab-delete {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid #dfe3e8;
+  border-radius: 8px;
+  color: #111111;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.ham-vocab-submit {
+  background: #f8f9fa;
+}
+
+.ham-vocab-delete {
+  color: #b33a31;
+}
+
+.ham-vocab-submit:hover,
+.ham-vocab-submit:focus-visible,
+.ham-vocab-cancel:hover,
+.ham-vocab-cancel:focus-visible,
+.ham-vocab-edit:hover,
+.ham-vocab-edit:focus-visible,
+.ham-vocab-delete:hover,
+.ham-vocab-delete:focus-visible {
+  outline: none;
+  border-color: #b9c0c8;
+  background: #f8f9fa;
+}
+
 .ham-entry {
   max-width: 1080px;
   width: 100%;
@@ -2743,6 +2852,13 @@ body.tool-auth-open {
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
+}
+
+.ham-vocab-entry-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .ham-entry-index,
@@ -2795,6 +2911,37 @@ body.tool-auth-open {
   font-size: 16px;
   font-weight: 800;
   line-height: 1.65;
+}
+
+.ham-vocab-word {
+  font-size: clamp(20px, 3vw, 30px);
+  letter-spacing: 0;
+}
+
+.ham-vocab-detail {
+  display: grid;
+  gap: 8px;
+}
+
+.ham-vocab-detail p {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 10px;
+  color: #111111;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.ham-vocab-detail strong {
+  color: #111111;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.ham-vocab-detail span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .ham-highlightable {
@@ -3031,6 +3178,34 @@ body.tool-auth-open {
     scroll-padding-top: 0;
   }
 
+  .ham-content {
+    height: 100%;
+    padding: 12px 12px 18px;
+    overflow-y: auto;
+  }
+
+  .ham-content .ham-results {
+    height: auto;
+    padding: 0;
+  }
+
+  .ham-vocab-form {
+    margin-bottom: 12px;
+    padding: 14px;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    border-radius: 12px;
+  }
+
+  .ham-vocab-actions {
+    justify-content: stretch;
+  }
+
+  .ham-vocab-submit,
+  .ham-vocab-cancel {
+    flex: 1 1 120px;
+  }
+
   .ham-entry {
     min-height: 0;
     width: 100%;
@@ -3067,6 +3242,27 @@ body.tool-auth-open {
     line-height: 1.55;
     overflow-wrap: anywhere;
     word-break: keep-all;
+  }
+
+  .ham-vocab-word {
+    font-size: 23px;
+    line-height: 1.35;
+  }
+
+  .ham-vocab-detail p {
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 8px;
+    font-size: 13.5px;
+  }
+
+  .ham-vocab-entry-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .ham-vocab-edit,
+  .ham-vocab-delete {
+    flex: 1 1 90px;
   }
 
   .ham-entry-image {
