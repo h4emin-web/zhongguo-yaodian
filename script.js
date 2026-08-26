@@ -649,6 +649,28 @@ function formatKrwStockValue(value) {
   return `${Math.round(number).toLocaleString()}원`;
 }
 
+function formatKrwMarketCap(value) {
+  const number = Number(value);
+
+  if (!Number.isFinite(number) || number <= 0) {
+    return "시총 -";
+  }
+
+  const eok = Math.round(number / 100000000);
+  const jo = Math.floor(eok / 10000);
+  const restEok = eok % 10000;
+
+  if (jo > 0 && restEok > 0) {
+    return `시총 ${jo}조 ${restEok.toLocaleString()}억`;
+  }
+
+  if (jo > 0) {
+    return `시총 ${jo}조`;
+  }
+
+  return `시총 ${eok.toLocaleString()}억`;
+}
+
 function formatSignedStockChange(value, rate) {
   const change = Number(value);
   const changeRate = Number(rate);
@@ -673,6 +695,7 @@ function getStockCardElements(card) {
   return {
     price: card.querySelector(".calendar-stock-price"),
     change: card.querySelector(".calendar-stock-change"),
+    marketCap: card.querySelector(".calendar-stock-market-cap"),
     refresh: card.querySelector(".calendar-stock-refresh")
   };
 }
@@ -688,6 +711,10 @@ function renderStockPrice(card, data) {
   card.classList.add(data.direction === "up" ? "is-up" : data.direction === "down" ? "is-down" : "is-flat");
   elements.price.textContent = formatKrwStockValue(data.price);
   elements.change.textContent = formatSignedStockChange(data.change, data.changeRate);
+
+  if (elements.marketCap) {
+    elements.marketCap.textContent = formatKrwMarketCap(data.marketCap);
+  }
 }
 
 function renderStockError(card, message) {
@@ -701,6 +728,10 @@ function renderStockError(card, message) {
   card.classList.remove("is-up", "is-down", "is-flat");
   elements.price.textContent = "-";
   elements.change.textContent = message || "조회 실패";
+
+  if (elements.marketCap) {
+    elements.marketCap.textContent = "시총 -";
+  }
 }
 
 async function fetchStockPrice(card, { showLoading = false } = {}) {

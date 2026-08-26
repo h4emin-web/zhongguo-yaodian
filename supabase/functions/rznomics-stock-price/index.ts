@@ -13,7 +13,7 @@ const JSON_HEADERS = {
 const DEFAULT_STOCK_CODE = "476830";
 const STOCKS: Record<string, { name: string; market: string }> = {
   "476830": { name: "알지노믹스", market: "KOSDAQ" },
-  "028050": { name: "삼성E&A", market: "KOSPI" }
+  "950260": { name: "인제니아테라퓨틱스", market: "KOSDAQ" }
 };
 
 type StockRequest = {
@@ -37,6 +37,7 @@ type NaverStockData = {
   lv?: number;
   aq?: number;
   aa?: number;
+  countOfListedStock?: number;
 };
 
 function json(body: unknown, status = 200) {
@@ -110,6 +111,8 @@ async function fetchStockPrice(input: StockRequest = {}) {
   const direction = directionFromRf(stock.rf);
   const changeAbs = numberOrZero(stock.cv);
   const rateAbs = numberOrZero(stock.cr);
+  const price = numberOrZero(stock.nv);
+  const listedShares = numberOrZero(stock.countOfListedStock);
 
   return {
     ok: true,
@@ -117,7 +120,7 @@ async function fetchStockPrice(input: StockRequest = {}) {
     code: stockCode,
     name: stock.nm || stockMeta.name,
     market: stockMeta.market,
-    price: numberOrZero(stock.nv),
+    price,
     previousClose: numberOrZero(stock.sv || stock.pcv),
     change: direction.sign * changeAbs,
     changeAbs,
@@ -131,6 +134,8 @@ async function fetchStockPrice(input: StockRequest = {}) {
     low: numberOrZero(stock.lv),
     volume: numberOrZero(stock.aq),
     tradedValue: numberOrZero(stock.aa),
+    listedShares,
+    marketCap: price * listedShares,
     standardAt: payload?.result?.time ? new Date(payload.result.time).toISOString() : "",
     fetchedAt: new Date().toISOString()
   };

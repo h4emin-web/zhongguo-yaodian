@@ -1616,6 +1616,13 @@ body.tool-auth-open {
   line-height: 1.2;
 }
 
+.calendar-stock-market-cap {
+  color: rgba(92, 101, 110, 0.72);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
 .calendar-stock-card.is-up .calendar-stock-change {
   color: #c73d32;
 }
