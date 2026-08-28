@@ -10,9 +10,9 @@ const JSON_HEADERS = {
   "Content-Type": "application/json",
   "Cache-Control": "no-store"
 };
-const DEFAULT_STOCK_CODE = "476830";
+const DEFAULT_STOCK_CODE = "000660";
 const STOCKS: Record<string, { name: string; market: string }> = {
-  "476830": { name: "알지노믹스", market: "KOSDAQ" },
+  "000660": { name: "SK하이닉스", market: "KOSPI" },
   "950260": { name: "인제니아테라퓨틱스", market: "KOSDAQ" }
 };
 
