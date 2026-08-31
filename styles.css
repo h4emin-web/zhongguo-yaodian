@@ -2790,9 +2790,15 @@ body.tool-auth-open {
   box-shadow: 0 0 0 4px rgba(17, 17, 17, 0.06);
 }
 
+.ham-vocab-paste-field,
 .ham-vocab-memo-field,
 .ham-vocab-example-field {
   grid-column: 1 / -1;
+}
+
+.ham-vocab-paste-field textarea {
+  min-height: 82px;
+  background: #fbfcfd;
 }
 
 .ham-fullscreen.is-test-mode .ham-vocab-form {

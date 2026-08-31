@@ -65,6 +65,7 @@ const hamGroupList = document.querySelector(".ham-group-list");
 const hamNoteMeta = document.querySelector(".ham-note-meta");
 const hamSearchInput = document.querySelector("#ham-search-input");
 const hamVocabForm = document.querySelector(".ham-vocab-form");
+const hamBulkInput = document.querySelector("#ham-bulk-input");
 const hamJapaneseInput = document.querySelector("#ham-japanese-input");
 const hamMeaningInput = document.querySelector("#ham-meaning-input");
 const hamReadingInput = document.querySelector("#ham-reading-input");
@@ -4265,6 +4266,171 @@ function normalizeHamNumber(value) {
   return Number.isFinite(number) && number > 0 ? Math.floor(number) : 0;
 }
 
+function normalizeHamBulkText(value) {
+  return String(value || "")
+    .replace(/\r\n?/g, "\n")
+    .replace(/&nbsp;|&#x20;/gi, " ")
+    .replace(/\\\n/g, "\n")
+    .trim();
+}
+
+function cleanHamBulkLine(value) {
+  return String(value || "")
+    .replace(/&nbsp;|&#x20;/gi, " ")
+    .replace(/\\([*_`])/g, "$1")
+    .replace(/[*_`]/g, "")
+    .replace(/^#{1,6}\s*/, "")
+    .replace(/^>\s*/, "")
+    .replace(/^\s*[-*•]\s*/, "")
+    .replace(/\s*\\$/, "")
+    .trim();
+}
+
+function stripHamMeaningArrow(value) {
+  return cleanHamBulkLine(value).replace(/^(?:→|->|=>)\s*/, "").trim();
+}
+
+function compactHamLines(lines) {
+  const compacted = [];
+
+  lines.forEach((line) => {
+    if (!line) {
+      if (compacted.length > 0 && compacted[compacted.length - 1]) {
+        compacted.push("");
+      }
+      return;
+    }
+
+    compacted.push(line);
+  });
+
+  while (compacted[compacted.length - 1] === "") {
+    compacted.pop();
+  }
+
+  return compacted.join("\n");
+}
+
+function parseHamBulkVocabulary(value) {
+  const text = normalizeHamBulkText(value);
+  const rawLines = text.split("\n");
+  const lines = rawLines.map(cleanHamBulkLine);
+  const usedIndexes = new Set();
+  const firstLineIndex = lines.findIndex((line) => line);
+  const parsed = {
+    japanese: "",
+    meaning: "",
+    reading: "",
+    memo: "",
+    example: ""
+  };
+
+  if (firstLineIndex === -1) {
+    return parsed;
+  }
+
+  usedIndexes.add(firstLineIndex);
+
+  const titleLine = lines[firstLineIndex];
+  const titleMatch = titleLine.match(/^(.+?)[（(]([^）)]+)[）)]\s*$/);
+
+  if (titleMatch) {
+    parsed.japanese = titleMatch[1].trim();
+    parsed.reading = titleMatch[2].trim();
+  } else {
+    parsed.japanese = titleLine.trim();
+  }
+
+  const exampleHeaderIndex = lines.findIndex((line, index) => {
+    if (index <= firstLineIndex) {
+      return false;
+    }
+
+    return /^(?:例|例文|예|예문)[:：]?$/.test(line);
+  });
+
+  const meaningLineIndex = lines.findIndex((line, index) => {
+    if (index <= firstLineIndex) {
+      return false;
+    }
+
+    if (exampleHeaderIndex !== -1 && index > exampleHeaderIndex) {
+      return false;
+    }
+
+    return /^(?:→|->|=>)\s*/.test(line);
+  });
+
+  if (meaningLineIndex !== -1) {
+    parsed.meaning = stripHamMeaningArrow(lines[meaningLineIndex]);
+    usedIndexes.add(meaningLineIndex);
+  }
+
+  if (!parsed.reading) {
+    const readingLine = lines.find((line) => /^(?:읽는법|발음|요미가나|ふりがな)\s*[:：]/.test(line));
+    parsed.reading = readingLine ? readingLine.replace(/^(?:읽는법|발음|요미가나|ふりがな)\s*[:：]\s*/, "").trim() : "";
+  }
+
+  if (exampleHeaderIndex !== -1) {
+    usedIndexes.add(exampleHeaderIndex);
+    const exampleLines = [];
+
+    for (let index = exampleHeaderIndex + 1; index < lines.length; index++) {
+      const line = lines[index];
+
+      if (/^(?:📌\s*)?(?:자주 나오는 형태|자주 쓰는 형태|참고)[:：]?$/.test(line)) {
+        break;
+      }
+
+      usedIndexes.add(index);
+      exampleLines.push(line);
+    }
+
+    parsed.example = compactHamLines(exampleLines);
+  }
+
+  const memoLines = [];
+
+  lines.forEach((line, index) => {
+    if (usedIndexes.has(index)) {
+      return;
+    }
+
+    memoLines.push(line);
+  });
+
+  parsed.memo = compactHamLines(memoLines);
+
+  return {
+    japanese: normalizeHamText(parsed.japanese),
+    meaning: normalizeHamText(parsed.meaning),
+    reading: normalizeHamText(parsed.reading),
+    memo: normalizeHamText(parsed.memo, HAM_MEMO_MAX_LENGTH),
+    example: normalizeHamText(parsed.example, HAM_MEMO_MAX_LENGTH)
+  };
+}
+
+function hasParsedHamBulkVocabulary(parsed) {
+  return Boolean(parsed.japanese && (parsed.meaning || parsed.reading || parsed.memo || parsed.example));
+}
+
+function fillHamVocabFormFromBulk(value) {
+  const parsed = parseHamBulkVocabulary(value);
+
+  if (!hasParsedHamBulkVocabulary(parsed)) {
+    return false;
+  }
+
+  hamJapaneseInput.value = parsed.japanese;
+  hamMeaningInput.value = parsed.meaning;
+  hamReadingInput.value = parsed.reading;
+  hamVocabMemoInput.value = parsed.memo;
+  hamExampleInput.value = parsed.example;
+  updateHamMeta(getFilteredHamItems().length, "자동 분리됨");
+
+  return true;
+}
+
 function normalizeHamVocabItems(value) {
   if (!Array.isArray(value)) {
     return [];
@@ -5189,6 +5355,36 @@ if (hamSearchInput) {
     renderHamEntries();
   });
 }
+hamBulkInput?.addEventListener("paste", (event) => {
+  const text = event.clipboardData?.getData("text") || "";
+
+  if (!text.trim()) {
+    return;
+  }
+
+  event.preventDefault();
+  hamBulkInput.value = text;
+  fillHamVocabFormFromBulk(text);
+});
+hamBulkInput?.addEventListener("change", () => {
+  fillHamVocabFormFromBulk(hamBulkInput.value);
+});
+hamJapaneseInput?.addEventListener("paste", (event) => {
+  const text = event.clipboardData?.getData("text") || "";
+  const parsed = parseHamBulkVocabulary(text);
+
+  if (!hasParsedHamBulkVocabulary(parsed)) {
+    return;
+  }
+
+  event.preventDefault();
+
+  if (hamBulkInput) {
+    hamBulkInput.value = text;
+  }
+
+  fillHamVocabFormFromBulk(text);
+});
 hamVocabForm?.addEventListener("submit", (event) => {
   event.preventDefault();
   upsertHamVocabItem();
