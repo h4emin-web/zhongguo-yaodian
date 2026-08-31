@@ -23,6 +23,7 @@ type JapaneseVocabItem = {
   meaning: string;
   reading: string;
   memo: string;
+  favorite: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -94,6 +95,7 @@ function normalizeItems(value: unknown) {
       meaning,
       reading,
       memo,
+      favorite: record.favorite === true,
       createdAt: normalizeText(record.createdAt, 40) || now,
       updatedAt: normalizeText(record.updatedAt, 40) || now
     });

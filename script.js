@@ -4280,6 +4280,7 @@ function normalizeHamVocabItems(value) {
       meaning,
       reading,
       memo,
+      favorite: item.favorite === true,
       createdAt: normalizeHamText(item.createdAt, 40) || new Date().toISOString(),
       updatedAt: normalizeHamText(item.updatedAt, 40) || new Date().toISOString()
     });
@@ -4424,12 +4425,15 @@ async function loadHamLibrary() {
 
 function getFilteredHamItems() {
   const keyword = hamSearchKeyword.trim().toLowerCase();
+  const sourceItems = hamNotesOnly
+    ? hamItems.filter((item) => item.favorite)
+    : hamItems;
 
   if (!keyword) {
-    return hamItems;
+    return sourceItems;
   }
 
-  return hamItems.filter((item) => [
+  return sourceItems.filter((item) => [
     item.japanese,
     item.meaning,
     item.reading,
@@ -4439,13 +4443,16 @@ function getFilteredHamItems() {
 
 function updateHamMeta(filteredCount = 0, status = "") {
   const total = hamItems.length;
+  const favoriteCount = hamItems.filter((item) => item.favorite).length;
   const searchText = hamSearchKeyword ? ` · 검색 ${filteredCount}건` : "";
+  const favoriteText = hamNotesOnly ? `즐겨찾기 ${favoriteCount}건 중 ${filteredCount}건` : `일본어 단어 ${total}건`;
   const statusText = status ? ` · ${status}` : "";
 
-  hamMeta.textContent = `일본어 단어 ${total}건${searchText}${statusText}`;
+  hamMeta.textContent = `${favoriteText}${searchText}${statusText}`;
+  hamNotesToggle?.setAttribute("aria-pressed", String(hamNotesOnly));
 
   if (hamNoteMeta) {
-    hamNoteMeta.textContent = `저장된 단어 ${total}건`;
+    hamNoteMeta.textContent = `저장된 단어 ${total}건 · 즐겨찾기 ${favoriteCount}건`;
   }
 }
 
@@ -4531,6 +4538,7 @@ async function upsertHamVocabItem() {
     hamItems = [{
       id: createHamVocabId(),
       ...payload,
+      favorite: false,
       createdAt: now,
       updatedAt: now
     }, ...hamItems];
@@ -4556,6 +4564,31 @@ async function deleteHamVocabItem(itemId) {
   renderHamEntries("삭제 완료");
 }
 
+async function toggleHamVocabFavorite(itemId) {
+  if (!itemId) {
+    return;
+  }
+
+  let isFavorite = false;
+  const now = new Date().toISOString();
+
+  hamItems = hamItems.map((item) => {
+    if (item.id !== itemId) {
+      return item;
+    }
+
+    isFavorite = !item.favorite;
+    return {
+      ...item,
+      favorite: isFavorite,
+      updatedAt: now
+    };
+  });
+
+  await saveHamVocab();
+  renderHamEntries(isFavorite ? "즐겨찾기 추가" : "즐겨찾기 해제");
+}
+
 function renderHamEntries(status = "") {
   const filtered = getFilteredHamItems();
   updateHamMeta(filtered.length, status);
@@ -4564,7 +4597,9 @@ function renderHamEntries(status = "") {
   if (filtered.length === 0) {
     hamResults.innerHTML = hamSearchKeyword
       ? '<p class="empty-result">검색된 단어가 없습니다.</p>'
-      : '<p class="empty-result">아직 저장된 단어가 없습니다. 위에서 모르는 일본어를 추가하세요.</p>';
+      : hamNotesOnly
+        ? '<p class="empty-result">즐겨찾기에 저장된 단어가 없습니다.</p>'
+        : '<p class="empty-result">아직 저장된 단어가 없습니다. 위에서 모르는 일본어를 추가하세요.</p>';
     return;
   }
 
@@ -4574,6 +4609,7 @@ function renderHamEntries(status = "") {
         <span class="ham-entry-index">${index + 1}</span>
         <span class="ham-entry-group">${escapeHtml(item.reading || "읽는법 없음")}</span>
         <div class="ham-vocab-entry-actions">
+          <button class="ham-vocab-favorite${item.favorite ? " is-favorite" : ""}" type="button" data-ham-favorite="${escapeHtml(item.id)}" aria-pressed="${item.favorite ? "true" : "false"}" aria-label="${item.favorite ? "즐겨찾기 해제" : "즐겨찾기 추가"}">${item.favorite ? "★" : "☆"}</button>
           <button class="ham-vocab-edit" type="button" data-ham-edit="${escapeHtml(item.id)}">수정</button>
           <button class="ham-vocab-delete" type="button" data-ham-delete="${escapeHtml(item.id)}">삭제</button>
         </div>
@@ -4941,8 +4977,14 @@ hamGroupList?.addEventListener("click", (event) => {
   renderHamEntries();
 });
 hamResults.addEventListener("click", async (event) => {
+  const favoriteButton = event.target.closest("[data-ham-favorite]");
   const editButton = event.target.closest("[data-ham-edit]");
   const deleteButton = event.target.closest("[data-ham-delete]");
+
+  if (favoriteButton) {
+    await toggleHamVocabFavorite(favoriteButton.dataset.hamFavorite);
+    return;
+  }
 
   if (editButton) {
     const item = hamItems.find((entry) => entry.id === editButton.dataset.hamEdit);

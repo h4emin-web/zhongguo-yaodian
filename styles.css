@@ -2800,6 +2800,7 @@ body.tool-auth-open {
 
 .ham-vocab-submit,
 .ham-vocab-cancel,
+.ham-vocab-favorite,
 .ham-vocab-edit,
 .ham-vocab-delete {
   min-height: 38px;
@@ -2822,10 +2823,27 @@ body.tool-auth-open {
   color: #b33a31;
 }
 
+.ham-vocab-favorite {
+  width: 40px;
+  padding: 0;
+  border-radius: 999px;
+  color: #9b8a5a;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.ham-vocab-favorite.is-favorite {
+  border-color: #eed58f;
+  color: #d19b18;
+  background: #fff8df;
+}
+
 .ham-vocab-submit:hover,
 .ham-vocab-submit:focus-visible,
 .ham-vocab-cancel:hover,
 .ham-vocab-cancel:focus-visible,
+.ham-vocab-favorite:hover,
+.ham-vocab-favorite:focus-visible,
 .ham-vocab-edit:hover,
 .ham-vocab-edit:focus-visible,
 .ham-vocab-delete:hover,
@@ -3263,6 +3281,11 @@ body.tool-auth-open {
   .ham-vocab-edit,
   .ham-vocab-delete {
     flex: 1 1 90px;
+  }
+
+  .ham-vocab-favorite {
+    flex: 0 0 42px;
+    width: 42px;
   }
 
   .ham-entry-image {
