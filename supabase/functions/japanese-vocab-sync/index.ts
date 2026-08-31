@@ -23,7 +23,13 @@ type JapaneseVocabItem = {
   meaning: string;
   reading: string;
   memo: string;
+  example: string;
   favorite: boolean;
+  testStatus: string;
+  testSeenCount: number;
+  testRememberedCount: number;
+  testMissedCount: number;
+  testLastSeenAt: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -67,6 +73,12 @@ function normalizeText(value: unknown, max = MAX_TEXT_LENGTH) {
   return typeof value === "string" ? value.trim().slice(0, max) : "";
 }
 
+function normalizeNumber(value: unknown) {
+  const number = Number(value);
+
+  return Number.isFinite(number) && number > 0 ? Math.floor(number) : 0;
+}
+
 function normalizeItems(value: unknown) {
   if (!Array.isArray(value)) {
     return [];
@@ -82,6 +94,10 @@ function normalizeItems(value: unknown) {
     const meaning = normalizeText(record.meaning);
     const reading = normalizeText(record.reading);
     const memo = normalizeText(record.memo, MAX_MEMO_LENGTH);
+    const example = normalizeText(record.example, MAX_MEMO_LENGTH);
+    const testStatus = ["remembered", "missed"].includes(String(record.testStatus))
+      ? String(record.testStatus)
+      : "";
 
     if (!japanese && !meaning) {
       return items;
@@ -95,7 +111,13 @@ function normalizeItems(value: unknown) {
       meaning,
       reading,
       memo,
+      example,
       favorite: record.favorite === true,
+      testStatus,
+      testSeenCount: normalizeNumber(record.testSeenCount),
+      testRememberedCount: normalizeNumber(record.testRememberedCount),
+      testMissedCount: normalizeNumber(record.testMissedCount),
+      testLastSeenAt: normalizeText(record.testLastSeenAt, 40),
       createdAt: normalizeText(record.createdAt, 40) || now,
       updatedAt: normalizeText(record.updatedAt, 40) || now
     });

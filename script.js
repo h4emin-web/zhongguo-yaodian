@@ -60,6 +60,7 @@ const hamMeta = document.querySelector(".ham-meta");
 const hamClose = document.querySelector(".ham-close");
 const hamSidebarToggle = document.querySelector(".ham-sidebar-toggle");
 const hamNotesToggle = document.querySelector(".ham-notes-toggle");
+const hamTestToggle = document.querySelector(".ham-test-toggle");
 const hamGroupList = document.querySelector(".ham-group-list");
 const hamNoteMeta = document.querySelector(".ham-note-meta");
 const hamSearchInput = document.querySelector("#ham-search-input");
@@ -68,6 +69,7 @@ const hamJapaneseInput = document.querySelector("#ham-japanese-input");
 const hamMeaningInput = document.querySelector("#ham-meaning-input");
 const hamReadingInput = document.querySelector("#ham-reading-input");
 const hamVocabMemoInput = document.querySelector("#ham-vocab-memo-input");
+const hamExampleInput = document.querySelector("#ham-example-input");
 const hamVocabSubmit = document.querySelector(".ham-vocab-submit");
 const hamVocabCancel = document.querySelector(".ham-vocab-cancel");
 const hamResults = document.querySelector(".ham-results");
@@ -312,6 +314,9 @@ let hamMemoSaveTimer = null;
 let hamMemos = {};
 let hamSearchKeyword = "";
 let hamEditingId = "";
+let hamTestMode = false;
+let hamTestFlipped = false;
+let hamTestAnswer = "";
 let starBurstHue = 0;
 let hanaRateTimer = null;
 let stockPriceTimer = null;
@@ -4254,6 +4259,12 @@ function normalizeHamText(value, max = HAM_VOCAB_MAX_TEXT_LENGTH) {
   return String(value || "").trim().slice(0, max);
 }
 
+function normalizeHamNumber(value) {
+  const number = Number(value);
+
+  return Number.isFinite(number) && number > 0 ? Math.floor(number) : 0;
+}
+
 function normalizeHamVocabItems(value) {
   if (!Array.isArray(value)) {
     return [];
@@ -4269,6 +4280,8 @@ function normalizeHamVocabItems(value) {
     const meaning = normalizeHamText(item.meaning);
     const reading = normalizeHamText(item.reading);
     const memo = normalizeHamText(item.memo, HAM_MEMO_MAX_LENGTH);
+    const example = normalizeHamText(item.example, HAM_MEMO_MAX_LENGTH);
+    const testStatus = ["remembered", "missed"].includes(item.testStatus) ? item.testStatus : "";
 
     if (!japanese && !meaning) {
       return items;
@@ -4280,7 +4293,13 @@ function normalizeHamVocabItems(value) {
       meaning,
       reading,
       memo,
+      example,
       favorite: item.favorite === true,
+      testStatus,
+      testSeenCount: normalizeHamNumber(item.testSeenCount),
+      testRememberedCount: normalizeHamNumber(item.testRememberedCount),
+      testMissedCount: normalizeHamNumber(item.testMissedCount),
+      testLastSeenAt: normalizeHamText(item.testLastSeenAt, 40),
       createdAt: normalizeHamText(item.createdAt, 40) || new Date().toISOString(),
       updatedAt: normalizeHamText(item.updatedAt, 40) || new Date().toISOString()
     });
@@ -4437,22 +4456,78 @@ function getFilteredHamItems() {
     item.japanese,
     item.meaning,
     item.reading,
-    item.memo
+    item.memo,
+    item.example
   ].some((value) => String(value || "").toLowerCase().includes(keyword)));
+}
+
+function getHamTestStats() {
+  const unseen = hamItems.filter((item) => !item.testLastSeenAt).length;
+  const missed = hamItems.filter((item) => item.testStatus === "missed").length;
+  const remembered = hamItems.filter((item) => item.testStatus === "remembered").length;
+
+  return {
+    total: hamItems.length,
+    unseen,
+    missed,
+    remembered
+  };
+}
+
+function getHamTestRank(item, index) {
+  if (!item.testLastSeenAt) {
+    return [0, index];
+  }
+
+  if (item.testStatus === "missed") {
+    return [1, Date.parse(item.testLastSeenAt) || 0, index];
+  }
+
+  if (item.testStatus === "remembered") {
+    return [2, Date.parse(item.testLastSeenAt) || 0, index];
+  }
+
+  return [0, index];
+}
+
+function compareHamTestItems(left, right) {
+  const leftRank = getHamTestRank(left.item, left.index);
+  const rightRank = getHamTestRank(right.item, right.index);
+
+  for (let index = 0; index < leftRank.length; index++) {
+    if (leftRank[index] !== rightRank[index]) {
+      return leftRank[index] - rightRank[index];
+    }
+  }
+
+  return 0;
+}
+
+function getHamTestQueue() {
+  return hamItems
+    .map((item, index) => ({ item, index }))
+    .sort(compareHamTestItems)
+    .map(({ item }) => item);
 }
 
 function updateHamMeta(filteredCount = 0, status = "") {
   const total = hamItems.length;
   const favoriteCount = hamItems.filter((item) => item.favorite).length;
   const searchText = hamSearchKeyword ? ` · 검색 ${filteredCount}건` : "";
-  const favoriteText = hamNotesOnly ? `즐겨찾기 ${favoriteCount}건 중 ${filteredCount}건` : `일본어 단어 ${total}건`;
+  const stats = getHamTestStats();
+  const favoriteText = hamTestMode
+    ? `테스트 · 안본 ${stats.unseen}건 · 못함 ${stats.missed}건 · 기억 ${stats.remembered}건`
+    : hamNotesOnly
+      ? `즐겨찾기 ${favoriteCount}건 중 ${filteredCount}건`
+      : `일본어 단어 ${total}건`;
   const statusText = status ? ` · ${status}` : "";
 
   hamMeta.textContent = `${favoriteText}${searchText}${statusText}`;
   hamNotesToggle?.setAttribute("aria-pressed", String(hamNotesOnly));
+  hamTestToggle?.setAttribute("aria-pressed", String(hamTestMode));
 
   if (hamNoteMeta) {
-    hamNoteMeta.textContent = `저장된 단어 ${total}건 · 즐겨찾기 ${favoriteCount}건`;
+    hamNoteMeta.textContent = `저장된 단어 ${total}건 · 즐겨찾기 ${favoriteCount}건 · 못함 ${stats.missed}건`;
   }
 }
 
@@ -4499,6 +4574,7 @@ function setHamVocabForm(item) {
   hamMeaningInput.value = item.meaning || "";
   hamReadingInput.value = item.reading || "";
   hamVocabMemoInput.value = item.memo || "";
+  hamExampleInput.value = item.example || "";
 
   if (hamVocabSubmit) {
     hamVocabSubmit.textContent = "수정 저장";
@@ -4516,7 +4592,8 @@ function getHamVocabPayload() {
     japanese: normalizeHamText(hamJapaneseInput?.value),
     meaning: normalizeHamText(hamMeaningInput?.value),
     reading: normalizeHamText(hamReadingInput?.value),
-    memo: normalizeHamText(hamVocabMemoInput?.value, HAM_MEMO_MAX_LENGTH)
+    memo: normalizeHamText(hamVocabMemoInput?.value, HAM_MEMO_MAX_LENGTH),
+    example: normalizeHamText(hamExampleInput?.value, HAM_MEMO_MAX_LENGTH)
   };
 }
 
@@ -4539,6 +4616,11 @@ async function upsertHamVocabItem() {
       id: createHamVocabId(),
       ...payload,
       favorite: false,
+      testStatus: "",
+      testSeenCount: 0,
+      testRememberedCount: 0,
+      testMissedCount: 0,
+      testLastSeenAt: "",
       createdAt: now,
       updatedAt: now
     }, ...hamItems];
@@ -4589,7 +4671,143 @@ async function toggleHamVocabFavorite(itemId) {
   renderHamEntries(isFavorite ? "즐겨찾기 추가" : "즐겨찾기 해제");
 }
 
+function getHamTestStatusLabel(item) {
+  if (!item.testLastSeenAt) {
+    return "안본 단어";
+  }
+
+  if (item.testStatus === "missed") {
+    return "못함 반복";
+  }
+
+  if (item.testStatus === "remembered") {
+    return "기억함";
+  }
+
+  return "안본 단어";
+}
+
+function setHamTestMode(isActive) {
+  hamTestMode = isActive;
+  hamTestFlipped = false;
+  hamTestAnswer = "";
+  hamFullscreen.classList.toggle("is-test-mode", hamTestMode);
+  hamTestToggle?.setAttribute("aria-pressed", String(hamTestMode));
+
+  if (hamTestMode) {
+    hamNotesOnly = false;
+    hamSearchKeyword = "";
+    if (hamSearchInput) {
+      hamSearchInput.value = "";
+    }
+    setHamSidebarOpen(false);
+  }
+
+  renderHamEntries();
+}
+
+function flipHamTestCard() {
+  hamTestFlipped = !hamTestFlipped;
+  renderHamEntries();
+}
+
+async function markHamTestResult(result) {
+  if (!["remembered", "missed"].includes(result)) {
+    return;
+  }
+
+  const currentItem = getHamTestQueue()[0];
+
+  if (!currentItem) {
+    return;
+  }
+
+  const now = new Date().toISOString();
+
+  hamItems = hamItems.map((item) => {
+    if (item.id !== currentItem.id) {
+      return item;
+    }
+
+    return {
+      ...item,
+      testStatus: result,
+      testSeenCount: normalizeHamNumber(item.testSeenCount) + 1,
+      testRememberedCount: normalizeHamNumber(item.testRememberedCount) + (result === "remembered" ? 1 : 0),
+      testMissedCount: normalizeHamNumber(item.testMissedCount) + (result === "missed" ? 1 : 0),
+      testLastSeenAt: now,
+      updatedAt: now
+    };
+  });
+
+  hamTestFlipped = false;
+  hamTestAnswer = "";
+  await saveHamVocab();
+  renderHamEntries(result === "remembered" ? "기억함 저장" : "못함 반복 저장");
+}
+
+function renderHamTest(status = "") {
+  const queue = getHamTestQueue();
+  const stats = getHamTestStats();
+  updateHamMeta(queue.length, status);
+  renderHamGroupButtons();
+
+  if (queue.length === 0) {
+    hamResults.innerHTML = '<p class="empty-result">테스트할 단어가 없습니다. 먼저 단어를 추가하세요.</p>';
+    return;
+  }
+
+  const item = queue[0];
+  const statusLabel = getHamTestStatusLabel(item);
+
+  hamResults.innerHTML = `
+    <section class="ham-test-panel">
+      <div class="ham-test-summary" aria-label="테스트 진행상태">
+        <span class="ham-test-chip">전체 ${stats.total}건</span>
+        <span class="ham-test-chip">안본 ${stats.unseen}건</span>
+        <span class="ham-test-chip">못함 ${stats.missed}건</span>
+        <span class="ham-test-chip">기억 ${stats.remembered}건</span>
+      </div>
+      <article class="ham-test-card${hamTestFlipped ? " is-flipped" : ""}" data-ham-test-card>
+        <div class="ham-test-card-inner">
+          <section class="ham-test-face ham-test-front" aria-label="테스트 앞면">
+            <span class="ham-test-state">${escapeHtml(statusLabel)}</span>
+            <p class="ham-test-word">${renderMultilineText(item.japanese || "-")}</p>
+            <label class="ham-test-answer-row">
+              <span>한국어 뜻</span>
+              <input class="ham-test-answer" data-ham-test-answer type="text" autocomplete="off" value="${escapeHtml(hamTestAnswer)}" placeholder="뜻을 적어보세요">
+            </label>
+            <div class="ham-test-face-actions">
+              <button class="ham-test-reveal" type="button" data-ham-test-flip>뒤집기</button>
+            </div>
+          </section>
+          <section class="ham-test-face ham-test-back" aria-label="테스트 뒷면">
+            <span class="ham-test-state">${escapeHtml(statusLabel)}</span>
+            <div class="ham-test-details">
+              <p><strong>내 답</strong><span>${renderMultilineText(hamTestAnswer || "-")}</span></p>
+              <p><strong>뜻</strong><span>${renderMultilineText(item.meaning || "-")}</span></p>
+              <p><strong>발음</strong><span>${renderMultilineText(item.reading || "-")}</span></p>
+              <p><strong>예문</strong><span>${renderMultilineText(item.example || "-")}</span></p>
+              ${item.memo ? `<p><strong>메모</strong><span>${renderMultilineText(item.memo)}</span></p>` : ""}
+            </div>
+            <div class="ham-test-face-actions">
+              <button class="ham-test-reveal" type="button" data-ham-test-flip>앞면</button>
+              <button class="ham-test-result ham-test-remembered" type="button" data-ham-test-result="remembered">기억함</button>
+              <button class="ham-test-result ham-test-missed" type="button" data-ham-test-result="missed">못함</button>
+            </div>
+          </section>
+        </div>
+      </article>
+    </section>
+  `;
+}
+
 function renderHamEntries(status = "") {
+  if (hamTestMode) {
+    renderHamTest(status);
+    return;
+  }
+
   const filtered = getFilteredHamItems();
   updateHamMeta(filtered.length, status);
   renderHamGroupButtons();
@@ -4618,6 +4836,7 @@ function renderHamEntries(status = "") {
       <div class="ham-vocab-detail">
         <p><strong>뜻</strong><span>${renderMultilineText(item.meaning || "-")}</span></p>
         <p><strong>읽는법</strong><span>${renderMultilineText(item.reading || "-")}</span></p>
+        ${item.example ? `<p><strong>예문</strong><span>${renderMultilineText(item.example)}</span></p>` : ""}
         ${item.memo ? `<p><strong>메모</strong><span>${renderMultilineText(item.memo)}</span></p>` : ""}
       </div>
     </article>
@@ -4629,6 +4848,10 @@ function openHamTool() {
   hamFullscreen.setAttribute("aria-hidden", "false");
   hamActiveGroup = "";
   hamNotesOnly = false;
+  hamTestMode = false;
+  hamTestFlipped = false;
+  hamTestAnswer = "";
+  hamFullscreen.classList.remove("is-test-mode");
   setHamSidebarOpen(false);
   loadHamLibrary();
 }
@@ -4636,6 +4859,7 @@ function openHamTool() {
 function closeHamTool() {
   flushScheduledHamVocabSave();
   hamFullscreen.classList.remove("is-open");
+  hamFullscreen.classList.remove("is-test-mode");
   hamFullscreen.setAttribute("aria-hidden", "true");
 }
 
@@ -4948,9 +5172,16 @@ hamSidebarToggle?.addEventListener("click", () => {
 });
 hamNotesToggle?.addEventListener("click", () => {
   hamNotesOnly = !hamNotesOnly;
+  hamTestMode = false;
+  hamTestFlipped = false;
+  hamTestAnswer = "";
+  hamFullscreen.classList.remove("is-test-mode");
   hamActiveGroup = hamNotesOnly ? HAM_ALL_GROUP_ID : "";
   setHamSidebarOpen(false);
   renderHamEntries();
+});
+hamTestToggle?.addEventListener("click", () => {
+  setHamTestMode(!hamTestMode);
 });
 if (hamSearchInput) {
   runOnEnter(hamSearchInput, () => {
@@ -4977,9 +5208,21 @@ hamGroupList?.addEventListener("click", (event) => {
   renderHamEntries();
 });
 hamResults.addEventListener("click", async (event) => {
+  const testFlipButton = event.target.closest("[data-ham-test-flip]");
+  const testResultButton = event.target.closest("[data-ham-test-result]");
   const favoriteButton = event.target.closest("[data-ham-favorite]");
   const editButton = event.target.closest("[data-ham-edit]");
   const deleteButton = event.target.closest("[data-ham-delete]");
+
+  if (testFlipButton) {
+    flipHamTestCard();
+    return;
+  }
+
+  if (testResultButton) {
+    await markHamTestResult(testResultButton.dataset.hamTestResult);
+    return;
+  }
 
   if (favoriteButton) {
     await toggleHamVocabFavorite(favoriteButton.dataset.hamFavorite);
@@ -4996,6 +5239,15 @@ hamResults.addEventListener("click", async (event) => {
     await deleteHamVocabItem(deleteButton.dataset.hamDelete);
     return;
   }
+});
+hamResults.addEventListener("input", (event) => {
+  const answerInput = event.target.closest("[data-ham-test-answer]");
+
+  if (!answerInput) {
+    return;
+  }
+
+  hamTestAnswer = answerInput.value;
 });
 
 let worklogDragDepth = 0;
