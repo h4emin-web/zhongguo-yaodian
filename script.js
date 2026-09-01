@@ -4298,8 +4298,20 @@ function cleanHamBulkLine(value) {
     .trim();
 }
 
+function cleanHamTitleText(value) {
+  return cleanHamBulkLine(value).replace(/\s*[★☆]\s*$/g, "").trim();
+}
+
 function stripHamMeaningArrow(value) {
   return cleanHamBulkLine(value).replace(/^(?:→|->|=>)\s*/, "").trim();
+}
+
+function stripHamMeaningLabel(value) {
+  return cleanHamBulkLine(value).replace(/^(?:뜻|의미|한국어(?:\s*뜻)?|해석)\s*[:：]\s*/, "").trim();
+}
+
+function stripHamReadingLabel(value) {
+  return cleanHamBulkLine(value).replace(/^(?:읽는법|발음|요미가나|ふりがな|ひらがな|히라가나)\s*[:：]\s*/, "").trim();
 }
 
 function compactHamLines(lines) {
@@ -4347,10 +4359,10 @@ function parseHamBulkVocabulary(value) {
   const titleMatch = titleLine.match(/^(.+?)[（(]([^）)]+)[）)]\s*$/);
 
   if (titleMatch) {
-    parsed.japanese = titleMatch[1].trim();
+    parsed.japanese = cleanHamTitleText(titleMatch[1]);
     parsed.reading = titleMatch[2].trim();
   } else {
-    parsed.japanese = titleLine.trim();
+    parsed.japanese = cleanHamTitleText(titleLine);
   }
 
   const exampleHeaderIndex = lines.findIndex((line, index) => {
@@ -4361,7 +4373,19 @@ function parseHamBulkVocabulary(value) {
     return /^(?:例|例文|예|예문)[:：]?$/.test(line);
   });
 
-  const meaningLineIndex = lines.findIndex((line, index) => {
+  const labeledMeaningLineIndex = lines.findIndex((line, index) => {
+    if (index <= firstLineIndex) {
+      return false;
+    }
+
+    if (exampleHeaderIndex !== -1 && index > exampleHeaderIndex) {
+      return false;
+    }
+
+    return /^(?:뜻|의미|한국어(?:\s*뜻)?|해석)\s*[:：]/.test(line);
+  });
+
+  const arrowMeaningLineIndex = lines.findIndex((line, index) => {
     if (index <= firstLineIndex) {
       return false;
     }
@@ -4373,14 +4397,23 @@ function parseHamBulkVocabulary(value) {
     return /^(?:→|->|=>)\s*/.test(line);
   });
 
+  const meaningLineIndex = labeledMeaningLineIndex !== -1 ? labeledMeaningLineIndex : arrowMeaningLineIndex;
+
   if (meaningLineIndex !== -1) {
-    parsed.meaning = stripHamMeaningArrow(lines[meaningLineIndex]);
+    parsed.meaning = labeledMeaningLineIndex !== -1
+      ? stripHamMeaningLabel(lines[meaningLineIndex])
+      : stripHamMeaningArrow(lines[meaningLineIndex]);
     usedIndexes.add(meaningLineIndex);
   }
 
-  if (!parsed.reading) {
-    const readingLine = lines.find((line) => /^(?:읽는법|발음|요미가나|ふりがな)\s*[:：]/.test(line));
-    parsed.reading = readingLine ? readingLine.replace(/^(?:읽는법|발음|요미가나|ふりがな)\s*[:：]\s*/, "").trim() : "";
+  const readingLineIndex = lines.findIndex((line, index) => (
+    index !== firstLineIndex
+    && /^(?:읽는법|발음|요미가나|ふりがな|ひらがな|히라가나)\s*[:：]/.test(line)
+  ));
+
+  if (readingLineIndex !== -1) {
+    parsed.reading = stripHamReadingLabel(lines[readingLineIndex]);
+    usedIndexes.add(readingLineIndex);
   }
 
   if (exampleHeaderIndex !== -1) {
