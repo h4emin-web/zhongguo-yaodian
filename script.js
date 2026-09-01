@@ -4266,6 +4266,18 @@ function normalizeHamNumber(value) {
   return Number.isFinite(number) && number > 0 ? Math.floor(number) : 0;
 }
 
+function hasHamVocabContent(item) {
+  return Boolean(item.japanese || item.meaning || item.reading || item.memo || item.example);
+}
+
+function getFirstHamLine(value) {
+  return normalizeHamText(String(value || "").split("\n").find((line) => line.trim()) || "");
+}
+
+function getHamItemTitle(item) {
+  return item.japanese || item.meaning || getFirstHamLine(item.memo) || getFirstHamLine(item.example) || "메모";
+}
+
 function normalizeHamBulkText(value) {
   return String(value || "")
     .replace(/\r\n?/g, "\n")
@@ -4449,7 +4461,7 @@ function normalizeHamVocabItems(value) {
     const example = normalizeHamText(item.example, HAM_MEMO_MAX_LENGTH);
     const testStatus = ["remembered", "missed"].includes(item.testStatus) ? item.testStatus : "";
 
-    if (!japanese && !meaning) {
+    if (!hasHamVocabContent({ japanese, meaning, reading, memo, example })) {
       return items;
     }
 
@@ -4741,6 +4753,9 @@ function setHamVocabForm(item) {
   hamReadingInput.value = item.reading || "";
   hamVocabMemoInput.value = item.memo || "";
   hamExampleInput.value = item.example || "";
+  if (hamBulkInput) {
+    hamBulkInput.value = "";
+  }
 
   if (hamVocabSubmit) {
     hamVocabSubmit.textContent = "수정 저장";
@@ -4766,8 +4781,8 @@ function getHamVocabPayload() {
 async function upsertHamVocabItem() {
   const payload = getHamVocabPayload();
 
-  if (!payload.japanese && !payload.meaning) {
-    alert("일본어 또는 뜻을 입력하세요.");
+  if (!hasHamVocabContent(payload)) {
+    alert("일본어, 뜻, 읽는법, 메모, 예문 중 하나를 입력하세요.");
     return;
   }
 
@@ -4925,6 +4940,7 @@ function renderHamTest(status = "") {
 
   const item = queue[0];
   const statusLabel = getHamTestStatusLabel(item);
+  const itemTitle = getHamItemTitle(item);
 
   hamResults.innerHTML = `
     <section class="ham-test-panel">
@@ -4938,7 +4954,7 @@ function renderHamTest(status = "") {
         <div class="ham-test-card-inner">
           <section class="ham-test-face ham-test-front" aria-label="테스트 앞면">
             <span class="ham-test-state">${escapeHtml(statusLabel)}</span>
-            <p class="ham-test-word">${renderMultilineText(item.japanese || "-")}</p>
+            <p class="ham-test-word">${renderMultilineText(itemTitle)}</p>
             <label class="ham-test-answer-row">
               <span>한국어 뜻</span>
               <input class="ham-test-answer" data-ham-test-answer type="text" autocomplete="off" value="${escapeHtml(hamTestAnswer)}" placeholder="뜻을 적어보세요">
@@ -4998,7 +5014,7 @@ function renderHamEntries(status = "") {
           <button class="ham-vocab-delete" type="button" data-ham-delete="${escapeHtml(item.id)}">삭제</button>
         </div>
       </div>
-      <p class="ham-question ham-vocab-word">${renderMultilineText(item.japanese || "-")}</p>
+      <p class="ham-question ham-vocab-word">${renderMultilineText(getHamItemTitle(item))}</p>
       <div class="ham-vocab-detail">
         <p><strong>뜻</strong><span>${renderMultilineText(item.meaning || "-")}</span></p>
         <p><strong>읽는법</strong><span>${renderMultilineText(item.reading || "-")}</span></p>

@@ -79,6 +79,16 @@ function normalizeNumber(value: unknown) {
   return Number.isFinite(number) && number > 0 ? Math.floor(number) : 0;
 }
 
+function hasVocabContent(item: {
+  japanese: string;
+  meaning: string;
+  reading: string;
+  memo: string;
+  example: string;
+}) {
+  return Boolean(item.japanese || item.meaning || item.reading || item.memo || item.example);
+}
+
 function normalizeItems(value: unknown) {
   if (!Array.isArray(value)) {
     return [];
@@ -99,7 +109,7 @@ function normalizeItems(value: unknown) {
       ? String(record.testStatus)
       : "";
 
-    if (!japanese && !meaning) {
+    if (!hasVocabContent({ japanese, meaning, reading, memo, example })) {
       return items;
     }
 
