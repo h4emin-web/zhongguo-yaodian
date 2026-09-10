@@ -1660,6 +1660,31 @@ body.tool-auth-open {
   line-height: 1.2;
 }
 
+.calendar-stock-news {
+  margin-top: 12px;
+  display: block;
+  overflow: hidden;
+  color: rgba(39, 45, 51, 0.78);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calendar-stock-news:hover,
+.calendar-stock-news:focus-visible {
+  color: var(--text);
+  outline: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.calendar-stock-news[hidden] {
+  display: none;
+}
+
 .calendar-stock-card.is-up .calendar-stock-change {
   color: #c73d32;
 }

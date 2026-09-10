@@ -7,7 +7,7 @@ const CORS_HEADERS = {
 };
 const JSON_HEADERS = {
   ...CORS_HEADERS,
-  "Content-Type": "application/json",
+  "Content-Type": "application/json; charset=utf-8",
   "Cache-Control": "no-store"
 };
 type StockRequest = {
@@ -48,6 +48,14 @@ type NaverStockData = {
   aq?: number;
   aa?: number;
   countOfListedStock?: number;
+};
+
+type NaverNewsItem = {
+  title?: string;
+  titleFull?: string;
+  mobileNewsUrl?: string;
+  newsUrl?: string;
+  officeName?: string;
 };
 
 function json(body: unknown, status = 200) {
@@ -190,12 +198,13 @@ async function fetchStockPrice(input: StockRequest = {}) {
   const rateAbs = numberOrZero(stock.cr);
   const price = numberOrZero(stock.nv);
   const listedShares = numberOrZero(stock.countOfListedStock);
+  const news = await fetchLatestStockNews(stockCode).catch(() => null);
 
   return {
     ok: true,
     source: "Naver Finance",
     code: stockCode,
-    name: stock.nm || stockMeta.name,
+    name: stockMeta.name || stock.nm || stockCode,
     market: stockMeta.market,
     price,
     previousClose: numberOrZero(stock.sv || stock.pcv),
@@ -213,8 +222,40 @@ async function fetchStockPrice(input: StockRequest = {}) {
     tradedValue: numberOrZero(stock.aa),
     listedShares,
     marketCap: price * listedShares,
+    newsTitle: news?.title || "",
+    newsUrl: news?.url || "",
     standardAt: payload?.result?.time ? new Date(payload.result.time).toISOString() : "",
     fetchedAt: new Date().toISOString()
+  };
+}
+
+async function fetchLatestStockNews(stockCode: string) {
+  const newsUrl = `https://m.stock.naver.com/api/news/stock/${stockCode}?pageSize=1&page=1`;
+  const response = await fetch(newsUrl, {
+    headers: {
+      "Accept": "application/json, text/plain, */*",
+      "Referer": `https://m.stock.naver.com/domestic/stock/${stockCode}/news`,
+      "User-Agent": "Mozilla/5.0"
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error(`Naver stock news response error: ${response.status}`);
+  }
+
+  const payload = await response.json();
+  const newsGroups = Array.isArray(payload) ? payload : [];
+  const firstNews = newsGroups
+    .flatMap((group: { items?: NaverNewsItem[] }) => Array.isArray(group.items) ? group.items : [])
+    .find((item: NaverNewsItem) => stringOrEmpty(item.titleFull) || stringOrEmpty(item.title)) as NaverNewsItem | undefined;
+
+  if (!firstNews) {
+    return null;
+  }
+
+  return {
+    title: stringOrEmpty(firstNews.titleFull) || stringOrEmpty(firstNews.title),
+    url: stringOrEmpty(firstNews.mobileNewsUrl) || stringOrEmpty(firstNews.newsUrl)
   };
 }
 

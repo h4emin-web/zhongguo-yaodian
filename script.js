@@ -718,6 +718,7 @@ function getStockCardElements(card) {
     price: card.querySelector(".calendar-stock-price"),
     change: card.querySelector(".calendar-stock-change"),
     marketCap: card.querySelector(".calendar-stock-market-cap"),
+    news: card.querySelector(".calendar-stock-news"),
     refresh: card.querySelector(".calendar-stock-refresh")
   };
 }
@@ -767,6 +768,12 @@ function setStockIdle(card) {
   if (elements.marketCap) {
     elements.marketCap.textContent = "시총 -";
   }
+
+  if (elements.news) {
+    elements.news.hidden = true;
+    elements.news.removeAttribute("href");
+    elements.news.textContent = "";
+  }
 }
 
 function setStockLoading(card, query) {
@@ -791,6 +798,12 @@ function setStockLoading(card, query) {
 
   if (elements.marketCap) {
     elements.marketCap.textContent = "시총 -";
+  }
+
+  if (elements.news) {
+    elements.news.hidden = true;
+    elements.news.removeAttribute("href");
+    elements.news.textContent = "";
   }
 }
 
@@ -826,6 +839,18 @@ function renderStockPrice(card, data) {
     elements.marketCap.textContent = formatKrwMarketCap(data.marketCap);
   }
 
+  if (elements.news) {
+    if (data.newsTitle && data.newsUrl) {
+      elements.news.hidden = false;
+      elements.news.href = data.newsUrl;
+      elements.news.textContent = data.newsTitle;
+    } else {
+      elements.news.hidden = true;
+      elements.news.removeAttribute("href");
+      elements.news.textContent = "";
+    }
+  }
+
   currentStockQuery = data.code || stockName;
   card.dataset.stockQuery = currentStockQuery;
   saveStockQuery(currentStockQuery);
@@ -854,6 +879,12 @@ function renderStockError(card, message) {
 
   if (elements.marketCap) {
     elements.marketCap.textContent = "시총 -";
+  }
+
+  if (elements.news) {
+    elements.news.hidden = true;
+    elements.news.removeAttribute("href");
+    elements.news.textContent = "";
   }
 }
 
