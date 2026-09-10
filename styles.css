@@ -1663,14 +1663,14 @@ body.tool-auth-open {
 .calendar-stock-news {
   margin-top: 12px;
   display: block;
-  overflow: hidden;
   color: rgba(39, 45, 51, 0.78);
   font-size: 12px;
   font-weight: 800;
   line-height: 1.35;
   text-decoration: none;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: keep-all;
 }
 
 .calendar-stock-news:hover,

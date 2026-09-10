@@ -706,6 +706,24 @@ function formatSignedStockChange(value, rate) {
   return `${sign}${Math.abs(Math.round(change)).toLocaleString()}원 ${sign}${Math.abs(changeRate).toFixed(2)}%`;
 }
 
+function cleanDisplayText(value) {
+  return String(value || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&quot;/gi, "\"")
+    .replace(/&#34;/g, "\"")
+    .replace(/&#x22;/gi, "\"")
+    .replace(/&apos;/gi, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&#x27;/gi, "'")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&[a-z0-9#]+;/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function getStockCardElements(card) {
   if (!card) {
     return null;
@@ -814,7 +832,7 @@ function renderStockPrice(card, data) {
     return;
   }
 
-  const stockName = data.name || "실시간 주식 검색";
+  const stockName = cleanDisplayText(data.name) || "실시간 주식 검색";
   const stockMeta = [data.code, data.market].filter(Boolean).join(" · ") || "종목명 또는 코드";
 
   card.classList.remove("is-error", "is-up", "is-down", "is-flat");
@@ -840,10 +858,12 @@ function renderStockPrice(card, data) {
   }
 
   if (elements.news) {
-    if (data.newsTitle && data.newsUrl) {
+    const newsTitle = cleanDisplayText(data.newsTitle);
+
+    if (newsTitle && data.newsUrl) {
       elements.news.hidden = false;
       elements.news.href = data.newsUrl;
-      elements.news.textContent = data.newsTitle;
+      elements.news.textContent = newsTitle;
     } else {
       elements.news.hidden = true;
       elements.news.removeAttribute("href");

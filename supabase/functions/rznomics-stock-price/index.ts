@@ -86,6 +86,24 @@ function stringOrEmpty(value: unknown) {
   return typeof value === "string" || typeof value === "number" ? String(value).trim() : "";
 }
 
+function cleanText(value: unknown) {
+  return stringOrEmpty(value)
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&quot;/gi, "\"")
+    .replace(/&#34;/g, "\"")
+    .replace(/&#x22;/gi, "\"")
+    .replace(/&apos;/gi, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&#x27;/gi, "'")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&[a-z0-9#]+;/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function sanitizeStockCode(value: unknown) {
   const code = stringOrEmpty(value).replace(/\D/g, "");
   return /^\d{6}$/.test(code) ? code : "";
@@ -110,8 +128,8 @@ function stockMetaFromSearchItem(item: NaverSearchItem): StockMeta {
 
   return {
     code: stockCode,
-    name: stringOrEmpty(item.name) || stockCode,
-    market: stringOrEmpty(item.typeCode) || stringOrEmpty(item.typeName)
+    name: cleanText(item.name) || stockCode,
+    market: cleanText(item.typeCode) || cleanText(item.typeName)
   };
 }
 
@@ -159,8 +177,8 @@ async function resolveStockMeta(input: StockRequest): Promise<StockMeta> {
   if (directCode) {
     return {
       code: directCode,
-      name: stringOrEmpty(input.name) || directCode,
-      market: stringOrEmpty(input.market)
+      name: cleanText(input.name) || directCode,
+      market: cleanText(input.market)
     };
   }
 
@@ -204,7 +222,7 @@ async function fetchStockPrice(input: StockRequest = {}) {
     ok: true,
     source: "Naver Finance",
     code: stockCode,
-    name: stockMeta.name || stock.nm || stockCode,
+    name: cleanText(stockMeta.name) || cleanText(stock.nm) || stockCode,
     market: stockMeta.market,
     price,
     previousClose: numberOrZero(stock.sv || stock.pcv),
@@ -254,7 +272,7 @@ async function fetchLatestStockNews(stockCode: string) {
   }
 
   return {
-    title: stringOrEmpty(firstNews.titleFull) || stringOrEmpty(firstNews.title),
+    title: cleanText(firstNews.titleFull) || cleanText(firstNews.title),
     url: stringOrEmpty(firstNews.mobileNewsUrl) || stringOrEmpty(firstNews.newsUrl)
   };
 }
