@@ -141,7 +141,8 @@ const calendarSelectedDateLabel = document.querySelector(".calendar-selected-dat
 const ddayList = document.querySelector(".dday-list");
 const calendarDday = document.querySelector(".calendar-dday");
 const calendarDdayToggle = document.querySelector(".calendar-dday-toggle");
-const calendarStockCards = document.querySelectorAll(".calendar-stock-card");
+const stockSearchCard = document.querySelector(".stock-search-card");
+const stockSearchInput = document.querySelector("#stock-search-input");
 const localLauncherButtons = document.querySelectorAll(".local-launcher-start");
 const importCostPanel = document.querySelector(".import-cost-panel");
 const importPriceInput = document.querySelector("#import-price-input");
@@ -169,6 +170,7 @@ const STAR_BURST_HUE_STEP = 47;
 const HANA_RATE_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 const STOCK_PRICE_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const MARKET_INDEX_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+const STOCK_SEARCH_STORAGE_KEY = "haemin-workspace-stock-search";
 const HAM_VOCAB_STORAGE_KEY = "haemin-workspace-japanese-vocab";
 const HAM_SYNC_FUNCTION = "japanese-vocab-sync";
 const HAM_ALL_GROUP_ID = "__all";
@@ -322,6 +324,7 @@ let starBurstHue = 0;
 let hanaRateTimer = null;
 let stockPriceTimer = null;
 let marketIndexTimer = null;
+let currentStockQuery = "";
 let workspaceHeartTimer = null;
 let dailyNewsLoaded = false;
 let dailyNewsLoading = false;
@@ -709,11 +712,86 @@ function getStockCardElements(card) {
   }
 
   return {
+    name: card.querySelector(".calendar-stock-name"),
+    meta: card.querySelector(".calendar-stock-meta"),
+    input: card.querySelector("#stock-search-input"),
     price: card.querySelector(".calendar-stock-price"),
     change: card.querySelector(".calendar-stock-change"),
     marketCap: card.querySelector(".calendar-stock-market-cap"),
     refresh: card.querySelector(".calendar-stock-refresh")
   };
+}
+
+function readSavedStockQuery() {
+  try {
+    return localStorage.getItem(STOCK_SEARCH_STORAGE_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+function saveStockQuery(query) {
+  try {
+    const normalizedQuery = String(query || "").trim();
+
+    if (normalizedQuery) {
+      localStorage.setItem(STOCK_SEARCH_STORAGE_KEY, normalizedQuery);
+    } else {
+      localStorage.removeItem(STOCK_SEARCH_STORAGE_KEY);
+    }
+  } catch {
+    // localStorage can be unavailable in private or restricted browser contexts.
+  }
+}
+
+function setStockIdle(card) {
+  const elements = getStockCardElements(card);
+
+  if (!elements?.price || !elements.change) {
+    return;
+  }
+
+  card.classList.remove("is-error", "is-up", "is-down", "is-flat");
+
+  if (elements.name) {
+    elements.name.textContent = "실시간 주식 검색";
+  }
+
+  if (elements.meta) {
+    elements.meta.textContent = "종목명 또는 코드";
+  }
+
+  elements.price.textContent = "-";
+  elements.change.textContent = "검색어 입력";
+
+  if (elements.marketCap) {
+    elements.marketCap.textContent = "시총 -";
+  }
+}
+
+function setStockLoading(card, query) {
+  const elements = getStockCardElements(card);
+
+  if (!elements?.price || !elements.change) {
+    return;
+  }
+
+  card.classList.remove("is-error", "is-up", "is-down", "is-flat");
+
+  if (elements.name) {
+    elements.name.textContent = "조회 중";
+  }
+
+  if (elements.meta) {
+    elements.meta.textContent = query || "종목명 또는 코드";
+  }
+
+  elements.price.textContent = "-";
+  elements.change.textContent = "불러오는 중";
+
+  if (elements.marketCap) {
+    elements.marketCap.textContent = "시총 -";
+  }
 }
 
 function renderStockPrice(card, data) {
@@ -723,14 +801,34 @@ function renderStockPrice(card, data) {
     return;
   }
 
+  const stockName = data.name || "실시간 주식 검색";
+  const stockMeta = [data.code, data.market].filter(Boolean).join(" · ") || "종목명 또는 코드";
+
   card.classList.remove("is-error", "is-up", "is-down", "is-flat");
   card.classList.add(data.direction === "up" ? "is-up" : data.direction === "down" ? "is-down" : "is-flat");
+
+  if (elements.name) {
+    elements.name.textContent = stockName;
+  }
+
+  if (elements.meta) {
+    elements.meta.textContent = stockMeta;
+  }
+
+  if (elements.input) {
+    elements.input.value = stockName;
+  }
+
   elements.price.textContent = formatKrwStockValue(data.price);
   elements.change.textContent = formatSignedStockChange(data.change, data.changeRate);
 
   if (elements.marketCap) {
     elements.marketCap.textContent = formatKrwMarketCap(data.marketCap);
   }
+
+  currentStockQuery = data.code || stockName;
+  card.dataset.stockQuery = currentStockQuery;
+  saveStockQuery(currentStockQuery);
 }
 
 function renderStockError(card, message) {
@@ -742,6 +840,15 @@ function renderStockError(card, message) {
 
   card.classList.add("is-error");
   card.classList.remove("is-up", "is-down", "is-flat");
+
+  if (elements.name) {
+    elements.name.textContent = "실시간 주식 검색";
+  }
+
+  if (elements.meta) {
+    elements.meta.textContent = currentStockQuery || "종목명 또는 코드";
+  }
+
   elements.price.textContent = "-";
   elements.change.textContent = message || "조회 실패";
 
@@ -750,23 +857,32 @@ function renderStockError(card, message) {
   }
 }
 
-async function fetchStockPrice(card, { showLoading = false } = {}) {
+async function fetchStockPrice(card = stockSearchCard, { showLoading = false, query = null } = {}) {
   if (!card) {
     return;
   }
 
   const elements = getStockCardElements(card);
-  const stockCode = card.dataset.stockCode || "";
-  const stockName = card.dataset.stockName || "주가";
-  const stockMarket = card.dataset.stockMarket || "";
+  const hasExplicitQuery = query !== null && query !== undefined;
+  const stockQuery = String(hasExplicitQuery ? query : card.dataset.stockQuery || currentStockQuery || "").trim();
 
   if (!elements?.change) {
     return;
   }
 
+  if (!stockQuery) {
+    currentStockQuery = "";
+    card.dataset.stockQuery = "";
+    saveStockQuery("");
+    setStockIdle(card);
+    return;
+  }
+
+  currentStockQuery = stockQuery;
+  card.dataset.stockQuery = stockQuery;
+
   if (showLoading) {
-    card.classList.remove("is-error");
-    elements.change.textContent = "조회 중";
+    setStockLoading(card, stockQuery);
   }
 
   if (!supabaseClient) {
@@ -781,9 +897,7 @@ async function fetchStockPrice(card, { showLoading = false } = {}) {
   try {
     const { data, error } = await supabaseClient.functions.invoke("rznomics-stock-price", {
       body: {
-        code: stockCode,
-        name: stockName,
-        market: stockMarket
+        query: stockQuery
       }
     });
 
@@ -792,7 +906,7 @@ async function fetchStockPrice(card, { showLoading = false } = {}) {
     }
 
     if (!data || !data.ok) {
-      throw new Error((data && data.error) || `${stockName} 주가 조회 실패`);
+      throw new Error((data && data.error) || "주가 조회 실패");
     }
 
     renderStockPrice(card, data);
@@ -810,11 +924,11 @@ async function fetchStockPrice(card, { showLoading = false } = {}) {
 }
 
 function fetchAllStockPrices({ showLoading = false } = {}) {
-  return Promise.all(Array.from(calendarStockCards).map((card) => fetchStockPrice(card, { showLoading })));
+  return fetchStockPrice(stockSearchCard, { showLoading });
 }
 
 function startStockPriceUpdates() {
-  if (!calendarStockCards.length) {
+  if (!stockSearchCard) {
     return;
   }
 
@@ -822,9 +936,22 @@ function startStockPriceUpdates() {
     window.clearInterval(stockPriceTimer);
   }
 
-  fetchAllStockPrices({ showLoading: true });
+  currentStockQuery = readSavedStockQuery();
+
+  if (stockSearchInput && currentStockQuery) {
+    stockSearchInput.value = currentStockQuery;
+  }
+
+  if (currentStockQuery) {
+    fetchAllStockPrices({ showLoading: true });
+  } else {
+    setStockIdle(stockSearchCard);
+  }
+
   stockPriceTimer = window.setInterval(() => {
-    fetchAllStockPrices();
+    if (currentStockQuery) {
+      fetchAllStockPrices();
+    }
   }, STOCK_PRICE_REFRESH_INTERVAL_MS);
 }
 
@@ -1330,10 +1457,35 @@ calendarDdayToggle.addEventListener("click", () => {
   calendarDdayToggle.setAttribute("aria-expanded", String(!isCollapsed));
 });
 
-calendarStockCards.forEach((card) => {
-  const refreshButton = card.querySelector(".calendar-stock-refresh");
-  refreshButton?.addEventListener("click", () => fetchStockPrice(card, { showLoading: true }));
+stockSearchInput?.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter") {
+    return;
+  }
+
+  event.preventDefault();
+  fetchStockPrice(stockSearchCard, {
+    showLoading: true,
+    query: stockSearchInput.value
+  });
 });
+
+stockSearchCard
+  ?.querySelector(".stock-search-form")
+  ?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    fetchStockPrice(stockSearchCard, {
+      showLoading: true,
+      query: stockSearchInput?.value || ""
+    });
+  });
+
+stockSearchCard
+  ?.querySelector(".calendar-stock-refresh")
+  ?.addEventListener("click", () => {
+    fetchStockPrice(stockSearchCard, {
+      showLoading: true
+    });
+  });
 
 renderCalendarColorSwatches();
 setSelectedCalendarColor(DEFAULT_EVENT_COLOR);

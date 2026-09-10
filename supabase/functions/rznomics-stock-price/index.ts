@@ -10,16 +10,26 @@ const JSON_HEADERS = {
   "Content-Type": "application/json",
   "Cache-Control": "no-store"
 };
-const DEFAULT_STOCK_CODE = "000660";
-const STOCKS: Record<string, { name: string; market: string }> = {
-  "000660": { name: "SK하이닉스", market: "KOSPI" },
-  "950260": { name: "인제니아테라퓨틱스", market: "KOSDAQ" }
-};
-
 type StockRequest = {
   code?: unknown;
   name?: unknown;
   market?: unknown;
+  query?: unknown;
+};
+
+type StockMeta = {
+  code: string;
+  name: string;
+  market: string;
+};
+
+type NaverSearchItem = {
+  code?: string;
+  name?: string;
+  typeCode?: string;
+  typeName?: string;
+  nationCode?: string;
+  category?: string;
 };
 
 type NaverStockData = {
@@ -65,26 +75,93 @@ function numberOrZero(value: unknown) {
 }
 
 function stringOrEmpty(value: unknown) {
-  return typeof value === "string" ? value.trim() : "";
+  return typeof value === "string" || typeof value === "number" ? String(value).trim() : "";
 }
 
 function sanitizeStockCode(value: unknown) {
   const code = stringOrEmpty(value).replace(/\D/g, "");
-  return /^\d{6}$/.test(code) ? code : DEFAULT_STOCK_CODE;
+  return /^\d{6}$/.test(code) ? code : "";
 }
 
-function getStockMeta(stockCode: string, input: StockRequest) {
-  const knownStock = STOCKS[stockCode];
+function normalizeForCompare(value: unknown) {
+  return stringOrEmpty(value).replace(/\s+/g, "").toLowerCase();
+}
+
+function requestQuery(input: StockRequest) {
+  return stringOrEmpty(input.query) || stringOrEmpty(input.code) || stringOrEmpty(input.name);
+}
+
+function isKoreanStockItem(item: NaverSearchItem) {
+  return item.category === "stock"
+    && (!item.nationCode || item.nationCode === "KOR")
+    && Boolean(sanitizeStockCode(item.code));
+}
+
+function stockMetaFromSearchItem(item: NaverSearchItem): StockMeta {
+  const stockCode = sanitizeStockCode(item.code);
 
   return {
-    name: knownStock?.name || stringOrEmpty(input.name) || stockCode,
-    market: knownStock?.market || stringOrEmpty(input.market)
+    code: stockCode,
+    name: stringOrEmpty(item.name) || stockCode,
+    market: stringOrEmpty(item.typeCode) || stringOrEmpty(item.typeName)
   };
 }
 
+async function resolveStockMeta(input: StockRequest): Promise<StockMeta> {
+  const query = requestQuery(input);
+  const directCode = sanitizeStockCode(query) || sanitizeStockCode(input.code);
+  const normalizedQuery = normalizeForCompare(query);
+
+  if (!query) {
+    throw new Error("검색어를 입력하세요.");
+  }
+
+  try {
+    const searchUrl = `https://ac.stock.naver.com/ac?q=${encodeURIComponent(query)}&target=stock,ipo,index,marketindicator`;
+    const response = await fetch(searchUrl, {
+      headers: {
+        "Accept": "application/json, text/plain, */*",
+        "Referer": "https://finance.naver.com/",
+        "User-Agent": "Mozilla/5.0"
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Naver stock search response error: ${response.status}`);
+    }
+
+    const payload = await response.json();
+    const items = Array.isArray(payload?.items) ? payload.items as NaverSearchItem[] : [];
+    const exactCodeMatch = directCode
+      ? items.find((item) => isKoreanStockItem(item) && sanitizeStockCode(item.code) === directCode)
+      : undefined;
+    const exactNameMatch = items.find((item) => isKoreanStockItem(item) && normalizeForCompare(item.name) === normalizedQuery);
+    const firstStockMatch = items.find((item) => isKoreanStockItem(item));
+    const selected = exactCodeMatch || exactNameMatch || firstStockMatch;
+
+    if (selected) {
+      return stockMetaFromSearchItem(selected);
+    }
+  } catch (error) {
+    if (!directCode) {
+      throw error;
+    }
+  }
+
+  if (directCode) {
+    return {
+      code: directCode,
+      name: stringOrEmpty(input.name) || directCode,
+      market: stringOrEmpty(input.market)
+    };
+  }
+
+  throw new Error(`${query} 종목을 찾지 못했습니다.`);
+}
+
 async function fetchStockPrice(input: StockRequest = {}) {
-  const stockCode = sanitizeStockCode(input.code);
-  const stockMeta = getStockMeta(stockCode, input);
+  const stockMeta = await resolveStockMeta(input);
+  const stockCode = stockMeta.code;
   const naverRealtimeUrl = `https://polling.finance.naver.com/api/realtime?query=SERVICE_ITEM:${stockCode}`;
 
   const response = await fetch(naverRealtimeUrl, {

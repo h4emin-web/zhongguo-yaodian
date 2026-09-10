@@ -1543,6 +1543,43 @@ body.tool-auth-open {
   column-gap: 10px;
 }
 
+.stock-search-form {
+  margin: 0 0 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px;
+  align-items: center;
+  gap: 8px;
+}
+
+.stock-search-form input {
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid rgba(226, 231, 236, 0.96);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88);
+  outline: none;
+}
+
+.stock-search-form input::placeholder {
+  color: rgba(112, 121, 130, 0.62);
+}
+
+.stock-search-form input:focus {
+  border-color: rgba(184, 196, 204, 0.96);
+  background: #fff;
+}
+
+.stock-search-card .calendar-stock-top {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
 .calendar-stock-heading {
   min-width: 0;
 }
@@ -1646,6 +1683,11 @@ body.tool-auth-open {
 }
 
 @media (max-width: 620px) {
+  .stock-search-form input {
+    height: 34px;
+    font-size: 12px;
+  }
+
   .calendar-stock-price {
     font-size: 15px;
   }
