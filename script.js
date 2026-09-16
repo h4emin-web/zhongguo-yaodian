@@ -5391,7 +5391,12 @@ async function openWorklog(card) {
   document.body.classList.add("detail-open");
   worklogFilterInput.value = "";
   worklogResults.innerHTML = '<p class="empty-result">불러오는 중입니다.</p>';
-  worklogLoadButton.focus();
+
+  if (window.matchMedia("(max-width: 720px)").matches) {
+    worklogClose.focus();
+  } else {
+    worklogLoadButton.focus();
+  }
 
   await loadWorklogFromStorage();
   renderWorklog();

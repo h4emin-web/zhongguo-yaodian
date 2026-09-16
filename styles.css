@@ -3891,27 +3891,38 @@ body.tool-auth-open {
 
 @media (max-width: 720px) {
   .worklog-topbar {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
   }
 
   .worklog-topbar-actions {
-    flex-direction: column;
-    align-items: stretch;
+    flex: 0 0 auto;
+    display: block;
   }
 
-  .worklog-topbar-actions input {
-    width: 100%;
-  }
-
+  .worklog-topbar-actions input,
   .worklog-load-button,
   .worklog-clear-button,
+  .worklog-dropzone-overlay {
+    display: none;
+  }
+
   .worklog-close {
     display: inline-flex;
-    width: 100%;
+    width: auto;
+    height: 38px;
     min-height: 38px;
+    padding: 0 14px;
     align-items: center;
     justify-content: center;
+    font-size: 12px;
+  }
+
+  .worklog-dropzone {
+    padding: 16px 14px 32px;
   }
 }
 
