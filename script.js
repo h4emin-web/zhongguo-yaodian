@@ -1892,6 +1892,28 @@ function collectNamePools(rowGroups) {
   return { chinese, korean, english };
 }
 
+function collectManufacturerPool(rowGroups) {
+  const manufacturers = [];
+  const seen = new Set();
+
+  rowGroups.forEach((rows) => {
+    rows.forEach((row) => {
+      String(row.manufacturer || "")
+        .split(/[\n@]+/)
+        .map((value) => value.trim().toLowerCase())
+        .filter((value) => value.length >= 6 && !["co.", "co", "ltd.", "ltd", "inc.", "inc"].includes(value))
+        .forEach((value) => {
+          if (!seen.has(value)) {
+            seen.add(value);
+            manufacturers.push(value);
+          }
+        });
+    });
+  });
+
+  return manufacturers;
+}
+
 // 우파다시티닙 vs 유파다시티닙처럼, 외래어 표기 시 첫 음절 모음만 다르게 옮긴 같은
 // 원료명을 잡기 위한 매칭. 길이가 같고 첫 글자를 뺀 나머지가 완전히 동일할 때만
 // 인정한다 (중간이나 끝 글자가 다르면 실제로 다른 원료일 가능성이 높아 제외).
@@ -1919,6 +1941,24 @@ function expandByNamePools(rows, pools) {
       sharesName(row.korean, pools.korean) ||
       (row.english && sharesName(row.english.toLowerCase().trim(), pools.english));
   });
+}
+
+function sharesManufacturer(value, pool) {
+  const manufacturer = String(value || "").trim().toLowerCase();
+
+  if (!manufacturer || manufacturer.length < 3) {
+    return false;
+  }
+
+  return pool.some((entry) => manufacturer.includes(entry) || entry.includes(manufacturer));
+}
+
+function expandByManufacturerPool(rows, pool) {
+  if (!pool.length) {
+    return [];
+  }
+
+  return rows.filter((row) => sharesManufacturer(row.manufacturer, pool));
 }
 
 function unionByRef(...groups) {
@@ -1960,8 +2000,13 @@ async function renderGlobalSearch(keyword) {
     indiawcDirect,
     mfdsDirect.map((row) => ({ korean: row.ingredient }))
   ]);
+  const manufacturerPool = collectManufacturerPool([wcDirect, usdmfDirect, indiawcDirect, mfdsDirect]);
 
-  const wcExpanded = dedupeWcRows(unionByRef(wcDirect, expandByNamePools(wcRows, pools)));
+  const wcExpanded = dedupeWcRows(unionByRef(
+    wcDirect,
+    expandByNamePools(wcRows, pools),
+    expandByManufacturerPool(wcRows, manufacturerPool)
+  ));
   const wcMatches = [
     ...latestByManufacturer(bySource(wcExpanded, "WC")),
     ...latestByManufacturer(bySource(wcExpanded, "COPP"))
@@ -1969,15 +2014,18 @@ async function renderGlobalSearch(keyword) {
   const cnphMatches = unionByRef(cnphDirect, expandByNamePools(cnphRows, pools));
   const usdmfMatches = unionByRef(
     usdmfDirect,
-    usdmfRows.filter((row) => row.english && sharesName(row.english.toLowerCase().trim(), pools.english))
+    usdmfRows.filter((row) => row.english && sharesName(row.english.toLowerCase().trim(), pools.english)),
+    expandByManufacturerPool(usdmfRows, manufacturerPool)
   );
   const indiawcMatches = unionByRef(
     indiawcDirect,
-    indiawcRows.filter((row) => row.english && sharesName(row.english.toLowerCase().trim(), pools.english))
+    indiawcRows.filter((row) => row.english && sharesName(row.english.toLowerCase().trim(), pools.english)),
+    expandByManufacturerPool(indiawcRows, manufacturerPool)
   );
   const mfdsMatches = unionByRef(
     mfdsDirect,
-    mfdsRows.filter((row) => row.ingredient && sharesName(row.ingredient, pools.korean))
+    mfdsRows.filter((row) => row.ingredient && sharesName(row.ingredient, pools.korean)),
+    expandByManufacturerPool(mfdsRows, manufacturerPool)
   );
 
   currentGlobalMatches = { wc: wcMatches, mfds: mfdsMatches, cnph: cnphMatches, usdmf: usdmfMatches, indiawc: indiawcMatches };
@@ -2180,7 +2228,7 @@ async function loadMfdsData() {
 
     mfdsRows = await response.json();
     mfdsRows.forEach((row) => {
-      row._s = row.ingredient.toLowerCase();
+      row._s = `${row.ingredient} ${row.applicant} ${row.manufacturer} ${row.country}`.toLowerCase();
     });
     mfdsLoaded = true;
     mfdsResults.innerHTML = '<p class="empty-result">검색어를 입력하세요.</p>';
@@ -3791,7 +3839,7 @@ async function loadCnphData() {
 
     cnphRows = await response.json();
     cnphRows.forEach((row) => {
-      row._s = `${row.chinese} ${row.korean} ${row.english}`.toLowerCase();
+      row._s = `${row.chinese} ${row.korean} ${row.english} ${row.category} ${row.part}`.toLowerCase();
     });
     cnphLoaded = true;
     cnphResults.innerHTML = '<p class="empty-result">검색어를 입력하세요.</p>';
@@ -3924,7 +3972,7 @@ async function loadUsdmfData() {
 
     usdmfRows = await response.json();
     usdmfRows.forEach((row) => {
-      row._s = row.english.toLowerCase();
+      row._s = `${row.english} ${row.korean} ${row.manufacturer} ${row.dmfNumber}`.toLowerCase();
     });
     usdmfLoaded = true;
     usdmfResults.innerHTML = '<p class="empty-result">검색어를 입력하세요.</p>';
@@ -4062,7 +4110,7 @@ async function loadIndiawcData() {
 
     indiawcRows = await response.json();
     indiawcRows.forEach((row) => {
-      row._s = row.english.toLowerCase();
+      row._s = `${row.english} ${row.manufacturer} ${row.wcNumber}`.toLowerCase();
     });
     indiawcLoaded = true;
     indiawcResults.innerHTML = '<p class="empty-result">검색어를 입력하세요.</p>';
@@ -4234,7 +4282,7 @@ async function loadWcData() {
 
     wcRows = await response.json();
     wcRows.forEach((row) => {
-      row._s = `${row.chinese} ${row.korean} ${row.english}`.toLowerCase();
+      row._s = `${row.chinese} ${row.korean} ${row.english} ${row.manufacturer}`.toLowerCase();
     });
     wcLoaded = true;
     wcResults.innerHTML = '<p class="empty-result">검색어를 입력하세요.</p>';
