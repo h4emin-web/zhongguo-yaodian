@@ -4144,34 +4144,6 @@ function normalizeWorklogShareText(value) {
     .trim();
 }
 
-async function copyWorklogEntry(entry, button) {
-  const text = normalizeWorklogShareText(getWorklogEntryCopyText(entry));
-
-  try {
-    if (!navigator.clipboard) {
-      throw new Error("클립보드를 사용할 수 없습니다.");
-    }
-
-    await navigator.clipboard.writeText(text);
-
-    if (button) {
-      button.textContent = "복사됨";
-      window.setTimeout(() => {
-        button.textContent = "복사";
-      }, 1200);
-    }
-  } catch (error) {
-    console.error(error);
-
-    if (button) {
-      button.textContent = "복사실패";
-      window.setTimeout(() => {
-        button.textContent = "복사";
-      }, 1200);
-    }
-  }
-}
-
 async function shareWorklogEntry(entry, button) {
   const text = normalizeWorklogShareText(getWorklogEntryCopyText(entry));
   const title = entry.querySelector(".worklog-company")?.textContent.trim() || "업무일지";
@@ -5237,7 +5209,6 @@ function renderWorklog() {
         ${person.rows.map((row) => `
           <article class="worklog-entry">
             <div class="worklog-entry-actions">
-              <button class="worklog-copy-button" type="button" aria-label="업무일지 항목 복사">복사</button>
               <button class="worklog-share-button" type="button" aria-label="업무일지 항목 공유">공유</button>
             </div>
             <div class="worklog-entry-head">
@@ -5346,19 +5317,15 @@ worklogResults.addEventListener("toggle", (event) => {
   });
 }, true);
 worklogResults.addEventListener("click", (event) => {
-  const copyButton = event.target.closest(".worklog-copy-button");
   const shareButton = event.target.closest(".worklog-share-button");
 
-  if (!copyButton && !shareButton) {
+  if (!shareButton) {
     return;
   }
 
-  const button = copyButton || shareButton;
-  const entry = button.closest(".worklog-entry");
+  const entry = shareButton.closest(".worklog-entry");
 
-  if (entry && copyButton) {
-    copyWorklogEntry(entry, copyButton);
-  } else if (entry && shareButton) {
+  if (entry) {
     shareWorklogEntry(entry, shareButton);
   }
 });

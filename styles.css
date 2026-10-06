@@ -3650,7 +3650,6 @@ body.tool-auth-open {
   gap: 6px;
 }
 
-.worklog-copy-button,
 .worklog-share-button {
   min-width: 48px;
   height: 30px;
@@ -3666,8 +3665,6 @@ body.tool-auth-open {
   box-shadow: 0 6px 14px rgba(31, 36, 41, 0.05);
 }
 
-.worklog-copy-button:hover,
-.worklog-copy-button:focus-visible,
 .worklog-share-button:hover,
 .worklog-share-button:focus-visible {
   color: var(--text);
@@ -3681,7 +3678,7 @@ body.tool-auth-open {
   align-items: baseline;
   gap: 8px 14px;
   margin-bottom: 10px;
-  padding-right: 116px;
+  padding-right: 62px;
   padding-bottom: 10px;
   border-bottom: 1px solid #eceff2;
 }
@@ -3800,7 +3797,6 @@ body.tool-auth-open {
     gap: 5px;
   }
 
-  .worklog-copy-button,
   .worklog-share-button {
     min-width: 44px;
     height: 28px;
@@ -3812,7 +3808,7 @@ body.tool-auth-open {
     display: grid;
     gap: 5px;
     margin-bottom: 11px;
-    padding-right: 104px;
+    padding-right: 54px;
     padding-bottom: 11px;
   }
 
