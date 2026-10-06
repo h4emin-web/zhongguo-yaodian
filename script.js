@@ -4121,21 +4121,39 @@ function renderMultilineText(value) {
 }
 
 const WORKLOG_IMPORTANT_PATTERN = /(긴급|중요|확인|요청|회신|연락|답변|견적|발주|납기|입고|출고|정산|결제|송금|클레임|불량|문제|변경|보류|완료|미완료|누락|지연|오늘|내일|오전|오후|asap|urgent|confirm|reply|due|deadline|follow[-\s]?up)/i;
+const WORKLOG_IMPORTANT_GLOBAL_PATTERN = /(긴급|중요|확인|요청|회신|연락|답변|견적|발주|납기|입고|출고|정산|결제|송금|클레임|불량|문제|변경|보류|완료|미완료|누락|지연|오늘|내일|오전|오후|asap|urgent|confirm|reply|due|deadline|follow[-\s]?up)/gi;
+
+function renderWorklogImportantText(line) {
+  let html = "";
+  let lastIndex = 0;
+
+  WORKLOG_IMPORTANT_GLOBAL_PATTERN.lastIndex = 0;
+
+  for (const match of line.matchAll(WORKLOG_IMPORTANT_GLOBAL_PATTERN)) {
+    const index = match.index || 0;
+    const keyword = match[0];
+
+    html += escapeHtml(line.slice(lastIndex, index));
+    html += `<strong class="worklog-important">${escapeHtml(keyword)}</strong>`;
+    lastIndex = index + keyword.length;
+  }
+
+  html += escapeHtml(line.slice(lastIndex));
+  return html;
+}
 
 function renderWorklogContent(value) {
   const lines = String(value || "").split(/\r?\n/);
 
   return lines
     .map((line) => {
-      const escapedLine = escapeHtml(line);
-
       if (!line.trim()) {
         return "";
       }
 
       return WORKLOG_IMPORTANT_PATTERN.test(line)
-        ? `<strong class="worklog-important">${escapedLine}</strong>`
-        : escapedLine;
+        ? renderWorklogImportantText(line)
+        : escapeHtml(line);
     })
     .join("<br>");
 }
