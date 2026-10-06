@@ -3889,6 +3889,11 @@ body.tool-auth-open {
   line-height: 1.75;
 }
 
+.worklog-important {
+  color: #11161b;
+  font-weight: 900;
+}
+
 @media (max-width: 720px) {
   .worklog-topbar {
     flex-direction: row;
@@ -3923,6 +3928,70 @@ body.tool-auth-open {
 
   .worklog-dropzone {
     padding: 16px 14px 32px;
+  }
+
+  .worklog-results {
+    gap: 12px;
+  }
+
+  .worklog-person {
+    border-radius: 10px;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .worklog-person summary {
+    padding: 15px 16px;
+    gap: 10px;
+    font-size: 16px;
+    line-height: 1.35;
+  }
+
+  .worklog-count {
+    padding: 4px 9px;
+    font-size: 12px;
+  }
+
+  .worklog-entries {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .worklog-entry {
+    padding: 14px 14px 15px;
+    border-radius: 10px;
+    background: #ffffff;
+  }
+
+  .worklog-entry-head {
+    display: grid;
+    gap: 5px;
+    margin-bottom: 11px;
+    padding-bottom: 11px;
+  }
+
+  .worklog-entry-head .worklog-company {
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  .worklog-entry-head .worklog-material {
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  .worklog-entry-meta {
+    margin-left: 0;
+    gap: 6px;
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .worklog-content {
+    font-size: 15px;
+    line-height: 1.82;
+    letter-spacing: 0;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
   }
 }
 

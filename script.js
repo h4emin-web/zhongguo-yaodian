@@ -1057,6 +1057,13 @@ function createStarBurst(event) {
     return;
   }
 
+  const isMobilePointer = event.pointerType === "touch" ||
+    window.matchMedia("(max-width: 720px), (pointer: coarse)").matches;
+
+  if (isMobilePointer) {
+    return;
+  }
+
   const burst = document.createElement("div");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const starCount = reducedMotion ? 5 : STAR_BURST_COUNT;
@@ -4507,6 +4514,26 @@ function renderMultilineText(value) {
   return escapeHtml(value).replaceAll("\n", "<br>");
 }
 
+const WORKLOG_IMPORTANT_PATTERN = /(긴급|중요|확인|요청|회신|연락|답변|견적|발주|납기|입고|출고|정산|결제|송금|클레임|불량|문제|변경|보류|완료|미완료|누락|지연|오늘|내일|오전|오후|asap|urgent|confirm|reply|due|deadline|follow[-\s]?up)/i;
+
+function renderWorklogContent(value) {
+  const lines = String(value || "").split(/\r?\n/);
+
+  return lines
+    .map((line) => {
+      const escapedLine = escapeHtml(line);
+
+      if (!line.trim()) {
+        return "";
+      }
+
+      return WORKLOG_IMPORTANT_PATTERN.test(line)
+        ? `<strong class="worklog-important">${escapedLine}</strong>`
+        : escapedLine;
+    })
+    .join("<br>");
+}
+
 function normalizeHamText(value, max = HAM_VOCAB_MAX_TEXT_LENGTH) {
   return String(value || "").trim().slice(0, max);
 }
@@ -5551,7 +5578,7 @@ function renderWorklog() {
                 ${row.contact ? `<span>${escapeHtml(row.contact)}</span>` : ""}
               </span>
             </div>
-            <div class="worklog-content">${escapeHtml(row.content)}</div>
+            <div class="worklog-content">${renderWorklogContent(row.content)}</div>
           </article>
         `).join("")}
       </div>
