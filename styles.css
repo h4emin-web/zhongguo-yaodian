@@ -3680,30 +3680,36 @@ body.tool-auth-open {
   line-height: 1.75;
 }
 
-.worklog-important {
-  color: #11161b;
-  font-weight: 900;
-}
-
 @media (max-width: 720px) {
   .worklog-topbar {
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 10px;
     padding: 14px 16px;
   }
 
   .worklog-topbar-actions {
-    flex: 0 0 auto;
-    display: block;
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
   }
 
-  .worklog-topbar-actions input,
   .worklog-load-button,
   .worklog-clear-button,
   .worklog-dropzone-overlay {
     display: none;
+  }
+
+  .worklog-topbar-actions input {
+    display: block;
+    width: 100%;
+    height: 38px;
+    min-width: 0;
+    padding: 0 12px;
+    font-size: 13px;
   }
 
   .worklog-close {
