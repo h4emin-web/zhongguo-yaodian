@@ -141,8 +141,6 @@ const calendarSelectedDateLabel = document.querySelector(".calendar-selected-dat
 const ddayList = document.querySelector(".dday-list");
 const calendarDday = document.querySelector(".calendar-dday");
 const calendarDdayToggle = document.querySelector(".calendar-dday-toggle");
-const stockSearchCard = document.querySelector(".stock-search-card");
-const stockSearchInput = document.querySelector("#stock-search-input");
 const localLauncherButtons = document.querySelectorAll(".local-launcher-start");
 const importCostPanel = document.querySelector(".import-cost-panel");
 const importPriceInput = document.querySelector("#import-price-input");
@@ -168,9 +166,7 @@ const PROTECTED_TOOL_PASSWORD = "1515";
 const STAR_BURST_COUNT = 12;
 const STAR_BURST_HUE_STEP = 47;
 const HANA_RATE_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
-const STOCK_PRICE_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const MARKET_INDEX_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
-const STOCK_SEARCH_STORAGE_KEY = "haemin-workspace-stock-search";
 const HAM_VOCAB_STORAGE_KEY = "haemin-workspace-japanese-vocab";
 const HAM_SYNC_FUNCTION = "japanese-vocab-sync";
 const HAM_ALL_GROUP_ID = "__all";
@@ -322,9 +318,7 @@ let hamTestFlipped = false;
 let hamTestAnswer = "";
 let starBurstHue = 0;
 let hanaRateTimer = null;
-let stockPriceTimer = null;
 let marketIndexTimer = null;
-let currentStockQuery = "";
 let workspaceHeartTimer = null;
 let dailyNewsLoaded = false;
 let dailyNewsLoading = false;
@@ -658,363 +652,6 @@ function initializeMarketIndexTrend() {
   }, MARKET_INDEX_REFRESH_INTERVAL_MS);
 }
 
-function formatKrwStockValue(value) {
-  const number = Number(value);
-
-  if (!Number.isFinite(number) || number <= 0) {
-    return "-";
-  }
-
-  return `${Math.round(number).toLocaleString()}원`;
-}
-
-function formatKrwMarketCap(value) {
-  const number = Number(value);
-
-  if (!Number.isFinite(number) || number <= 0) {
-    return "시총 -";
-  }
-
-  const eok = Math.round(number / 100000000);
-  const jo = Math.floor(eok / 10000);
-  const restEok = eok % 10000;
-
-  if (jo > 0 && restEok > 0) {
-    return `시총 ${jo}조 ${restEok.toLocaleString()}억`;
-  }
-
-  if (jo > 0) {
-    return `시총 ${jo}조`;
-  }
-
-  return `시총 ${eok.toLocaleString()}억`;
-}
-
-function formatSignedStockChange(value, rate) {
-  const change = Number(value);
-  const changeRate = Number(rate);
-
-  if (!Number.isFinite(change) || !Number.isFinite(changeRate)) {
-    return "-";
-  }
-
-  if (change === 0 && changeRate === 0) {
-    return "0원 0.00%";
-  }
-
-  const sign = change > 0 ? "+" : "-";
-  return `${sign}${Math.abs(Math.round(change)).toLocaleString()}원 ${sign}${Math.abs(changeRate).toFixed(2)}%`;
-}
-
-function cleanDisplayText(value) {
-  return String(value || "")
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&quot;/gi, "\"")
-    .replace(/&#34;/g, "\"")
-    .replace(/&#x22;/gi, "\"")
-    .replace(/&apos;/gi, "'")
-    .replace(/&#39;/g, "'")
-    .replace(/&#x27;/gi, "'")
-    .replace(/&amp;/gi, "&")
-    .replace(/&lt;/gi, "<")
-    .replace(/&gt;/gi, ">")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&[a-z0-9#]+;/gi, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function getStockCardElements(card) {
-  if (!card) {
-    return null;
-  }
-
-  return {
-    name: card.querySelector(".calendar-stock-name"),
-    meta: card.querySelector(".calendar-stock-meta"),
-    input: card.querySelector("#stock-search-input"),
-    price: card.querySelector(".calendar-stock-price"),
-    change: card.querySelector(".calendar-stock-change"),
-    marketCap: card.querySelector(".calendar-stock-market-cap"),
-    news: card.querySelector(".calendar-stock-news"),
-    refresh: card.querySelector(".calendar-stock-refresh")
-  };
-}
-
-function readSavedStockQuery() {
-  try {
-    return localStorage.getItem(STOCK_SEARCH_STORAGE_KEY) || "";
-  } catch {
-    return "";
-  }
-}
-
-function saveStockQuery(query) {
-  try {
-    const normalizedQuery = String(query || "").trim();
-
-    if (normalizedQuery) {
-      localStorage.setItem(STOCK_SEARCH_STORAGE_KEY, normalizedQuery);
-    } else {
-      localStorage.removeItem(STOCK_SEARCH_STORAGE_KEY);
-    }
-  } catch {
-    // localStorage can be unavailable in private or restricted browser contexts.
-  }
-}
-
-function setStockIdle(card) {
-  const elements = getStockCardElements(card);
-
-  if (!elements?.price || !elements.change) {
-    return;
-  }
-
-  card.classList.remove("is-error", "is-up", "is-down", "is-flat");
-
-  if (elements.name) {
-    elements.name.textContent = "실시간 주식 검색";
-  }
-
-  if (elements.meta) {
-    elements.meta.textContent = "종목명 또는 코드";
-  }
-
-  elements.price.textContent = "-";
-  elements.change.textContent = "검색어 입력";
-
-  if (elements.marketCap) {
-    elements.marketCap.textContent = "시총 -";
-  }
-
-  if (elements.news) {
-    elements.news.hidden = true;
-    elements.news.removeAttribute("href");
-    elements.news.textContent = "";
-  }
-}
-
-function setStockLoading(card, query) {
-  const elements = getStockCardElements(card);
-
-  if (!elements?.price || !elements.change) {
-    return;
-  }
-
-  card.classList.remove("is-error", "is-up", "is-down", "is-flat");
-
-  if (elements.name) {
-    elements.name.textContent = "조회 중";
-  }
-
-  if (elements.meta) {
-    elements.meta.textContent = query || "종목명 또는 코드";
-  }
-
-  elements.price.textContent = "-";
-  elements.change.textContent = "불러오는 중";
-
-  if (elements.marketCap) {
-    elements.marketCap.textContent = "시총 -";
-  }
-
-  if (elements.news) {
-    elements.news.hidden = true;
-    elements.news.removeAttribute("href");
-    elements.news.textContent = "";
-  }
-}
-
-function renderStockPrice(card, data) {
-  const elements = getStockCardElements(card);
-
-  if (!elements?.price || !elements.change) {
-    return;
-  }
-
-  const stockName = cleanDisplayText(data.name) || "실시간 주식 검색";
-  const stockMeta = [data.code, data.market].filter(Boolean).join(" · ") || "종목명 또는 코드";
-
-  card.classList.remove("is-error", "is-up", "is-down", "is-flat");
-  card.classList.add(data.direction === "up" ? "is-up" : data.direction === "down" ? "is-down" : "is-flat");
-
-  if (elements.name) {
-    elements.name.textContent = stockName;
-  }
-
-  if (elements.meta) {
-    elements.meta.textContent = stockMeta;
-  }
-
-  if (elements.input) {
-    elements.input.value = stockName;
-  }
-
-  elements.price.textContent = formatKrwStockValue(data.price);
-  elements.change.textContent = formatSignedStockChange(data.change, data.changeRate);
-
-  if (elements.marketCap) {
-    elements.marketCap.textContent = formatKrwMarketCap(data.marketCap);
-  }
-
-  if (elements.news) {
-    const newsTitle = cleanDisplayText(data.newsTitle);
-
-    if (newsTitle && data.newsUrl) {
-      elements.news.hidden = false;
-      elements.news.href = data.newsUrl;
-      elements.news.textContent = newsTitle;
-    } else {
-      elements.news.hidden = true;
-      elements.news.removeAttribute("href");
-      elements.news.textContent = "";
-    }
-  }
-
-  currentStockQuery = data.code || stockName;
-  card.dataset.stockQuery = currentStockQuery;
-  saveStockQuery(currentStockQuery);
-}
-
-function renderStockError(card, message) {
-  const elements = getStockCardElements(card);
-
-  if (!elements?.price || !elements.change) {
-    return;
-  }
-
-  card.classList.add("is-error");
-  card.classList.remove("is-up", "is-down", "is-flat");
-
-  if (elements.name) {
-    elements.name.textContent = "실시간 주식 검색";
-  }
-
-  if (elements.meta) {
-    elements.meta.textContent = currentStockQuery || "종목명 또는 코드";
-  }
-
-  elements.price.textContent = "-";
-  elements.change.textContent = message || "조회 실패";
-
-  if (elements.marketCap) {
-    elements.marketCap.textContent = "시총 -";
-  }
-
-  if (elements.news) {
-    elements.news.hidden = true;
-    elements.news.removeAttribute("href");
-    elements.news.textContent = "";
-  }
-}
-
-async function fetchStockPrice(card = stockSearchCard, { showLoading = false, query = null } = {}) {
-  if (!card) {
-    return;
-  }
-
-  const elements = getStockCardElements(card);
-  const hasExplicitQuery = query !== null && query !== undefined;
-  const stockQuery = String(hasExplicitQuery ? query : card.dataset.stockQuery || currentStockQuery || "").trim();
-
-  if (!elements?.change) {
-    return;
-  }
-
-  if (!stockQuery) {
-    currentStockQuery = "";
-    card.dataset.stockQuery = "";
-    saveStockQuery("");
-    setStockIdle(card);
-    return;
-  }
-
-  currentStockQuery = stockQuery;
-  card.dataset.stockQuery = stockQuery;
-
-  if (showLoading) {
-    setStockLoading(card, stockQuery);
-  }
-
-  if (!supabaseClient) {
-    renderStockError(card, "Supabase 연결 설정 필요");
-    return;
-  }
-
-  if (elements.refresh) {
-    elements.refresh.disabled = true;
-  }
-
-  try {
-    const { data, error } = await supabaseClient.functions.invoke("rznomics-stock-price", {
-      body: {
-        query: stockQuery
-      }
-    });
-
-    if (error) {
-      throw error;
-    }
-
-    if (!data || !data.ok) {
-      throw new Error((data && data.error) || "주가 조회 실패");
-    }
-
-    renderStockPrice(card, data);
-  } catch (error) {
-    console.error(error);
-    const message = error && typeof error === "object" && "message" in error
-      ? error.message
-      : String(error);
-    renderStockError(card, `주가 조회 실패: ${message}`);
-  } finally {
-    if (elements.refresh) {
-      elements.refresh.disabled = false;
-    }
-  }
-}
-
-function fetchAllStockPrices({ showLoading = false } = {}) {
-  return fetchStockPrice(stockSearchCard, { showLoading });
-}
-
-function startStockPriceUpdates() {
-  if (!stockSearchCard) {
-    return;
-  }
-
-  if (stockPriceTimer) {
-    window.clearInterval(stockPriceTimer);
-  }
-
-  currentStockQuery = readSavedStockQuery();
-
-  if (stockSearchInput && currentStockQuery) {
-    stockSearchInput.value = currentStockQuery;
-  }
-
-  if (currentStockQuery) {
-    fetchAllStockPrices({ showLoading: true });
-  } else {
-    setStockIdle(stockSearchCard);
-  }
-
-  stockPriceTimer = window.setInterval(() => {
-    if (currentStockQuery) {
-      fetchAllStockPrices();
-    }
-  }, STOCK_PRICE_REFRESH_INTERVAL_MS);
-}
-
-function stopStockPriceUpdates() {
-  if (!stockPriceTimer) {
-    return;
-  }
-
-  window.clearInterval(stockPriceTimer);
-  stockPriceTimer = null;
-}
-
 function setWorkspaceExpanded(isExpanded) {
   if (!workspaceToggle || !workspaceContent) {
     return;
@@ -1219,8 +856,7 @@ function organizeWorkspaceCatalog() {
   const hamButton = infoList?.querySelector('.tools-item[data-tool="ham"]');
 
   if (infoList && worklogBox) {
-    const stockCard = infoList.querySelector(".calendar-stock-card");
-    infoList.insertBefore(worklogBox, stockCard || null);
+    infoList.appendChild(worklogBox);
 
     if (hamButton) {
       hamButton.classList.add("ham-list-divider");
@@ -1514,36 +1150,6 @@ calendarDdayToggle.addEventListener("click", () => {
   const isCollapsed = calendarDday.classList.toggle("is-collapsed");
   calendarDdayToggle.setAttribute("aria-expanded", String(!isCollapsed));
 });
-
-stockSearchInput?.addEventListener("keydown", (event) => {
-  if (event.key !== "Enter") {
-    return;
-  }
-
-  event.preventDefault();
-  fetchStockPrice(stockSearchCard, {
-    showLoading: true,
-    query: stockSearchInput.value
-  });
-});
-
-stockSearchCard
-  ?.querySelector(".stock-search-form")
-  ?.addEventListener("submit", (event) => {
-    event.preventDefault();
-    fetchStockPrice(stockSearchCard, {
-      showLoading: true,
-      query: stockSearchInput?.value || ""
-    });
-  });
-
-stockSearchCard
-  ?.querySelector(".calendar-stock-refresh")
-  ?.addEventListener("click", () => {
-    fetchStockPrice(stockSearchCard, {
-      showLoading: true
-    });
-  });
 
 renderCalendarColorSwatches();
 setSelectedCalendarColor(DEFAULT_EVENT_COLOR);
@@ -5812,7 +5418,6 @@ worklogDropzone.addEventListener("drop", (event) => {
 
 initializeHanaExchangeRate();
 initializeMarketIndexTrend();
-startStockPriceUpdates();
 loadWorklogFromStorage();
 
 if (location.hash === "#worklog") {
