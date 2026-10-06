@@ -4124,6 +4124,195 @@ function renderWorklogContent(value) {
   return renderMultilineText(value);
 }
 
+function getWorklogEntryCopyText(entry) {
+  const company = entry.querySelector(".worklog-company")?.textContent.trim() || "";
+  const material = entry.querySelector(".worklog-material")?.textContent.trim() || "";
+  const meta = Array.from(entry.querySelectorAll(".worklog-entry-meta span"))
+    .map((item) => item.textContent.trim())
+    .filter(Boolean)
+    .join(" / ");
+  const content = entry.querySelector(".worklog-content")?.innerText.trim() || "";
+
+  return [company, material, meta, content].filter(Boolean).join("\n");
+}
+
+function wrapCanvasText(context, text, x, y, maxWidth, lineHeight) {
+  const lines = String(text || "").split(/\r?\n/);
+  let currentY = y;
+
+  lines.forEach((line) => {
+    const words = line.split(/\s+/);
+    let currentLine = "";
+
+    if (!line.trim()) {
+      currentY += lineHeight;
+      return;
+    }
+
+    words.forEach((word) => {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+
+      if (context.measureText(testLine).width > maxWidth && currentLine) {
+        context.fillText(currentLine, x, currentY);
+        currentLine = word;
+        currentY += lineHeight;
+      } else {
+        currentLine = testLine;
+      }
+    });
+
+    if (currentLine) {
+      context.fillText(currentLine, x, currentY);
+      currentY += lineHeight;
+    }
+  });
+
+  return currentY;
+}
+
+function measureWrappedCanvasText(context, text, maxWidth, lineHeight) {
+  const lines = String(text || "").split(/\r?\n/);
+  let count = 0;
+
+  lines.forEach((line) => {
+    const words = line.split(/\s+/);
+    let currentLine = "";
+
+    if (!line.trim()) {
+      count += 1;
+      return;
+    }
+
+    words.forEach((word) => {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+
+      if (context.measureText(testLine).width > maxWidth && currentLine) {
+        count += 1;
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
+    });
+
+    if (currentLine) {
+      count += 1;
+    }
+  });
+
+  return Math.max(1, count) * lineHeight;
+}
+
+function canvasToBlob(canvas) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) {
+        resolve(blob);
+      } else {
+        reject(new Error("이미지 생성 실패"));
+      }
+    }, "image/png");
+  });
+}
+
+async function copyWorklogEntry(entry, button) {
+  const company = entry.querySelector(".worklog-company")?.textContent.trim() || "업무일지";
+  const material = entry.querySelector(".worklog-material")?.textContent.trim() || "";
+  const meta = Array.from(entry.querySelectorAll(".worklog-entry-meta span"))
+    .map((item) => item.textContent.trim())
+    .filter(Boolean)
+    .join(" / ");
+  const content = entry.querySelector(".worklog-content")?.innerText.trim() || "";
+  const textFallback = getWorklogEntryCopyText(entry);
+
+  try {
+    if (!navigator.clipboard) {
+      throw new Error("클립보드를 사용할 수 없습니다.");
+    }
+
+    if (!window.ClipboardItem) {
+      await navigator.clipboard.writeText(textFallback);
+    } else {
+      const scale = Math.max(2, Math.min(3, window.devicePixelRatio || 2));
+      const width = 820;
+      const padding = 34;
+      const contentWidth = width - padding * 2;
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+
+      context.font = "28px 'Noto Sans CJK SC DemiLight', 'Nanum Gothic', sans-serif";
+      const contentHeight = measureWrappedCanvasText(context, content, contentWidth, 28);
+      const height = Math.max(280, padding * 2 + 34 + 28 + (meta ? 28 : 0) + contentHeight + 46);
+
+      canvas.width = width * scale;
+      canvas.height = height * scale;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      context.scale(scale, scale);
+
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, width, height);
+      context.strokeStyle = "#e6eaee";
+      context.lineWidth = 2;
+      context.strokeRect(1, 1, width - 2, height - 2);
+
+      context.fillStyle = "#12171d";
+      context.font = "800 26px 'Noto Sans CJK SC DemiLight', 'Nanum Gothic', sans-serif";
+      context.fillText(company, padding, padding + 24);
+
+      context.fillStyle = "#52606d";
+      context.font = "700 19px 'Noto Sans CJK SC DemiLight', 'Nanum Gothic', sans-serif";
+      context.fillText(material, padding, padding + 56);
+
+      let y = padding + 88;
+
+      if (meta) {
+        context.fillStyle = "#77818b";
+        context.font = "700 16px 'Noto Sans CJK SC DemiLight', 'Nanum Gothic', sans-serif";
+        context.fillText(meta, padding, y);
+        y += 30;
+      }
+
+      context.strokeStyle = "#edf0f3";
+      context.beginPath();
+      context.moveTo(padding, y);
+      context.lineTo(width - padding, y);
+      context.stroke();
+      y += 34;
+
+      context.fillStyle = "#171c22";
+      context.font = "18px 'Noto Sans CJK SC DemiLight', 'Nanum Gothic', sans-serif";
+      wrapCanvasText(context, content, padding, y, contentWidth, 28);
+
+      const blob = await canvasToBlob(canvas);
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "image/png": blob
+        })
+      ]);
+    }
+
+    if (button) {
+      button.textContent = "복사됨";
+      window.setTimeout(() => {
+        button.textContent = "복사";
+      }, 1200);
+    }
+  } catch (error) {
+    console.error(error);
+
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(textFallback);
+
+      if (button) {
+        button.textContent = "텍스트 복사";
+        window.setTimeout(() => {
+          button.textContent = "복사";
+        }, 1200);
+      }
+    }
+  }
+}
+
 function normalizeHamText(value, max = HAM_VOCAB_MAX_TEXT_LENGTH) {
   return String(value || "").trim().slice(0, max);
 }
@@ -5160,6 +5349,7 @@ function renderWorklog() {
       <div class="worklog-entries">
         ${person.rows.map((row) => `
           <article class="worklog-entry">
+            <button class="worklog-copy-button" type="button" aria-label="업무일지 항목 복사">복사</button>
             <div class="worklog-entry-head">
               <span class="worklog-company">${escapeHtml(row.company)}</span>
               <span class="worklog-material">${escapeHtml(row.material)}</span>
@@ -5265,6 +5455,19 @@ worklogResults.addEventListener("toggle", (event) => {
     }
   });
 }, true);
+worklogResults.addEventListener("click", (event) => {
+  const copyButton = event.target.closest(".worklog-copy-button");
+
+  if (!copyButton) {
+    return;
+  }
+
+  const entry = copyButton.closest(".worklog-entry");
+
+  if (entry) {
+    copyWorklogEntry(entry, copyButton);
+  }
+});
 runOnEnter(worklogFilterInput, renderWorklog);
 
 hamClose.addEventListener("click", closeHamTool);

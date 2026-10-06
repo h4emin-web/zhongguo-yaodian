@@ -3634,11 +3634,37 @@ body.tool-auth-open {
 }
 
 .worklog-entry {
+  position: relative;
   padding: 18px 20px;
   border: 1px solid #eceff2;
   border-radius: 10px;
   background: var(--surface-soft);
   box-shadow: var(--shadow-soft);
+}
+
+.worklog-copy-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  min-width: 48px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid rgba(218, 224, 229, 0.95);
+  border-radius: 8px;
+  color: rgba(54, 62, 70, 0.78);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(31, 36, 41, 0.05);
+}
+
+.worklog-copy-button:hover,
+.worklog-copy-button:focus-visible {
+  color: var(--text);
+  background: #ffffff;
+  outline: none;
 }
 
 .worklog-entry-head {
@@ -3647,6 +3673,7 @@ body.tool-auth-open {
   align-items: baseline;
   gap: 8px 14px;
   margin-bottom: 10px;
+  padding-right: 62px;
   padding-bottom: 10px;
   border-bottom: 1px solid #eceff2;
 }
@@ -3759,10 +3786,20 @@ body.tool-auth-open {
     background: #ffffff;
   }
 
+  .worklog-copy-button {
+    top: 10px;
+    right: 10px;
+    min-width: 44px;
+    height: 28px;
+    padding: 0 10px;
+    font-size: 11px;
+  }
+
   .worklog-entry-head {
     display: grid;
     gap: 5px;
     margin-bottom: 11px;
+    padding-right: 54px;
     padding-bottom: 11px;
   }
 
