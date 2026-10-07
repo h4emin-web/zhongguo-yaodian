@@ -983,6 +983,16 @@ async function shareCardAsImage(card, button) {
           }
           console.error(shareError);
         }
+      } else if (navigator.share) {
+        try {
+          await navigator.share({ title, url: location.href });
+          return;
+        } catch (shareError) {
+          if (shareError.name === "AbortError") {
+            return;
+          }
+          console.error(shareError);
+        }
       }
 
       const url = URL.createObjectURL(blob);
