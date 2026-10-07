@@ -5325,6 +5325,10 @@ worklogResults.addEventListener("toggle", (event) => {
       person.open = false;
     }
   });
+
+  window.requestAnimationFrame(() => {
+    openedPerson.scrollIntoView({ block: "start" });
+  });
 }, true);
 worklogResults.addEventListener("click", (event) => {
   const shareButton = event.target.closest(".worklog-share-button");
