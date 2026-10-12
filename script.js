@@ -1576,12 +1576,28 @@ function sharesManufacturer(value, pool) {
   return pool.some((entry) => manufacturer.includes(entry) || entry.includes(manufacturer));
 }
 
-function expandByManufacturerPool(rows, pool) {
+function manufacturerIncludesKeyword(value, keyword) {
+  const manufacturer = String(value || "").trim().toLowerCase();
+  const normalizedKeyword = String(keyword || "").trim().toLowerCase();
+
+  return Boolean(normalizedKeyword && manufacturer.includes(normalizedKeyword));
+}
+
+function collectManufacturerPoolByKeyword(rowGroups, keyword) {
+  return collectManufacturerPool(rowGroups.map((rows) => (
+    rows.filter((row) => manufacturerIncludesKeyword(row.manufacturer, keyword))
+  )));
+}
+
+function expandByManufacturerPool(rows, pool, keyword) {
   if (!pool.length) {
     return [];
   }
 
-  return rows.filter((row) => sharesManufacturer(row.manufacturer, pool));
+  return rows.filter((row) => (
+    manufacturerIncludesKeyword(row.manufacturer, keyword) &&
+    sharesManufacturer(row.manufacturer, pool)
+  ));
 }
 
 function unionByRef(...groups) {
@@ -1623,12 +1639,12 @@ async function renderGlobalSearch(keyword) {
     indiawcDirect,
     mfdsDirect.map((row) => ({ korean: row.ingredient }))
   ]);
-  const manufacturerPool = collectManufacturerPool([wcDirect, usdmfDirect, indiawcDirect, mfdsDirect]);
+  const manufacturerPool = collectManufacturerPoolByKeyword([wcDirect, usdmfDirect, indiawcDirect, mfdsDirect], keyword);
 
   const wcExpanded = dedupeWcRows(unionByRef(
     wcDirect,
     expandByNamePools(wcRows, pools),
-    expandByManufacturerPool(wcRows, manufacturerPool)
+    expandByManufacturerPool(wcRows, manufacturerPool, keyword)
   ));
   const wcMatches = [
     ...latestByManufacturer(bySource(wcExpanded, "WC")),
@@ -1638,17 +1654,17 @@ async function renderGlobalSearch(keyword) {
   const usdmfMatches = unionByRef(
     usdmfDirect,
     usdmfRows.filter((row) => row.english && sharesName(row.english.toLowerCase().trim(), pools.english)),
-    expandByManufacturerPool(usdmfRows, manufacturerPool)
+    expandByManufacturerPool(usdmfRows, manufacturerPool, keyword)
   );
   const indiawcMatches = unionByRef(
     indiawcDirect,
     indiawcRows.filter((row) => row.english && sharesName(row.english.toLowerCase().trim(), pools.english)),
-    expandByManufacturerPool(indiawcRows, manufacturerPool)
+    expandByManufacturerPool(indiawcRows, manufacturerPool, keyword)
   );
   const mfdsMatches = unionByRef(
     mfdsDirect,
     mfdsRows.filter((row) => row.ingredient && sharesName(row.ingredient, pools.korean)),
-    expandByManufacturerPool(mfdsRows, manufacturerPool)
+    expandByManufacturerPool(mfdsRows, manufacturerPool, keyword)
   );
 
   currentGlobalMatches = { wc: wcMatches, mfds: mfdsMatches, cnph: cnphMatches, usdmf: usdmfMatches, indiawc: indiawcMatches };
